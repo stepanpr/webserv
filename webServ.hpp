@@ -23,12 +23,12 @@
 
 class Server
 {
-	class Sockets
-	{
-		public:
-		int listen_fd;
-		int client_fd;
-	};
+	// class Sockets
+	// {
+	// 	public:
+	// 	int listen_fd;
+	// 	int client_fd;
+	// };
 
 
 
@@ -46,8 +46,8 @@ class Server
 
 		Server();
 		int startServer();
-		int hendlerRequest(int clientFD);
-		int hendlerresponse();
+		int requestHandler(int &clientFD);
+		int responseHandler(int &clientFD);
 		// Sockets sock;
 		
 };
