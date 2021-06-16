@@ -17,37 +17,49 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <thread>
+#include <pthread.h>
+#include <stdio.h>
+#include <sys/timeb.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <errno.h>
+#include <functional>
+
 
 
 
 
 class Server
 {
-	// class Sockets
-	// {
-	// 	public:
-	// 	int listen_fd;
-	// 	int client_fd;
-	// };
-
-
-
-
-	public:
+	private:
 		bool running;		//запущен ли сервер
 		int result;
 		int serverFD; 		//сокет сервера
-		// int clientFD; 		//сокет который возвращает accept
+		int clientFD; 		//сокет который возвращает accept
+
+		std::stringstream response; 		// ответ клиенту
+		std::stringstream response_body; 	// тело ответа
 
 		struct sockaddr_in srv_addr;
 		struct sockaddr_in cli_addr;
 		// socklen_t sin_len;
 
-
+	public:
 		Server();
 		int startServer();
-		int requestHandler(int &clientFD);
-		int responseHandler(int &clientFD);
+		void stopServer();
+		void requestHandler();
+		int responseHandler();
+
+		std::thread first;
+
 		// Sockets sock;
 		
 };
