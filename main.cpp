@@ -18,5 +18,7 @@ int	main(int argc, char **argv)
 		std::cout << "webserv: configuration file syntax is wrong" << std::endl;
 		return (1);
 	}
-	Server *servers = config.createServers();
+
+	int	port1 = 8181;
+	Server server;
 }
