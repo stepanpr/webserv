@@ -4,6 +4,7 @@
 int	main(int argc, char **argv)
 {
 	Config config;
+	// std::vector<Config> servers;
 
 	if (argc > 2)
 	{
@@ -13,10 +14,13 @@ int	main(int argc, char **argv)
 	}
 	else if (argc == 2)
 		config.setPath(std::string(argv[1]));
+	config.readConfig();
 	if (!config.isValid())
 	{
 		std::cout << "webserv: configuration file syntax is wrong" << std::endl;
 		return (1);
 	}
-	Server *servers = config.createServers();
+	// Server *servers = config.createServers();
+	config.createServers();
+
 }
