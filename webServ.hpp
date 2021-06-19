@@ -33,9 +33,6 @@
 #include <functional>
 
 
-
-
-
 class Server
 {
 	private:
@@ -45,7 +42,7 @@ class Server
 		int clientFD; 		//сокет который возвращает accept
 
 		std::stringstream response; 		// ответ клиенту
-		std::stringstream response_body; 	// тело ответа
+		// std::stringstream response_body; 	// тело ответа
 
 		struct sockaddr_in srv_addr;
 		struct sockaddr_in cli_addr;
@@ -56,16 +53,13 @@ class Server
 		int startServer();
 		void stopServer();
 		void requestHandler();
-		int responseHandler();
+		int responseHandler(std::string str);
 
 		std::thread first;
 
 		// Sockets sock;
-		
+
 };
-
-
-
 
 
 # define RED  "\e[0;31m"
