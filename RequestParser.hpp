@@ -2,6 +2,7 @@
 # define REQUESTPARSER_HPP
 # include <iostream>
 #include <sstream>
+#include <map>
 
 class RequestParser
 {
@@ -14,6 +15,9 @@ public:
 	// RequestParser &operator=(const RequestParser &copy);
 
 private:
+	std::string _metod;
+	std::string _path;
+	std::string _protokol;
 
 };
 

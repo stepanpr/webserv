@@ -4,7 +4,7 @@ int main()
 {
 	std::stringstream zapros;
 
-	zapros	<< "GET / HTTP/1.1\r\n"
+	zapros	<< "GET /favicon.ico HTTP/1.1\r\n"
 			<< "Host: localhost:5006\r\n"
 			<< "Connection: keep-alive\r\n"
 			<< "Cache-Control: max-age=0\r\n"
@@ -18,7 +18,8 @@ int main()
 			<< "Sec-Fetch-User: ?1\r\n"
 			<< "Sec-Fetch-Dest: document\r\n"
 			<< "Accept-Encoding: gzip, deflate, br\r\n"
-			<< "Accept-Language: en-US,en;q=0.9\r\n\r\n" << std::endl;
+			<< "Accept-Language: en-US,en;q=0.9\r\n\r\n"
+			<< "<<< BODY >>>\r\n\r\n" << std::endl;
 
 	// std::cout << zapros.str() << std::endl;
 
