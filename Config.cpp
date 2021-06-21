@@ -4,18 +4,6 @@
 Config::Config() : _path(std::string(DEFAULT_CONFIG_PATH)), _isValid(true)
 {
 	_numOfServers = 0;
-	// t_config a;
-	// a.listen = "dfsdfd";
-	// // a.port = 2;
-	// Server s;
-	// servers.insert(std::pair<Server, t_config>(s, a));
-
-	// for(std::map<Server, t_config>::iterator i_beg = servers.begin(); i_beg != servers.end(); i_beg++)
-	// {
-	// 	std::cout << i_beg->second.listen << "dfdf"; 
-	// 	// servers[]
-	// }
-	// servers[s] = a;
 }
 
 Config::Config(std::string const &path) : _path(path), _isValid(true)
@@ -63,11 +51,9 @@ bool Config::isValid()
 /*-------------------------------------------------------------------------------*/
 
 
-
 // void Config::configHandler()
 // {
 // 	load();
-
 		// std::cout << _configs[0].location[0].location  << "\n";
 		// std::cout << _configs[0].location[0].index  << "\n";
 		// std::cout << _configs[0].location[0].autoindex  << "\n";
@@ -78,8 +64,6 @@ bool Config::isValid()
 		// std::cout << _configs[0].location[1].autoindex  << "\n";
 		// std::cout << _configs[0].location[1].methods  << "\n";
 		// std::cout << _configs[0].location[1].root  << "\n";
-
-
 
 	// read();
 // }
@@ -108,7 +92,7 @@ void Config::load(std::string path)
 	{
         file >> buffer;
 		// std::cout << configBuffer << "\n";
-         data.push_back(buffer);
+        data.push_back(buffer);
     }
 
 	file.close();
