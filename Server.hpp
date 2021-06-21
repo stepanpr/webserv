@@ -1,9 +1,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
-# include <iostream>
-# include "Config.hpp"
+# include "Global.hpp"
 
-// typedef struct 	t_config a.;
 class Config;
 
 class Server

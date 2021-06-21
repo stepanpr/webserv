@@ -32,9 +32,9 @@ void Server::startServer(struct s_config &config, int id)
 
 
 	std::cout << "listen: " << config.listen << std::endl;
-	std::cout << "listen: " << config.server_name << std::endl;
-	std::cout << "listen: " << config.error_page << std::endl;
-	std::cout << "listen: " << config.location[0].index << std::endl;
+	std::cout << "server_name: " << config.server_name << std::endl;
+	std::cout << "error_page: " << config.error_page << std::endl;
+	std::cout << "index: " << config.location[0].index << std::endl;
 
 
 
