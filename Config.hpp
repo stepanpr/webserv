@@ -46,8 +46,8 @@ typedef struct 	s_config
 class Config
 {
 	private:
-		bool _isValid; 
 		std::string _path;
+		bool _isValid; 
 		int _numOfServers;
 		std::vector<t_config> _configs;
 		std::vector<Server> _servers;
@@ -110,14 +110,14 @@ template<class Config>
 void *cmds(void* object)
 {
 	Config* obj = (Config*)object;
-	std::string s;
+	std::string cmd;
+	(void)obj; ////использ. перем.
 	// std::cout << CYAN<<"webserv: " << obj->get <<RESET<<std::endl;
-
 	while(1)
 	{
 		// std::cout << CYAN<<"webserv: please enter your command (exit)" <<RESET<<std::endl;
-		std::cin >> s;
-		if (s == "exit")
+		std::cin >> cmd;
+		if (cmd == "exit")
 		{
 			std::cout << "\e[0;36m" << "Bye" << "\033[0m" << std::endl;
 			sleep(1);

@@ -14,10 +14,15 @@ Server::~Server()
 
 Server::Server(const Server &copy)
 {
+	*this = copy;
 }
 
 Server	&Server::operator=(const Server &copy)
 {
+	this->listen_sock_fd = copy.listen_sock_fd;
+	this->servaddr.sin_addr = copy.servaddr.sin_addr;
+	this->servaddr.sin_family = copy.servaddr.sin_family;
+	this->servaddr.sin_port = copy.servaddr.sin_port;
 	return (*this);
 }
 
@@ -55,10 +60,11 @@ int Server::startServer(struct s_config *config)
 		return 0;
 	}
 
-	servaddr = {0};											//заполняем структуру sockaddr_in 
+	// servaddr = {0};											//заполняем структуру sockaddr_in 
 	servaddr.sin_family = AF_INET;							// AF_INET определяет, что используется сеть для работы с сокетом
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 			//связывает сокет со всеми доступными интерфейсами
-	servaddr.sin_port = htons(stoi(config->listen)); 		//port
+	const char *port = config->listen.c_str();
+	servaddr.sin_port = htons(atoi(port)); 					//port
 
 	if (-1 == bind(listen_sock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr))) //Bind: Привязка сокета к адресу
 	{

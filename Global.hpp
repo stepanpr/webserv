@@ -10,8 +10,13 @@
 # include <unistd.h>
 # include <pthread.h>
 # include <algorithm>
-# include <thread>
 
+# include <stdio.h>
+# include <stdlib.h>
+# include <pthread.h>
+# include <unistd.h>
+# include <string.h>
+# include <sys/time.h>
 
 
 # include "Server.hpp"

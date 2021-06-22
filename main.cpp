@@ -37,7 +37,6 @@ int	main(int argc, char **argv)
 
 	/*-------------------------------------------------------------------------------*/
 	
-	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 	config.createServers();  //запускаем сервера
 

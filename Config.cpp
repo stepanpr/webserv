@@ -1,6 +1,6 @@
 
 #include "Config.hpp"
-
+# include <pthread.h>
 
 Config::Config() : _path(std::string(DEFAULT_CONFIG_PATH)), _isValid(true)
 {
@@ -18,10 +18,13 @@ Config::~Config()
 
 Config::Config(const Config &copy)
 {
+	*this = copy;
 }
 
 Config	&Config::operator=(const Config &copy)
 {
+	this->_path = copy._path;
+	// for()COPY values
 	return (*this);
 }
 
@@ -59,8 +62,7 @@ void Config::load(std::string path)
 	std::string buffer;
 	std::ifstream file;
 
-	int pos = 0, start = 0;
-	file.open(path);
+	file.open(path.c_str());
 	if (!(file.is_open()))
 	{
 		std::cout << YELLOW << "config error: configuraion path is bad\n" << RESET;
@@ -145,7 +147,7 @@ void Config::read(std::vector<std::string> &data)
 			new_config.serverID = i;
 			std::vector<std::string>::iterator it = data.begin();
 
-			for(int j = 1; j < data.size(); j++)							//начинаем с единицы чтобы не попасть на "server"
+			for(unsigned long j = 1; j < data.size(); j++)							//начинаем с единицы чтобы не попасть на "server"
 			{
 				if (data[j] == "listen")
 					new_config.listen = data[j+1];
@@ -159,7 +161,7 @@ void Config::read(std::vector<std::string> &data)
 				{
 					std::cout << std::setw(15) << BLUE << "location\n" << RESET;
 					t_location new_location;
-					for(int l = j; l < data.size(); l++)
+					for(unsigned long l = j; l < data.size(); l++)
 					{
 						if (data[l] == "location")
 							new_location.location = data[l + 1];
@@ -202,13 +204,13 @@ void Config::read(std::vector<std::string> &data)
 void Config::showConfig()
 {
 	std::cout << BLUE << "\n\n************************************CONFIG:\n" << RESET;
-	for(int k = 0; k < _configs.size(); k++)
+	for(unsigned long k = 0; k < _configs.size(); k++)
 	{	
 		std::cout << std::setw(14)<< BLUE_B << "========SERVER[" << k << "]========\n" << RESET;
 		std::cout << std::setw(13) << BLUE  << "listen: " << RESET << _configs[k].listen << "\n";
 		std::cout << std::setw(8)<< BLUE  << "server_name: " << RESET << _configs[k].server_name  << "\n";
 		std::cout << std::setw(9)<< BLUE  << "error_page: " << RESET << _configs[k].error_page  << "\n";
-		for(int l = 0; l < _configs[k].location.size(); l++)
+		for(unsigned long l = 0; l < _configs[k].location.size(); l++)
 		{
 			std::cout << std::setw(14)<<  BLUE << "-------LOCATION[" << l << "]-------\n" << RESET;
 			std::cout << std::setw(11)<< BLUE  << "location: " << RESET << _configs[k].location[l].location  << "\n";

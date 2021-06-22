@@ -16,13 +16,13 @@ RequestParser::RequestParser(std::string buf)
 
 	pos = buf.find(double_separator);	// Отрезали запрос с хедерами
 	{
-	if (pos != std::string::npos)
+	if (pos != std::string::npos)													///???
 		token = buf.substr(0, pos + separator.length());
 		buf.erase(0, pos + double_separator.length());
 	}
 
 	pos = token.find(separator);		// Отрезали заголовок запроса
-	if (pos != std::string::npos)
+	if (pos != std::string::npos)													///???
 	{
 		token_header = token.substr(0, pos);
 		token.erase(token.begin(), token.begin() + token_header.length() + separator.length());
