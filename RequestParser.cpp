@@ -11,7 +11,9 @@ RequestParser::RequestParser(std::string buf)
 	std::string separator = "\r\n";
 	std::string double_separator = "\r\n\r\n";
 	std::string space = " ";
-	bool is_ok = false;
+	bool is_host = false;
+	bool is_chunked= false;
+	bool is_length = false;
 
 	size_t counter = 0;
 
@@ -60,13 +62,36 @@ RequestParser::RequestParser(std::string buf)
 	{
 		std::map<std::string,std::string>::iterator it = _headers.begin();
   		for (it = _headers.begin(); it != _headers.end(); ++it)
+		{
+			if ((it->first.compare("Host:") == 0))
+				is_host = true;
 			if ((it->first.compare("Transfer-Encoding:") == 0) && (it->second.compare("chunked") == 0))
-			{
-				std::cout << "This is chunked request\n";
-				is_ok = true;
-			}
-		std::cout << is_ok << '\n';
+				is_chunked = true;
+			if ((it->first.compare("Content-Length:") == 0) && (it->second.compare("chunked") == 0))
+				is_length = true;
+		}
+
+		std::cout << "is_host: " << is_host << " is_chunked: " << is_chunked << " is_length: " << is_length << '\n';
 	}
+
+	//  начинаем читать тело
+
+	std::string bodydigit;
+	std::stringstream bodybuffer;
+	long int bodydigit_dec;
+	char * pEnd;
+
+	pos = buf.find(separator);		// Нашли цифру
+
+		bodydigit = buf.substr(0, pos);
+		bodydigit_dec = strtol(bodydigit.c_str(), &pEnd, 16);
+		buf.erase(buf.begin(), buf.begin() + bodydigit.length() + separator.length());
+
+	bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
+
+	std::cout << bodybuffer.str() << std::endl;
+
+
 
 	// std::cout << buf << std::endl;
 
@@ -95,6 +120,12 @@ std::string RequestParser::getProtokol()
 {
 	return (_protokol);
 }
+
+std::map<std::string,std::string> RequestParser::getHeaders()
+{
+	return (_headers);
+}
+
 
 // RequestParser::RequestParser(const RequestParser &copy)
 // {
