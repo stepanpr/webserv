@@ -227,6 +227,13 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i)
 				*/
 
 				/* std::map requestHeaders= */ RequestParser parseHTTP((char*)buf);
+				std::map<std::string, std::string> m = parseHTTP.getHeaders();
+				std::cout << parseHTTP.getMetod() << " " << parseHTTP.getPath() << '\n';
+				for (std::map<std::string, std::string>::iterator it = m.begin(); it != m.end() ; it++)
+				{
+					std::cout << it->first << " : " << it->second << '\n';
+				}
+
 
 				/*
 				** ОТПРАВКА ОБРАБОТАННОГО ЗАПРОСА В RESPONSE - response(&(*pfd_array), i, MAP_with_values);
