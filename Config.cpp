@@ -130,7 +130,7 @@ void Config::read(std::vector<std::string> &data)
 	}
 
 
-	std::cout << BLUE << "\nMap of configfile:\n" << RESET;
+	std::cout << BLUE << "\nMap of configuration file:\n" << RESET;
  
 	/* старт парсинга */
 	for(int i = 0; i < _numOfServers; i++) //i <= _numOfServers; как вариант, перед циклом ищем количество "server" в файле

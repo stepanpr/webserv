@@ -28,11 +28,11 @@ int	main(int argc, char **argv)
 	std::string cmd;
 	while(1)
 	{
-		std::cout  << std::endl << CYAN << "webserv: do you wand to see config? (y/n)" << RESET << std::endl;
+		std::cout  << std::endl << CYAN_B << "webserv: " << CYAN << "do you want to see config? (y/n)" << RESET << std::endl;
 		std::cin >> cmd;
 		if (cmd == "y") { enter(""); config.showConfig(); break ; }
 		if (cmd == "n") { break ;}
-		else { std::cout  << CYAN << "webserv: please, enter \"y\" or \"n\"" << RESET << std::endl; }
+		else { std::cout  << CYAN_B << "webserv: " << CYAN << "please, enter \"y\" or \"n\"" << RESET << std::endl; }
 	}
 
 	/*-------------------------------------------------------------------------------*/
