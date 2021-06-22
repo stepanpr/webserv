@@ -25,11 +25,7 @@ int	main(int argc, char **argv)
 		std::cout << CYAN << "webserv: please, check configuration file" << RESET << std::endl << std::endl;
 		return 1;
 	}
-<<<<<<< HEAD
 
-	int	port1 = 8181;
-	Server server;
-=======
 	std::string cmd;
 	while(1)
 	{
@@ -47,5 +43,4 @@ int	main(int argc, char **argv)
 
 
 	return 0;
->>>>>>> fb9a0e460b329e37b10651ee006a9a85775627cd
 }
