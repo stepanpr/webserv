@@ -44,7 +44,7 @@ $(NAME): $(OBJS)
 
 
 clean:
-	$(RM) ./test/*.o
+	$(RM) ./*.o
 
 fclean: clean
 	$(RM) $(NAME)
