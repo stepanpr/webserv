@@ -7,7 +7,7 @@
 int	main(int argc, char **argv)
 {
 	Config config(DEFAULT_CONFIG_PATH);
-	std::cout << CYAN << "Reading config..." << RESET << std::endl << std::endl;
+	std::cout << CYAN_B << "Reading config..." << RESET << std::endl << std::endl;
 	sleep(1);
 	if (argc > 2)
 	{
@@ -37,6 +37,7 @@ int	main(int argc, char **argv)
 
 	/*-------------------------------------------------------------------------------*/
 	
+	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 	config.createServers();  //запускаем сервера
 

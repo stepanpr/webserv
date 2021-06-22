@@ -10,7 +10,9 @@
 # include <unistd.h>
 # include "Server.hpp"
 # include "Config.hpp"
-
+# include <pthread.h>
+#include <algorithm>
+#include <thread>
 
 
 

@@ -1,6 +1,7 @@
 
 #include "Config.hpp"
 
+
 Config::Config() : _path(std::string(DEFAULT_CONFIG_PATH)), _isValid(true)
 {
 	_numOfServers = 0;
@@ -51,22 +52,6 @@ bool Config::isValid()
 /*-------------------------------------------------------------------------------*/
 
 
-// void Config::configHandler()
-// {
-// 	load();
-		// std::cout << _configs[0].location[0].location  << "\n";
-		// std::cout << _configs[0].location[0].index  << "\n";
-		// std::cout << _configs[0].location[0].autoindex  << "\n";
-		// std::cout << _configs[0].location[0].methods  << "\n";
-		// std::cout << _configs[0].location[0].root  << "\n";
-		// std::cout << _configs[0].location[1].location  << "\n";
-		// std::cout << _configs[0].location[1].index  << "\n";
-		// std::cout << _configs[0].location[1].autoindex  << "\n";
-		// std::cout << _configs[0].location[1].methods  << "\n";
-		// std::cout << _configs[0].location[1].root  << "\n";
-
-	// read();
-// }
 
 void Config::load(std::string path)
 {
@@ -92,7 +77,7 @@ void Config::load(std::string path)
 	{
         file >> buffer;
 		// std::cout << configBuffer << "\n";
-        data.push_back(buffer);
+         data.push_back(buffer);
     }
 
 	file.close();
@@ -157,6 +142,7 @@ void Config::read(std::vector<std::string> &data)
 			std::cout << std::setw(12) << BLUE_B << data[0] << "\n" << RESET;
 			// _numOfServers +=1;
 			t_config new_config;
+			new_config.serverID = i;
 			std::vector<std::string>::iterator it = data.begin();
 
 			for(int j = 1; j < data.size(); j++)							//начинаем с единицы чтобы не попасть на "server"
@@ -243,14 +229,9 @@ void Config::showConfig()
 
 
 
-
-
-
-
-
-
-
 /*-------------------------------------------------------------------------------*/
+
+
 
 
 void Config::createServers()
@@ -261,17 +242,21 @@ void Config::createServers()
 	  	для каждого из серверов передаем соответствующую ему структуру с данными 
 	*/
 
-	std::cout << CYAN << "Start servers..." << RESET << std::endl << std::endl;
+	pthread_t *threads;
+	threads = new pthread_t[_numOfServers];
+	std::cout << std::endl << CYAN_B << "Start servers..." << std::endl << CYAN <<"(enter \"exit\" for get out)" << RESET << std::endl << std::endl;
 	sleep(1);
+	// pthread_create(&threads[0], NULL, &cmd, &_numOfServers);
+
 	for(int i = 0; i < _numOfServers; i++)
     {
-		Server tmp;
-		//заполняем необходимые поля по необходимости tmp:
-		//tmp.port = stoi(_configs[i].listen);
-		//????????
-        _servers.push_back(tmp);
-        _servers[i].startServer(_configs[i], i);
+		pthread_create(&threads[i], NULL, initServer<struct s_config, Server>, &_configs[i]);
     }
+	pthread_create(&threads[_numOfServers], NULL, &cmds<Config>, &(*this));
 
-
+	for (int i = 0; i < _numOfServers;)
+	{
+		pthread_join(threads[i++], NULL);
+	}
+	// delete [] threads;
 }

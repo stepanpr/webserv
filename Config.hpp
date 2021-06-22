@@ -2,20 +2,27 @@
 #ifndef CONFIG_HPP
 # define CONFIG_HPP
 # include "Global.hpp"
+# include "Server.hpp"
 # define DEFAULT_CONFIG_PATH "config/default.conf"
+
 
 class Server;
 
-/*
-*	server 						: сервер
-*		listen 					: порт
-*		server_name localhost	: адрес
-*		error_page /www/default	: путь к дикектории с ошибками
-*		location / 				: путь относительно корня (root)/
-*			index index.html	: индекс
-*			autoindex off		: автоиндекс
-*			methods GET			: метод
-*			root 				: путь к корню
+
+
+
+/*******************************************
+************STANDART CONFIGURATION**********
+********************************************
+**	server 						: сервер
+**		listen 					: порт
+**		server_name localhost	: адрес
+**		error_page /www/default	: путь к дикектории с ошибками
+**		location / 				: путь относительно корня (root)/
+**			index index.html	: индекс
+**			autoindex off		: автоиндекс
+**			methods GET			: метод
+**			root 				: путь к корню
 */
 
 typedef struct 	s_location
@@ -29,6 +36,7 @@ typedef struct 	s_location
 
 typedef struct 	s_config
 {
+	int serverID;
 	std::string listen;
 	std::string server_name;
 	std::string error_page;
@@ -67,8 +75,6 @@ class Config
 
 		/*  congig handler */
 		void createServers();
-
-
 };
 
 
@@ -85,6 +91,40 @@ void enter(M message)
 		if (str == 0x0A)
 			break ;
 		++i;
+	}
+}
+
+
+// инициация потока с сервером
+template<class STRUCTURE, class SERVER>
+void* initServer(void* structure)
+{
+	STRUCTURE* config = (STRUCTURE*) structure;
+	SERVER newServer;
+	newServer.startServer(config);
+    return 0;
+}
+
+// командная строка во время выполнения серверов
+template<class Config>
+void *cmds(void* object)
+{
+	Config* obj = (Config*)object;
+	std::string s;
+	// std::cout << CYAN<<"webserv: " << obj->get <<RESET<<std::endl;
+
+	while(1)
+	{
+		// std::cout << CYAN<<"webserv: please enter your command (exit)" <<RESET<<std::endl;
+		std::cin >> s;
+		if (s == "exit")
+		{
+			std::cout << "\e[0;36m" << "Bye" << "\033[0m" << std::endl;
+			sleep(1);
+			exit(0);
+		}
+		std::cout << "\e[0;36m" << "webserv: command is not valid" << "\033[0m" <<std::endl;
+		
 	}
 }
 
