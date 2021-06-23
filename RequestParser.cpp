@@ -1,7 +1,7 @@
 #include "RequestParser.hpp"
 
-RequestParser::RequestParser(void)
-{ }
+RequestParser::RequestParser(void) : _is_ok(false)
+{  }
 
 RequestParser::RequestParser(std::string buf)
 {
@@ -14,6 +14,7 @@ RequestParser::RequestParser(std::string buf)
 	bool is_host = false;
 	bool is_chunked= false;
 	bool is_length = false;
+
 
 	size_t counter = 0;
 
@@ -75,25 +76,54 @@ RequestParser::RequestParser(std::string buf)
 	}
 
 	//  начинаем читать тело
+	if (((is_chunked = true) || (is_length = true)) || ((is_host = false) && (is_chunked = false) && (is_length = false))) // если есть body-хедеры или нет хедеров совсем!
+	{
+		std::string bodydigit;
 
+		long int bodydigit_dec;
+		char * pEnd;
+
+		pos = buf.find(separator);		// Нашли цифру
+		bodydigit = buf.substr(0, pos);
+		bodydigit_dec = strtol(bodydigit.c_str(), &pEnd, 16);
+
+		if (bodydigit_dec > 0)
+		{
+			buf.erase(buf.begin(), buf.begin() + bodydigit.length() + separator.length());
+			_bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
+		}
+		if (bodydigit_dec == 0)
+		{
+			_is_ok = true;
+			std::cout << _bodybuffer.str() << std::endl;
+		}
+	}
+
+}
+
+void RequestParser::addRequest(std::string buf) // добавляем чанки в боди
+{
+	size_t pos = 0;
+	std::string separator = "\r\n";
 	std::string bodydigit;
-	std::stringstream bodybuffer;
 	long int bodydigit_dec;
 	char * pEnd;
 
 	pos = buf.find(separator);		// Нашли цифру
+	bodydigit = buf.substr(0, pos);
+	bodydigit_dec = strtol(bodydigit.c_str(), &pEnd, 16);
 
-		bodydigit = buf.substr(0, pos);
-		bodydigit_dec = strtol(bodydigit.c_str(), &pEnd, 16);
+	if (bodydigit_dec > 0)
+	{
 		buf.erase(buf.begin(), buf.begin() + bodydigit.length() + separator.length());
+		_bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
+	}
 
-	bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
-
-	std::cout << bodybuffer.str() << std::endl;
-
-
-
-	// std::cout << buf << std::endl;
+	if (bodydigit_dec == 0)
+	{
+		_is_ok = true;
+		std::cout << _bodybuffer.str() << std::endl;
+	}
 
 }
 

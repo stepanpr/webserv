@@ -9,7 +9,8 @@ class RequestParser
 
 public:
 	RequestParser();
-	RequestParser(std::string buf);
+	RequestParser(std::string);
+	void addRequest(std::string);
 	void PrintMap();
 
 	std::string getMetod();
@@ -22,9 +23,11 @@ public:
 	// RequestParser &operator=(const RequestParser &copy);
 
 private:
+	bool _is_ok;
 	std::string _metod;
 	std::string _path;
 	std::string _protokol;
+	std::stringstream _bodybuffer;
 	std::map<std::string,std::string> _headers;
 };
 

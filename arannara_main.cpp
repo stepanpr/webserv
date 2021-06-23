@@ -56,6 +56,9 @@ int main()
 
 
 	RequestParser a(zapros_chunked.str());
+	a.addRequest(zapros_chunked2.str());
+	a.addRequest(zapros_chunked3.str());
+	a.addRequest(zapros_chunked4.str());
 	// a.PrintMap();
 
 }
