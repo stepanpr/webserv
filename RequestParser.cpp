@@ -101,6 +101,16 @@ RequestParser::RequestParser(std::string buf)
 
 }
 
+void RequestParser::RequestWaiter(char *str)
+{
+	int i = 0;
+	while (str[i] != '\0')
+	{
+		std::string =
+	}
+
+}
+
 void RequestParser::addRequest(std::string buf) // добавляем чанки в боди
 {
 	size_t pos = 0;

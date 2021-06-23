@@ -11,6 +11,7 @@ public:
 	RequestParser();
 	RequestParser(std::string);
 	void addRequest(std::string);
+	void RequestWaiter(char *);
 	void PrintMap();
 
 	std::string getMetod();
