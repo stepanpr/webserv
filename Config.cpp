@@ -1,7 +1,15 @@
-#include "Config.hpp"
 
-Config::Config(): _path(std::string(DEFAULT_CONFIG_PATH))
+#include "Config.hpp"
+# include <pthread.h>
+
+Config::Config() : _path(std::string(DEFAULT_CONFIG_PATH)), _isValid(true)
 {
+	_numOfServers = 0;
+}
+
+Config::Config(std::string const &path) : _path(path), _isValid(true)
+{
+	_numOfServers = 0;
 }
 
 Config::~Config()
@@ -10,20 +18,247 @@ Config::~Config()
 
 Config::Config(const Config &copy)
 {
+	*this = copy;
 }
 
 Config	&Config::operator=(const Config &copy)
 {
+	this->_path = copy._path;
+	// for()COPY values
 	return (*this);
 }
 
-bool Config::isValid()
-{
-	//check if configuration file argv[1] is valid
-	return true;
-}
+/*-------------------------------------------------------------------------------*/
 
 void Config::setPath(const std::string &path)
 {
 	_path = path;
+}
+
+std::string Config::getPath()
+{
+	return _path;
+}
+
+std::vector<t_config> Config::getConfigs()
+{
+	return _configs;
+}
+
+bool Config::isValid()
+{
+	return _isValid;
+}
+
+
+
+/*-------------------------------------------------------------------------------*/
+
+
+
+void Config::load(std::string path)
+{
+	std::vector<std::string> data;
+	std::string buffer;
+	std::ifstream file;
+
+	file.open(path.c_str());
+	if (!(file.is_open()))
+	{
+		std::cout << YELLOW << "config error: configuraion path is bad\n" << RESET;
+		_isValid = false;
+		return ;
+	}
+	// else
+	// {
+	// 	std::cout << "Config file found!\n";
+	// }
+
+	/* записываем строки разбитые по пробелу в вектор data */
+	while(!file.eof()) 
+	{
+        file >> buffer;
+		// std::cout << configBuffer << "\n";
+         data.push_back(buffer);
+    }
+
+	file.close();
+	read(data);
+}
+
+
+
+
+void Config::read(std::vector<std::string> &data)
+{
+	/* вывод data (не распарсенные данные из конфига) */
+	// for (int i =0; i<data.size(); i++)	
+	// {
+	// std::cout << data[i] << "\n";}
+
+	{	/* подсчет серверов в конфиге */
+		for(std::vector<std::string>::iterator it = data.begin(); it != data.end(); it++) 
+		{
+			if (*it == "server")
+				_numOfServers += 1;
+		}
+		if (_numOfServers == 0) //если серверов не найдено, то возвращаем ошибку
+		{
+			std::cout << YELLOW << "config error: there is no required server to run\n" << RESET;
+			_isValid = false;
+			return ;
+		}
+		std::cout << BLUE << "The number of servers will be started: " << GREEN_B << _numOfServers << "\n" << RESET;
+	}
+
+	{	/* проверка на четность скобок */
+		int openBrace = 0;
+		int closeBrace = 0;
+		for(std::vector<std::string>::iterator it = data.begin(); it != data.end(); it++) 
+		{
+			if (*it == "{")
+				openBrace += 1;
+			if (*it == "}")
+				closeBrace += 1;
+		}
+		// std::cout << openBrace << "\n";
+		// std::cout << closeBrace << "\n";
+		if (openBrace != closeBrace) //если скобок не одинаковое количество, то возвращаем ошибку
+		{
+			std::cout << YELLOW << "config error: wrong number of brackets\n" << RESET;
+			_isValid = false;
+			return ;
+		}
+	}
+
+
+	std::cout << BLUE << "\nMap of configuration file:\n" << RESET;
+ 
+	/* старт парсинга */
+	for(int i = 0; i < _numOfServers; i++) //i <= _numOfServers; как вариант, перед циклом ищем количество "server" в файле
+	{
+		
+
+		if (data[0] == "server") 
+		{
+			std::cout << std::setw(12) << BLUE_B << data[0] << "\n" << RESET;
+			// _numOfServers +=1;
+			t_config new_config;
+			new_config.serverID = i;
+			std::vector<std::string>::iterator it = data.begin();
+
+			for(unsigned long j = 1; j < data.size(); j++)							//начинаем с единицы чтобы не попасть на "server"
+			{
+				if (data[j] == "listen")
+					new_config.listen = data[j+1];
+				if (data[j] == "server_name")
+					new_config.server_name = data[j+1];
+				if (data[j] == "error_page")
+					new_config.error_page = data[j+1];
+
+				// new_config.server_name = (data[j] == "server_name") ? data[j+1] : std::string();
+				if (data[j] == "location")//////////////
+				{
+					std::cout << std::setw(15) << BLUE << "location\n" << RESET;
+					t_location new_location;
+					for(unsigned long l = j; l < data.size(); l++)
+					{
+						if (data[l] == "location")
+							new_location.location = data[l + 1];
+						if (data[l] == "index")
+							new_location.index = data[l + 1];
+						if (data[l] == "autoindex")
+							new_location.autoindex = data[l + 1];
+						if (data[l] == "methods")
+							new_location.methods = data[l + 1];
+						if (data[l] == "root")
+							new_location.root = data[l + 1];
+						if (data[l] == "}")
+							break ;
+					}
+					new_config.location.push_back(new_location);
+				}/////////////////////////////////////////
+				if (data[j] == "server")
+				{	
+					it++;
+					data.erase(data.begin(), it);
+					break ;
+				}
+				it++;
+			}
+			_configs.push_back(new_config);
+		} 
+		else 
+		{
+			std::cout << YELLOW << "config error: is not valid\n" << RESET;
+			_isValid = false;
+			return ;
+		}
+
+	}
+
+}
+
+
+
+void Config::showConfig()
+{
+	std::cout << BLUE << "\n\n************************************CONFIG:\n" << RESET;
+	for(unsigned long k = 0; k < _configs.size(); k++)
+	{	
+		std::cout << std::setw(14)<< BLUE_B << "========SERVER[" << k << "]========\n" << RESET;
+		std::cout << std::setw(13) << BLUE  << "listen: " << RESET << _configs[k].listen << "\n";
+		std::cout << std::setw(8)<< BLUE  << "server_name: " << RESET << _configs[k].server_name  << "\n";
+		std::cout << std::setw(9)<< BLUE  << "error_page: " << RESET << _configs[k].error_page  << "\n";
+		for(unsigned long l = 0; l < _configs[k].location.size(); l++)
+		{
+			std::cout << std::setw(14)<<  BLUE << "-------LOCATION[" << l << "]-------\n" << RESET;
+			std::cout << std::setw(11)<< BLUE  << "location: " << RESET << _configs[k].location[l].location  << "\n";
+			std::cout << std::setw(14)<< BLUE  << "index: " << RESET << _configs[k].location[l].index  << "\n";
+			std::cout << std::setw(10)<< BLUE  << "autoindex: " << RESET << _configs[k].location[l].autoindex  << "\n";
+			std::cout << std::setw(12)<< BLUE  << "methods: " << RESET << _configs[k].location[l].methods  << "\n";
+			std::cout << std::setw(15)<< BLUE  << "root: " << RESET << _configs[k].location[l].root  << "\n";
+		}
+		// std::cout << PURPLE  << "==================\n" << RESET;
+		enter("press ENTER to continue");
+		std::cout << "\n";
+	}
+	std::cout << BLUE << "***************************************END\n" << RESET;
+}
+
+
+
+
+
+
+/*-------------------------------------------------------------------------------*/
+
+
+
+
+void Config::createServers()
+{
+
+	/* 	
+		поочередно запускаем серверы в количестве _numOfServers, 
+	  	для каждого из серверов передаем соответствующую ему структуру с данными 
+	*/
+
+	pthread_t *threads;
+	threads = new pthread_t[_numOfServers];
+	std::cout << std::endl << CYAN_B << "Start servers..." << std::endl << CYAN <<"(enter \"exit\" for get out)" << RESET << std::endl << std::endl;
+	sleep(1);
+	// pthread_create(&threads[0], NULL, &cmd, &_numOfServers);
+
+	for(int i = 0; i < _numOfServers; i++)
+    {
+		pthread_create(&threads[i], NULL, initServer<struct s_config, Server>, &_configs[i]);
+    }
+	pthread_create(&threads[_numOfServers], NULL, &cmds<Config>, &(*this));
+
+	for (int i = 0; i < _numOfServers;)
+	{
+		pthread_join(threads[i++], NULL);
+	}
+	// delete [] threads;
 }
