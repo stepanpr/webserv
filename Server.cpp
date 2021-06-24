@@ -38,7 +38,7 @@ int Server::startServer(struct s_config *config)
 
 
 	pthread_mutex_lock(&lock);
-	std::cout << std::endl << GREEN_B << "Server started! " << WHITE <<"(ID: " 
+	std::cout << std::endl << GREEN_B << "Server started! " << WHITE <<"(ID: "
 	<< config->serverID << "; port: " << config->listen << ")" << RESET << std::endl;
 	pthread_mutex_unlock(&lock);
 
@@ -60,7 +60,7 @@ int Server::startServer(struct s_config *config)
 		return 0;
 	}
 
-	// servaddr = {0};											//заполняем структуру sockaddr_in 
+	// servaddr = {0};											//заполняем структуру sockaddr_in
 	servaddr.sin_family = AF_INET;							// AF_INET определяет, что используется сеть для работы с сокетом
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 			//связывает сокет со всеми доступными интерфейсами
 	const char *port = config->listen.c_str();
@@ -94,7 +94,7 @@ int Server::pollLoop(struct s_config &config)
 {
 
 
-	/*	
+	/*
 	**	struct pollfd {
 	**   	int fd;			- описатель файла
 	**  	short events;	- запрошенные события
@@ -122,12 +122,12 @@ int Server::pollLoop(struct s_config &config)
 	while (1)
 	{
 
-		/* 
+		/*
 		** int poll(struct pollfd fds[], nfds_t nfds, int timeout)
 		** pollfd fds[] - используется для хранения файлового дескриптора сокета, статус которого необходимо проверить;
 		** nfds - параметр типа nfds_t, используемый для обозначения бщее количества элементов (клиентов);
 		** timeout - время блокировки (в миллисекундах)
-		*/ 
+		*/
 		int ret = poll(pfd_array, 1 + MAX_CLIENTS, -1); //-1 (infinity) или значние TIMEOUT
 		if (ret == -1)
 		{
@@ -145,16 +145,16 @@ int Server::pollLoop(struct s_config &config)
 			{
 				listen_sock->revents &= ~POLLIN;
 
-				// struct sockaddr_in cliaddr;		
+				// struct sockaddr_in cliaddr;
 				socklen_t clilen = sizeof(struct sockaddr_in);
-				int sock_fd = accept(listen_sock_fd, (struct sockaddr*)&cliaddr, &clilen);	//Accept: Ожидание входящего соединения 
+				int sock_fd = accept(listen_sock_fd, (struct sockaddr*)&cliaddr, &clilen);	//Accept: Ожидание входящего соединения
 				if (sock_fd > 0)
 				{
 					// ограничение числа подключений
 					if (clients_count == MAX_CLIENTS)
 					{
 						close(sock_fd);
-						std::cout << WHITE_B << MAX_CLIENTS << WHITE 
+						std::cout << WHITE_B << MAX_CLIENTS << WHITE
 						<<" clients already connected, unexpected new connection have discarded" << RESET << std::endl;
 
 					} else
@@ -170,8 +170,8 @@ int Server::pollLoop(struct s_config &config)
 								pfd_array[1 + i].fd = sock_fd;
 								pfd_array[1 + i].events = POLLIN;
 
-								std::cout << WHITE <<"!client " << WHITE_B << i << WHITE << " has been connected from " << WHITE_B 
-								<< inet_ntoa((in_addr)cliaddr.sin_addr) << ":" << config.listen << WHITE << " | clients total: " 
+								std::cout << WHITE <<"!client " << WHITE_B << i << WHITE << " has been connected from " << WHITE_B
+								<< inet_ntoa((in_addr)cliaddr.sin_addr) << ":" << config.listen << WHITE << " | clients total: "
 								<< WHITE_B << clients_count << RESET << std::endl;
 								// std::cout << "!got connection from " << inet_ntoa((in_addr)cliaddr.sin_addr) << std::endl;
 								break;
@@ -220,19 +220,20 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i)
 				buf[ret] = '\0';
 				std::cout << WHITE_B << ret << WHITE << " bytes received from client " << WHITE_B << i << RESET << std::endl;
 				std::cout << GREEN << buf << RESET << std::endl;
-				
+
 
 				/*
 				** ЗАПУСК ОБРАБОТЧИКА ЗАПРОСА!
 				*/
 
 				/* std::map requestHeaders= */ RequestParser parseHTTP((char*)buf);
-				std::map<std::string, std::string> m = parseHTTP.getHeaders();
-				std::cout << parseHTTP.getMetod() << " " << parseHTTP.getPath() << '\n';
-				for (std::map<std::string, std::string>::iterator it = m.begin(); it != m.end() ; it++)
-				{
-					std::cout << it->first << " : " << it->second << '\n';
-				}
+
+				// std::map<std::string, std::string> m = parseHTTP.getHeaders();
+				// std::cout << parseHTTP.getMetod() << " " << parseHTTP.getPath() << '\n';
+				// for (std::map<std::string, std::string>::iterator it = m.begin(); it != m.end() ; it++)
+				// {
+				// 	std::cout << it->first << " : " << it->second << '\n';
+				// }
 
 
 				/*
@@ -262,12 +263,12 @@ int Server::response(struct pollfd *pfd_array, int &i)
 
 	if (!file) 								//нужного контента нету
 	{
-		std::ifstream error_404;			
+		std::ifstream error_404;
 		file.open("www/default/404.html");
-		if (!file) 
+		if (!file)
 		{
 			std::cout << YELLOW << "error: content not found!" << RESET << std::endl;
-		} 
+		}
 		else
 		{
 			error_404.read(file_buffer, 300);

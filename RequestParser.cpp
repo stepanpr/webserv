@@ -68,7 +68,7 @@ RequestParser::RequestParser(std::string buf)
 				is_host = true;
 			if ((it->first.compare("Transfer-Encoding:") == 0) && (it->second.compare("chunked") == 0))
 				is_chunked = true;
-			if ((it->first.compare("Content-Length:") == 0) && (it->second.compare("chunked") == 0))
+			if ((it->first.compare("Content-Length:") == 0))
 				is_length = true;
 		}
 
