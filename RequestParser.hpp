@@ -13,7 +13,7 @@ public:
 	RequestParser();
 	RequestParser(std::string);
 	void addRequest(std::string);
-	void RequestWaiter(char *);
+	void RequestWaiter(const char *);
 	void PrintMap();
 
 	std::string getMetod();
@@ -26,7 +26,13 @@ public:
 	// RequestParser &operator=(const RequestParser &copy);
 
 private:
-	bool _is_ok;
+	bool _is_ok;			// запрос ок! отправляем на обработку
+	bool _is_host;			// есть ли хедер Host:
+	bool _is_chunked;		// есть ли хедер Content-encoding: chunked
+	bool _is_length;		// есть ли хедер Content-length:
+	bool _is_headers_ok;	// все ли хедеры пришли?
+	bool _is_startline_ok;	// есть ли стартлайн
+
 	std::stringstream _ss;
 	std::string _metod;
 	std::string _path;
