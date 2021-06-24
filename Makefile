@@ -24,7 +24,7 @@ RESET = \033[0m
 
 all: $(NAME)
 	
-%.o: %.cpp
+%.o: %.cpp %.hpp
 	@echo "$(GREEN)Compiling...$(RESET)"
 	@sleep 0.2
 	@$(CC) $(CFLAGS)  -c $< -o $@
