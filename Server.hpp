@@ -1,6 +1,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 # include "Global.hpp"
+# include "RequestParser.hpp"
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -40,8 +41,8 @@ class Server
 
 		int startServer(struct s_config *config);
 		int pollLoop(struct s_config &config);
-		int request(struct pollfd *pfd_array, int &clients_count, int &i); //&
-		int response(struct pollfd *pfd_array, int &i);
+		int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config); //&
+		int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
 
 
 
