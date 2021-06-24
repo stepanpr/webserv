@@ -293,12 +293,11 @@ int Server::response(struct pollfd *pfd_array, int &i, RequestParser &HTTPreques
 	// }
 
 	/* обработка method */
-	std::string method = parseHTTPrequest.getMetod();
+	std::string method = HTTPrequest.getMetod();
 
 	/* обработка path */
 	std::string path;
-
-	int isExist = 0;
+	int isExist = 0; //существует ли location с таким запросом
 	for (int i =0; i < config.location.size(); i++)
 	{ 
 		if (config.location[i].location == HTTPrequest.getPath())			//если, у нас не корень и запрос совпадает с каким-то локейшеном (с маской локейшена)
@@ -314,7 +313,8 @@ int Server::response(struct pollfd *pfd_array, int &i, RequestParser &HTTPreques
 		path = config.error_page + '/' + "404.html";
 
 	/* обработка protocol */
-	std::string protocol = parseHTTPrequest.getProtokol();
+	std::string protocol = HTTPrequest.getProtokol();
+
 
 
 	/* обработка заголовков */
@@ -346,10 +346,9 @@ int Server::response(struct pollfd *pfd_array, int &i, RequestParser &HTTPreques
 
 
 
-
+/* формирование ответа на основе обработанного запроса */
 if (HTTPrequest.getPath() != "/favicon.ico")
 {
-	//формирование ответа на основе обработанного запроса
 	std::stringstream response_body;////////////////////////////////////
 	std::ifstream file; // создаем объект класса ifstream
 	char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;    //поменять!
