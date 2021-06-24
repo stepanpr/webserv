@@ -54,11 +54,25 @@ int main()
 	// std::cout << zapros.str() << std::endl;
 
 
+	char str[] = {"G"};
+	char str2[] = {"ET / HT"};
+	char str3[] = {"TP/1.1\r\nHost: localho"};
+	char str4[] = {"st:5006\r\nConnection: keep-alive\r\n"};
+	char str5[] = {"Cache-Control: max-age=0\r\n"};
+	char str6[] = {"Accept-Language: en-US,en;q=0.9\r\n\r\n"};
 
-	RequestParser a(zapros_chunked.str());
-	a.addRequest(zapros_chunked2.str());
-	a.addRequest(zapros_chunked3.str());
-	a.addRequest(zapros_chunked4.str());
+	RequestParser a;
+	a.RequestWaiter(str);
+	a.RequestWaiter(str2);
+	a.RequestWaiter(str3);
+	a.RequestWaiter(str4);
+	a.RequestWaiter(str5);
+	a.RequestWaiter(str6);
+
+	// RequestParser a(zapros_chunked.str());
+	// a.addRequest(zapros_chunked2.str());
+	// a.addRequest(zapros_chunked3.str());
+	// a.addRequest(zapros_chunked4.str());
 	// a.PrintMap();
 
 }

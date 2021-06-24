@@ -3,6 +3,8 @@
 # include <iostream>
 #include <sstream>
 #include <map>
+#include <stdio.h>//itoa
+#include <stdlib.h>//itoa
 
 class RequestParser
 {
@@ -25,6 +27,7 @@ public:
 
 private:
 	bool _is_ok;
+	std::stringstream _ss;
 	std::string _metod;
 	std::string _path;
 	std::string _protokol;

@@ -98,16 +98,28 @@ RequestParser::RequestParser(std::string buf)
 			std::cout << _bodybuffer.str() << std::endl;
 		}
 	}
-
 }
 
 void RequestParser::RequestWaiter(char *str)
 {
-	int i = 0;
-	while (str[i] != '\0')
+	size_t pos = 0;
+	std::string buf = (char*)str;
+	std::string double_separator = "\r\n\r\n";
+
+	bool headers_is_ok = false;
+
+	_ss << buf;
+
+	if ((pos = buf.find(double_separator)) != std::string::npos)
 	{
-		std::string =
+		headers_is_ok = true;
 	}
+
+
+	if (headers_is_ok == true)
+		std::cout << _ss.str();
+
+
 
 }
 
