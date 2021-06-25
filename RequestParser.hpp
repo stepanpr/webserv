@@ -11,7 +11,7 @@ class RequestParser
 
 public:
 	RequestParser();
-	RequestParser(std::string);
+	// RequestParser(std::string);
 	void addRequest(std::string);
 	void RequestWaiter(const char *);
 	void PrintMap();

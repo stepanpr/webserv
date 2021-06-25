@@ -226,16 +226,17 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i)
 				** ЗАПУСК ОБРАБОТЧИКА ЗАПРОСА!
 				*/
 
-				/* std::map requestHeaders= */ RequestParser parseHTTP((char*)buf);
+				/* std::map requestHeaders= */ RequestParser parseHTTP;
+				parseHTTP.RequestWaiter((char*)buf);
 
 				// std::string get("GET");
 				// std::string post("POST");
 
 				// if (get.compare(parseHTTP.getMetod()) == 0)
-				// 	response(&(*pfd_array), i, 1);
+
 
 				// if (post.compare(parseHTTP.getMetod()) == 0)
-				// 	response(&(*pfd_array), i, 2);
+					// response(&(*pfd_array), i, 2);
 
 
 
@@ -251,10 +252,24 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i)
 				** ОТПРАВКА ОБРАБОТАННОГО ЗАПРОСА В RESPONSE - response(&(*pfd_array), i, MAP_with_values);
 				*/
 
+response(&(*pfd_array), i);
 
 
 
-				std::stringstream response_body;////////////////////////////////////
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+
+
+
+int Server::response(struct pollfd *pfd_array, int &i)
+{
+			std::stringstream response_body;////////////////////////////////////
 				std::ifstream file; // создаем объект класса ifstream
 				char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;    //поменять!
 
@@ -291,11 +306,8 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i)
 
 					std::stringstream response;
 					// if (flag == 1)
-						response << "HTTP/1.1 200 OK\r\n";
-					// if (flag == 2)
-					// 	response << "HTTP/1.1 201 OK\r\n";
-
-					response << "Version: HTTP/1.1\r\n"
+						response << "HTTP/1.1 200 OK\r\n"
+						 << "Version: HTTP/1.1\r\n"
 					<< "Content-Type: text/html; charset=utf-8\r\n"
 					<< "Content-Length: " << response_body.str().length()
 					<< "\r\n\r\n"
@@ -308,21 +320,8 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i)
 					}
 					}
 					return 0;
-			}
-		}
-	}
 
-	return 0;
 }
-
-
-
-
-
-
-
-
-
 
 
 

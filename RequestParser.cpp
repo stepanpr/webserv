@@ -3,25 +3,25 @@
 RequestParser::RequestParser(void) : _is_ok(false), _is_host(false), _is_chunked(false), _is_length(false), _is_headers_ok(false), _is_startline_ok(false)
 { }
 
-RequestParser::RequestParser(std::string buf)
-{
+// RequestParser::RequestParser(std::string buf)
+// {
 
 // 	size_t counter = 0;
 
 
 
-// 	if ( !(_metod.empty()) && !(_path.empty()) && !(_protokol.empty()))  //  проверяем все ли хорошо спарсилось, выставляет флаг is_ok
-// 	{
-// 		std::map<std::string,std::string>::iterator it = _headers.begin();
-//   		for (it = _headers.begin(); it != _headers.end(); ++it)
-// 		{
-// 			if ((it->first.compare("Host:") == 0))
-// 				is_host = true;
-// 			if ((it->first.compare("Transfer-Encoding:") == 0) && (it->second.compare("chunked") == 0))
-// 				is_chunked = true;
-// 			if ((it->first.compare("Content-Length:") == 0))
-// 				is_length = true;
-// 		}
+	// if ( !(_metod.empty()) && !(_path.empty()) && !(_protokol.empty()))  //  проверяем все ли хорошо спарсилось, выставляет флаг is_ok
+	// {
+	// 	std::map<std::string,std::string>::iterator it = _headers.begin();
+  	// 	for (it = _headers.begin(); it != _headers.end(); ++it)
+	// 	{
+	// 		if ((it->first.compare("Host:") == 0))
+	// 			is_host = true;
+	// 		if ((it->first.compare("Transfer-Encoding:") == 0) && (it->second.compare("chunked") == 0))
+	// 			is_chunked = true;
+	// 		if ((it->first.compare("Content-Length:") == 0))
+	// 			is_length = true;
+	// 	}
 
 // 		std::cout << "is_host: " << is_host << " is_chunked: " << is_chunked << " is_length: " << is_length << '\n';
 // 	}
@@ -49,7 +49,7 @@ RequestParser::RequestParser(std::string buf)
 // 			std::cout << _bodybuffer.str() << std::endl;
 // 		}
 // 	}
-}
+// }
 
 void RequestParser::RequestWaiter(const char *str)
 {
