@@ -1,6 +1,6 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
-# include "Global.hpp"
+# include "main.hpp"
 # include "RequestParser.hpp"
 #include <errno.h>
 #include <stdint.h>

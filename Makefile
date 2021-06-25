@@ -6,7 +6,7 @@ CC = clang++
 # -Wall -Wextra -Werror
 CFLAGS = -std=c++98
 
-SRCS = main.cpp Config.cpp Server.cpp RequestParser.cpp
+SRCS = main.cpp Config.cpp Server.cpp RequestParser.cpp Connection.cpp Response.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
