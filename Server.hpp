@@ -1,6 +1,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
-# include "Global.hpp"
+# include "main.hpp"
+# include "RequestParser.hpp"
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -11,7 +12,10 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <cstdio>
-#include <string.h>
+#include <string>
+#include <map>
+#include "Connection.hpp"
+
 #define MAX_CLIENTS 20
 // #define BACKLOG 10
 
@@ -26,6 +30,7 @@ class Server
 
 		// int clients_count;
 		int opt;
+		std::map<int, Connection> _mapConnection; //key = fd, value = Connection этого fd
 
 		// int i; //итератор (количество клиентов)
 
@@ -40,9 +45,14 @@ class Server
 
 		int startServer(struct s_config *config);
 		int pollLoop(struct s_config &config);
+<<<<<<< HEAD
 		int request(struct pollfd *pfd_array, int &clients_count, int &i); //&
 
 		int response(struct pollfd *pfd_array, int &i);
+=======
+		int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config); //&
+		int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
+>>>>>>> main
 
 
 

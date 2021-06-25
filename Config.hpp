@@ -1,7 +1,7 @@
 
 #ifndef CONFIG_HPP
 # define CONFIG_HPP
-# include "Global.hpp"
+# include "main.hpp"
 # include "Server.hpp"
 # define DEFAULT_CONFIG_PATH "config/default.conf"
 

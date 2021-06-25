@@ -39,6 +39,9 @@ private:
 	std::string _protokol;
 	std::stringstream _bodybuffer;
 	std::map<std::string,std::string> _headers;
+	std::string _body;
+	std::string _fullRequest;
+	bool		_isOk;
 };
 
 #endif

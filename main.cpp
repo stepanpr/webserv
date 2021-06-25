@@ -25,6 +25,7 @@ int	main(int argc, char **argv)
 		std::cout << CYAN << "webserv: please, check configuration file" << RESET << std::endl << std::endl;
 		return 1;
 	}
+
 	std::string cmd;
 	while(1)
 	{
