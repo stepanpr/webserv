@@ -12,7 +12,10 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <cstdio>
-#include <string.h>
+#include <string>
+#include <map>
+#include "Connection.hpp"
+
 #define MAX_CLIENTS 20
 // #define BACKLOG 10
 
@@ -27,6 +30,7 @@ class Server
 
 		// int clients_count;
 		int opt;
+		std::map<int, Connection> _mapConnection; //key = fd, value = Connection этого fd
 
 		// int i; //итератор (количество клиентов)
 

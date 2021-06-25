@@ -17,7 +17,7 @@ public:
 	/*
 	 * for Arannara
 	 */
-	int	parseRequest(char *buf, int	len); 	// эта функция принимает char *buf и длину buf, считанного в данной итерации
+	void	bufAnalize(char *buf, int	len); 	// эта функция принимает char *buf и длину buf, считанного в данной итерации
 											// добавляет buf к _response и
 
 private:

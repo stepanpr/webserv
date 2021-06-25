@@ -12,6 +12,8 @@ public:
 	Response &operator=(const Response &copy);
 
 private:
+	_finalResponse;
+	
 };
 
 #endif

@@ -28,6 +28,9 @@ private:
 	std::string _path;
 	std::string _protokol;
 	std::map<std::string,std::string> _headers;
+	std::string _body;
+	std::string _fullRequest;
+	bool		_isOk;
 };
 
 #endif
