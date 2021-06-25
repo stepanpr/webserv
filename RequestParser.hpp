@@ -13,7 +13,7 @@ public:
 	RequestParser();
 	// RequestParser(std::string);
 	void addRequest(std::string);
-	void RequestWaiter(const char *);
+	void RequestWaiter(const char *, int);
 	void PrintMap();
 
 	std::string getMetod();

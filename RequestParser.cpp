@@ -37,7 +37,7 @@ RequestParser::RequestParser(void) : _is_ok(false), _is_host(false), _is_chunked
 // 	}
 // }
 
-void RequestParser::RequestWaiter(const char *str)
+void RequestParser::RequestWaiter(const char *str, int len)
 {
 	size_t pos = 0;
 	std::string space = " ";
@@ -51,7 +51,6 @@ void RequestParser::RequestWaiter(const char *str)
 
 	std::string new_str = (char*)str;	//  Приводим к стрингу
 	buf.append(new_str);				//  Добавляем приходящую строку в буфер
-
 
 	pos = buf.find(separator);
 	//	Стартлайн
