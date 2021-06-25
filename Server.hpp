@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <cstdio>
-#include <string.h>
+#include "structure.h"
 #define MAX_CLIENTS 20
 // #define BACKLOG 10
 

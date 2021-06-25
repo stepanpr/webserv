@@ -3,6 +3,7 @@
 # define CONFIG_HPP
 # include "main.hpp"
 # include "Server.hpp"
+# include "structure.h"
 # define DEFAULT_CONFIG_PATH "config/default.conf"
 
 
@@ -24,24 +25,6 @@ class Server;
 **			methods GET			: метод
 **			root 				: путь к корню
 */
-
-typedef struct 	s_location
-{
-	std::string location;
-	std::string index;
-	std::string autoindex;
-	std::string methods;
-	std::string root;
-}				t_location;
-
-typedef struct 	s_config
-{
-	int serverID;
-	std::string listen;
-	std::string server_name;
-	std::string error_page;
-	std::vector<t_location> location;	
-}				t_config;
 
 class Config
 {
