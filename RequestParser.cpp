@@ -49,7 +49,15 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	std::string tmp_header;
 	std::string tmp_header_rigth;
 
-	std::string new_str = (char*)str;	//  Приводим к стрингу
+	char *tmp;
+	int i = 0;
+	while (i < len)
+	{
+		tmp[i] = str[i];
+		i++;
+	}
+
+	std::string new_str = (char*)tmp;	//  Приводим к стрингу
 	buf.append(new_str);				//  Добавляем приходящую строку в буфер
 
 	pos = buf.find(separator);
