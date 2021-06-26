@@ -204,9 +204,15 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 		{
 			pfd_array[1 + i].revents &= ~POLLIN;
 
+
+
+
 			/* !!!NEW_VERSION
-			** Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second; 
+			** Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
 			*/
+			Connection tempConnect = _mapConnection.find(pfd_array[1 + i].fd)->second;
+
+
 			uint8_t buf[1024];
 			int ret = recv(pfd_array[1 + i].fd, buf, 1024, 0); //read (pfd_array[1 + i].fd , buf, 1024); /* Возврат из функции recv происходит, когда модуль TCP решает передать процессу полученные от клиента данные. Данные возвращается в буфере buf, размер которого передается в третьем аргументе. В четвертом аргументе могут передаваться дополнительные опциипараметры. Функция возвращает число байтов, которые модуль TCP записал в буфер buf; если функция возвращает ноль, то клиент данных для передачи больше не имеет.*/
 
@@ -237,12 +243,25 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 
 
 				/* !!!NEW_VERSION
+				**
+				**
+				** arranara:
 				** temp.bufAnalize((char*)buf, ret);
+				**
+				**
+				** emabel:
 				** if _request.isOk => connection.state = WRITE
 				** connection.makeResponse
 				*/
+				tempConnect.bufHandler((char*)buf, ret);
+				if (tempConnect.get_isOk())
+					responseSend(tempConnect.responsePrepare());
+
 
 		
+
+
+
 				/*
 				** ЗАПУСК ОБРАБОТЧИКА ЗАПРОСА!
 				*/
@@ -257,6 +276,17 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 	}
 
 	return 0;
+}
+
+
+
+
+
+
+
+int responseSend(std::string response)
+{
+
 }
 
 

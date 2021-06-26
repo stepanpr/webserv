@@ -11,6 +11,8 @@ public:
 	~Response();
 	Response &operator=(const Response &copy);
 
+	void responseInit()
+
 private:
 	// _finalResponse;
 	
