@@ -1,74 +1,142 @@
 #include "RequestParser.hpp"
 
-RequestParser::RequestParser(void)
+RequestParser::RequestParser(void) : _is_ok(0), _is_host(false), _is_chunked(false), _is_length(false), _is_headers_ok(false), _is_startline_ok(false)
 { }
 
-RequestParser::RequestParser(std::string buf)
+// RequestParser::RequestParser(std::string buf)
+// {
+
+// 	size_t counter = 0;
+
+
+// 		std::cout << "is_host: " << is_host << " is_chunked: " << is_chunked << " is_length: " << is_length << '\n';
+// 	}
+
+// 	//  начинаем читать тело
+// 	if (((is_chunked = true) || (is_length = true)) || ((is_host = false) && (is_chunked = false) && (is_length = false))) // если есть body-хедеры или нет хедеров совсем!
+// 	{
+// 		std::string bodydigit;
+
+// 		long int bodydigit_dec;
+// 		char * pEnd;
+
+// 		pos = buf.find(separator);		// Нашли цифру
+// 		bodydigit = buf.substr(0, pos);
+// 		bodydigit_dec = strtol(bodydigit.c_str(), &pEnd, 16);
+
+// 		if (bodydigit_dec > 0)
+// 		{
+// 			buf.erase(buf.begin(), buf.begin() + bodydigit.length() + separator.length());
+// 			_bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
+// 		}
+// 		if (bodydigit_dec == 0)
+// 		{
+// 			_is_ok = true;
+// 			std::cout << _bodybuffer.str() << std::endl;
+// 		}
+// 	}
+// }
+
+int RequestParser::RequestWaiter(const char *str, int len)
 {
 	size_t pos = 0;
-	std::string token;
-	std::string token_header;
+	std::string space = " ";
 	std::string separator = "\r\n";
 	std::string double_separator = "\r\n\r\n";
-	std::string space = " ";
-	bool is_ok = false;
-
-	size_t counter = 0;
-
-	pos = buf.find(double_separator);	// Отрезали запрос с хедерами
-	if (pos != std::string::npos)
-	{
-		token = buf.substr(0, pos + separator.length());
-		buf.erase(0, pos + double_separator.length());
-	}
-
-	pos = token.find(separator);		// Отрезали заголовок запроса
-	if (pos != std::string::npos)
-	{
-		token_header = token.substr(0, pos);
-		token.erase(token.begin(), token.begin() + token_header.length() + separator.length());
-	}
-
-	pos = token_header.find(" ");		// Достали метод из заголовка
-	_metod = token_header.substr(0, pos);
-	token_header.erase(0, _metod.length() + space.length());
-
-	pos = token_header.find(" ");		// Достали путь из заголовка
-	_path = token_header.substr(0, pos);
-	token_header.erase(0, _path.length() + space.length());
-
-	pos = token_header.find(" ");		// Достали протокол из заголовка
-	_protokol = token_header.substr(0, pos);
-	token_header.erase();
-
-
+	std::string startline;
+	std::string headers;
+	std::string buf;
 	std::string tmp_header;
 	std::string tmp_header_rigth;
 
-	while ((pos = token.find(separator)) != std::string::npos) // Отрезаем по 1-му хедеру и кладем в мап
+	std::string new_str = (char*)str;	//  Приводим к стрингу
+	buf.append(new_str);				//  Добавляем приходящую строку в буфер
+
+	pos = buf.find(separator);
+	//	Стартлайн
+	if ( (pos != std::string::npos) && _is_startline_ok != true ) // если есть \r\n и не было стартлайна, то парсим и удаляем все что до него
 	{
-		tmp_header = token.substr(0, pos);
-		size_t pos2 = 0;
-		pos2 = tmp_header.find(" ");
-		tmp_header_rigth = tmp_header.substr(0, pos2);
-		tmp_header.erase(0, tmp_header_rigth.length() + space.length());
-		_headers.insert(std::pair<std::string,std::string>(tmp_header_rigth, tmp_header));
-		token.erase(0, tmp_header.length() + tmp_header_rigth.length() + separator.length() + space.length());
+		startline = buf.substr(0, pos);
+		buf.erase(buf.begin(), buf.begin() + startline.length() + separator.length());
+		pos = startline.find(" ");		// Достали метод из заголовка
+		_metod = startline.substr(0, pos);
+		startline.erase(0, _metod.length() + space.length());
+		pos = startline.find(" ");		// Достали путь из заголовка
+		_path = startline.substr(0, pos);
+		startline.erase(0, _path.length() + space.length());
+		pos = startline.find(" ");		// Достали протокол из заголовка
+		_protokol = startline.substr(0, pos);
+		startline.erase();
+		_is_startline_ok = true;
 	}
 
-	if ( !(_metod.empty()) && !(_path.empty()) && !(_protokol.empty()))  //  проверяем все ли хорошо спарсилось, выставляет флаг is_ok
+	//	Стартлайн спарсили, парсим хедеры
+	if ((pos = buf.find(double_separator)) != std::string::npos)  // если есть \r\n\r\n парсим и удаляем все что до него
+	{
+		if (_is_headers_ok != true) // если не было хедеров
+		{
+			headers = buf.substr(0, pos + separator.length());  // отрезаем хедеры
+			buf.erase(0, pos + double_separator.length());
+
+			while ((pos = headers.find(separator)) != std::string::npos) // Отрезаем по 1-му хедеру и кладем в мап
+			{
+				tmp_header = headers.substr(0, pos);
+				size_t pos2 = 0;
+				pos2 = tmp_header.find(" ");
+				tmp_header_rigth = tmp_header.substr(0, pos2);
+				tmp_header.erase(0, tmp_header_rigth.length() + space.length());
+				_headers.insert(std::pair<std::string,std::string>(tmp_header_rigth, tmp_header));
+				headers.erase(0, tmp_header.length() + tmp_header_rigth.length() + separator.length() + space.length());
+			}
+		}
+		_is_headers_ok = true;
+	}
+
+	if (!(_metod.empty()) && !(_path.empty()) && !(_protokol.empty()) && (_is_headers_ok == true) )  //  проверяем все ли хорошо спарсилось, выставляет флаг is_ok
 	{
 		std::map<std::string,std::string>::iterator it = _headers.begin();
   		for (it = _headers.begin(); it != _headers.end(); ++it)
-			if ((it->first.compare("Transfer-Encoding:") == 0) && (it->second.compare("chunked") == 0))
+		{
+			if ((it->first.compare("Host:") == 0))
 			{
-				std::cout << "This is chunked request\n";
-				is_ok = true;
+				_is_host = true;
+				_isOk = 1;
 			}
-		// std::cout << is_ok << '\n';
+
+			// if ((it->first.compare("Transfer-Encoding:") == 0) && (it->second.compare("chunked") == 0))
+			// 	_is_chunked = true;
+			// if ((it->first.compare("Content-Length:") == 0))
+			// 	_is_length = true;
+		}
 	}
 
-	// std::cout << buf << std::endl;
+	return (_isOk);
+
+}
+
+void RequestParser::addRequest(std::string buf) // добавляем чанки в боди
+{
+	size_t pos = 0;
+	std::string separator = "\r\n";
+	std::string bodydigit;
+	long int bodydigit_dec;
+	char * pEnd;
+
+	pos = buf.find(separator);		// Нашли цифру
+	bodydigit = buf.substr(0, pos);
+	bodydigit_dec = strtol(bodydigit.c_str(), &pEnd, 16);
+
+	if (bodydigit_dec > 0)
+	{
+		buf.erase(buf.begin(), buf.begin() + bodydigit.length() + separator.length());
+		_bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
+	}
+
+	if (bodydigit_dec == 0)
+	{
+		_is_ok = true;
+		std::cout << _bodybuffer.str() << std::endl;
+	}
 
 }
 
@@ -98,9 +166,8 @@ std::string RequestParser::getProtokol()
 
 std::map<std::string,std::string> RequestParser::getHeaders()
 {
-	return _headers;
+	return (_headers);
 }
-
 
 // RequestParser::RequestParser(const RequestParser &copy)
 // {
@@ -110,7 +177,6 @@ std::map<std::string,std::string> RequestParser::getHeaders()
 // {
 // 	return (*this);
 // }
-
 
 RequestParser::~RequestParser()
 { }
