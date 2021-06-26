@@ -13,23 +13,12 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <cstdio>
-<<<<<<< HEAD
-<<<<<<< HEAD
 #include <string>
 #include <map>
 #include "Connection.hpp"
-
 #define MAX_CLIENTS 20
-=======
 #include <string.h>
 #include <fcntl.h>
-#define MAX_CLIENTS 100
->>>>>>> emabel
-=======
-#include <string.h>
-#include <fcntl.h>
-#define MAX_CLIENTS 100
->>>>>>> emabel
 // #define BACKLOG 10
 
 class Config;
