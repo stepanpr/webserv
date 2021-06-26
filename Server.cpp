@@ -53,7 +53,7 @@ int Server::startServer(struct s_config *config)
 
 	opt = 1;
 	int opt1 = 1;
-	int opt2 = BUFFERSIZE;
+	int opt2 = 65536;
 
 	if (setsockopt(_listen_sock_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) < 0)
 		throw Exceptions();
@@ -204,6 +204,9 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 		{
 			pfd_array[1 + i].revents &= ~POLLIN;
 
+			/* !!!NEW_VERSION
+			** Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second; 
+			*/
 			uint8_t buf[1024];
 			int ret = recv(pfd_array[1 + i].fd, buf, 1024, 0); //read (pfd_array[1 + i].fd , buf, 1024); /* Возврат из функции recv происходит, когда модуль TCP решает передать процессу полученные от клиента данные. Данные возвращается в буфере buf, размер которого передается в третьем аргументе. В четвертом аргументе могут передаваться дополнительные опциипараметры. Функция возвращает число байтов, которые модуль TCP записал в буфер buf; если функция возвращает ноль, то клиент данных для передачи больше не имеет.*/
 
@@ -227,11 +230,19 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 				std::cout << WHITE <<"Client " WHITE_B << i << WHITE << " has been disconnected | clients total: " << WHITE_B << clients_count << RESET << std::endl;
 			} else if (ret > 0)
 			{
+
 				buf[ret] = '\0';
 				std::cout << WHITE_B << ret << WHITE << " bytes received from client " << WHITE_B << i << RESET << std::endl;
 				std::cout << GREEN << buf << RESET << std::endl;
-				
 
+
+				/* !!!NEW_VERSION
+				** temp.bufAnalize((char*)buf, ret);
+				** if _request.isOk => connection.state = WRITE
+				** connection.makeResponse
+				*/
+
+		
 				/*
 				** ЗАПУСК ОБРАБОТЧИКА ЗАПРОСА!
 				*/
@@ -331,7 +342,7 @@ if (HTTPrequest.getPath() != "/favicon.ico")
 {
 	std::stringstream response_body;////////////////////////////////////
 	std::ifstream file; // создаем объект класса ifstream
-	char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;    //поменять!
+	char *file_buffer = new char[10000 + 1]; file_buffer[10000] = 0;    //поменять!
 
 // www/site.com/index.html
 	file.open(path.c_str()); 	//пытаемся открыть файл по запросу
@@ -346,7 +357,7 @@ if (HTTPrequest.getPath() != "/favicon.ico")
 		} 
 		else
 		{
-			error_404.read(file_buffer, 300);
+			error_404.read(file_buffer, 10000);
 			response_body << file_buffer;
 		}
 		return -1;
@@ -361,7 +372,7 @@ if (HTTPrequest.getPath() != "/favicon.ico")
 		// std::string file_buffer;
 		// char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;
 		// response_body << file;
-		file.read(file_buffer, 300);
+		file.read(file_buffer, 100000);
 		// for(file >> file_buffer; !file.eof(); file >> file_buffer)
 		// 	std::cout << file_buffer;
 		response_body << file_buffer;

@@ -1,7 +1,8 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
-# include "Global.hpp"
+# include "main.hpp"
 # include "RequestParser.hpp"
+#include "Connection.hpp"
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -13,7 +14,8 @@
 #include <netdb.h>
 #include <cstdio>
 #include <string.h>
-#define MAX_CLIENTS 20
+#include <fcntl.h>
+#define MAX_CLIENTS 100
 // #define BACKLOG 10
 
 class Config;
@@ -21,14 +23,15 @@ class Config;
 class Server
 {
 	private:
-		int listen_sock_fd;
-		struct sockaddr_in servaddr;
-		struct sockaddr_in cliaddr;	//структура clnt_addr, в которую мы будем записывать адрес и порт подсоединившегося клиента
-
+		int _listen_sock_fd;
+		struct sockaddr_in _servaddr;
+		struct sockaddr_in _cliaddr;	//структура clnt_addr, в которую мы будем записывать адрес и порт подсоединившегося клиента
 		// int clients_count;
 		int opt;
-
 		// int i; //итератор (количество клиентов)
+
+		std::map<int, Connection> _mapConnection;
+
 
 		
 
