@@ -153,6 +153,8 @@ void Config::read(std::vector<std::string> &data)
 					new_config.listen = data[j+1];
 				if (data[j] == "server_name")
 					new_config.server_name = data[j+1];
+				if (data[j] == "max_body_size")
+					new_config.max_body_size = data[j+1];
 				if (data[j] == "error_page")
 					new_config.error_page = data[j+1];
 
