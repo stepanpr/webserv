@@ -12,7 +12,11 @@ public:
 	Response &operator=(const Response &copy);
 
 private:
+<<<<<<< HEAD
 	_finalResponse;
+=======
+	// _finalResponse;
+>>>>>>> emabel
 	
 };
 

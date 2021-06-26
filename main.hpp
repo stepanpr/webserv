@@ -9,6 +9,7 @@
 # include <iomanip>
 # include <unistd.h>
 # include <pthread.h>
+# include <sys/errno.h>
 # include <algorithm>
 
 # include <stdio.h>
@@ -24,6 +25,20 @@
 # include "RequestParser.hpp"
 
 
+# define MAX_THREADS 3 /* ограничение допустимого количества потоков */
+
+
+
+
+
+class Exceptions: public std::exception
+{
+	public:
+		virtual const char* what() const throw()
+		{
+			return strerror(errno);
+		}
+};
 
 
 # define RED  "\e[0;31m"
