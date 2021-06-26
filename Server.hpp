@@ -14,11 +14,17 @@
 #include <netdb.h>
 #include <cstdio>
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include <string>
 #include <map>
 #include "Connection.hpp"
 
 #define MAX_CLIENTS 20
+=======
+#include <string.h>
+#include <fcntl.h>
+#define MAX_CLIENTS 100
+>>>>>>> emabel
 =======
 #include <string.h>
 #include <fcntl.h>
@@ -36,14 +42,11 @@ class Server
 		struct sockaddr_in _cliaddr;	//структура clnt_addr, в которую мы будем записывать адрес и порт подсоединившегося клиента
 		// int clients_count;
 		int opt;
-<<<<<<< HEAD
+
 		std::map<int, Connection> _mapConnection; //key = fd, value = Connection этого fd
 
-=======
->>>>>>> emabel
-		// int i; //итератор (количество клиентов)
 
-		std::map<int, Connection> _mapConnection;
+		// int i; //итератор (количество клиентов)
 
 
 		

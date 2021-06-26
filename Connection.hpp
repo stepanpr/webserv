@@ -17,14 +17,18 @@ public:
 	/*
 	 * for Arannara
 	 */
-	void	bufAnalize(char *buf, int	len); 	// эта функция принимает char *buf и длину buf, считанного в данной итерации
+	void	bufHandler(char *buf, int	len); 	// эта функция принимает char *buf и длину buf, считанного в данной итерации
 											// добавляет buf к _response и
+
+	int get_isOk();
+	std::string	responsePrepare();
 
 private:
 	RequestParser		_request;
 	Response			_response;
 	int					_state;
 	int					_sock_fd;
+	int 	_isOK;
 };
 
 #endif

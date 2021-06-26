@@ -204,7 +204,16 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 		if (pfd_array[1 + i].fd != -1 && (pfd_array[1 + i].revents & POLLIN) != 0)
 		{
 			pfd_array[1 + i].revents &= ~POLLIN;
-			Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
+
+
+
+
+			/* !!!NEW_VERSION
+			** Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
+			*/
+			Connection tempConnect = _mapConnection.find(pfd_array[1 + i].fd)->second;
+
+
 			uint8_t buf[1024];
 			int ret = recv(pfd_array[1 + i].fd, buf, 1024, 0); //read (pfd_array[1 + i].fd , buf, 1024); /* Возврат из функции recv происходит, когда модуль TCP решает передать процессу полученные от клиента данные. Данные возвращается в буфере buf, размер которого передается в третьем аргументе. В четвертом аргументе могут передаваться дополнительные опциипараметры. Функция возвращает число байтов, которые модуль TCP записал в буфер buf; если функция возвращает ноль, то клиент данных для передачи больше не имеет.*/
 
@@ -229,13 +238,30 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 				std::cout << WHITE <<"Client " WHITE_B << i << WHITE << " has been disconnected | clients total: " << WHITE_B << clients_count << RESET << std::endl;
 			} else if (ret > 0)
 			{
-				// buf[ret] = '\0';
-				temp.bufAnalize((char*)buf, ret);  
-			//if _request.isOk => connection.state = WRITE
-			//connection.makeResponse
+
+				buf[ret] = '\0';
 				std::cout << WHITE_B << ret << WHITE << " bytes received from client " << WHITE_B << i << RESET << std::endl;
 				std::cout << GREEN << buf << RESET << std::endl;
-				memset(buf, 0, 1024);
+
+
+				/* !!!NEW_VERSION
+				**
+				**
+				** arranara:
+				** temp.bufAnalize((char*)buf, ret);
+				**
+				**
+				** emabel:
+				** if _request.isOk => connection.state = WRITE
+				** connection.makeResponse
+				*/
+				tempConnect.bufHandler((char*)buf, ret);
+				if (tempConnect.get_isOk())
+					responseSend(tempConnect.responsePrepare());
+
+
+		
+
 
 
 				/* !!!NEW_VERSION
@@ -259,6 +285,17 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 	}
 
 	return 0;
+}
+
+
+
+
+
+
+
+int responseSend(std::string response)
+{
+
 }
 
 
