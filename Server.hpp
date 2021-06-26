@@ -23,6 +23,8 @@
 
 class Config;
 
+class Connection;
+
 class Server
 {
 	private:
@@ -50,6 +52,9 @@ class Server
 		int pollLoop(struct s_config &config);
 		int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config); //&
 		int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
+
+		int responseSend(std::string response, struct pollfd *pfd_array, int &i);
+
 
 
 

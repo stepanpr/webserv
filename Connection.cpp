@@ -24,10 +24,9 @@ Connection	&Connection::operator=(const Connection &copy)
 void Connection::bufHandler(char *buf, int	len)
 {
 
-	// _isOK = _request.RequestWaiter(buf, len);
+	_isOK = _request.RequestWaiter(buf, len);
 
 	
-
 }
 
 
@@ -37,10 +36,10 @@ void Connection::bufHandler(char *buf, int	len)
 std::string Connection::responsePrepare()
 {
 
-	std::string response; // = _response.init(_request)
+	std::string responseString = _response->responseInit(_request, _config);
 
 
-	return response;
+	return responseString;
 }
 
 
@@ -49,4 +48,11 @@ std::string Connection::responsePrepare()
 int Connection::get_isOk()
 {
 	return _isOK;
+}
+
+void Connection::setConfig(struct  s_config &config)
+{
+	this->_config = &config;
+	// std::cout << config.listen << '\n';
+
 }

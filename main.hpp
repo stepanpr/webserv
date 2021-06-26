@@ -23,6 +23,7 @@
 # include "Server.hpp"
 # include "Config.hpp"
 # include "RequestParser.hpp"
+# include "Response.hpp"
 
 
 # define MAX_THREADS 3 /* ограничение допустимого количества потоков */

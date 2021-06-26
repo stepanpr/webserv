@@ -212,6 +212,8 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 			** Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
 			*/
 			Connection tempConnect = _mapConnection.find(pfd_array[1 + i].fd)->second;
+			tempConnect.setConfig(config);
+			
 
 
 			uint8_t buf[1024];
@@ -257,29 +259,18 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 				*/
 				tempConnect.bufHandler((char*)buf, ret);
 				if (tempConnect.get_isOk())
-					responseSend(tempConnect.responsePrepare());
-
-
-		
-
-
-
-				/* !!!NEW_VERSION
-				** temp.bufAnalize((char*)buf, ret);
-				** if _request.isOk => connection.state = WRITE
-				** connection.makeResponse
-				*/
+					responseSend(tempConnect.responsePrepare(), &(*pfd_array), i);
 
 		
 				/*
 				** ЗАПУСК ОБРАБОТЧИКА ЗАПРОСА!
 				*/
-				RequestParser HTTPrequest((char*)buf);
+				// RequestParser HTTPrequest((char*)buf);
 
 				/*
 				** ОТПРАВКА ОБРАБОТАННОГО ЗАПРОСА В RESPONSE - response(&(*pfd_array), i, MAP_with_values);
 				*/
-				response(&(*pfd_array), i, HTTPrequest, config);
+				// response(&(*pfd_array), i, HTTPrequest, config);
 			}
 		}
 	}
@@ -297,13 +288,22 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 				// 	std::cout << it->first << " : " << it->second << '\n';
 				// }
 
+	return 0;
 }
 
 
 
-int responseSend(std::string response)
+int Server::responseSend(std::string response, struct pollfd *pfd_array, int &i)
 {
 
+
+	// std::cout << response;
+		if(-1 == send(pfd_array[1 + i].fd, response.c_str(), response.length(), 0))
+		{
+			printf("Error on call 'send': %s\n", strerror(errno));
+			return -1;
+		}
+	return 0;
 }
 
 
