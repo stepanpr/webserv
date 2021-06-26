@@ -297,13 +297,14 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 				// 	std::cout << it->first << " : " << it->second << '\n';
 				// }
 
+}
+
 
 
 int responseSend(std::string response)
 {
 
 }
-
 
 
 
@@ -448,61 +449,61 @@ if (HTTPrequest.getPath() != "/favicon.ico")
 
 
 
-int Server::response(struct pollfd *pfd_array, int &i)
-{
-			std::stringstream response_body;////////////////////////////////////
-				std::ifstream file; // создаем объект класса ifstream
-				char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;    //поменять!
+// int Server::response(struct pollfd *pfd_array, int &i)
+// {
+// 			std::stringstream response_body;////////////////////////////////////
+// 				std::ifstream file; // создаем объект класса ifstream
+// 				char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;    //поменять!
 
 
-				file.open("www/site.com/index.html"); 	//пытаемся открыть файл по запросу
+// 				file.open("www/site.com/index.html"); 	//пытаемся открыть файл по запросу
 
-				if (!file) 								//нужного контента нету
-				{
-					std::ifstream error_404;
-					file.open("www/default/404.html");
-					if (!file)
-					{
-						std::cout << YELLOW << "error: content not found!" << RESET << std::endl;
-					}
-					else
-					{
-						error_404.read(file_buffer, 300);
-						response_body << file_buffer;
-					}
-					return -1;
-				}
-				else									//контейнт найден
-				{
-					std::cout << std::endl << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl;
-					// std::string file_buffer;
-					// char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;
-					// response_body << file;
-					file.read(file_buffer, 300);
-					// for(file >> file_buffer; !file.eof(); file >> file_buffer)
-					// 	std::cout << file_buffer;
-					response_body << file_buffer;
-				// }
+// 				if (!file) 								//нужного контента нету
+// 				{
+// 					std::ifstream error_404;
+// 					file.open("www/default/404.html");
+// 					if (!file)
+// 					{
+// 						std::cout << YELLOW << "error: content not found!" << RESET << std::endl;
+// 					}
+// 					else
+// 					{
+// 						error_404.read(file_buffer, 300);
+// 						response_body << file_buffer;
+// 					}
+// 					return -1;
+// 				}
+// 				else									//контейнт найден
+// 				{
+// 					std::cout << std::endl << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl;
+// 					// std::string file_buffer;
+// 					// char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;
+// 					// response_body << file;
+// 					file.read(file_buffer, 300);
+// 					// for(file >> file_buffer; !file.eof(); file >> file_buffer)
+// 					// 	std::cout << file_buffer;
+// 					response_body << file_buffer;
+// 				// }
 
 
-					std::stringstream response;
-					// if (flag == 1)
-						response << "HTTP/1.1 200 OK\r\n"
-						 << "Version: HTTP/1.1\r\n"
-					<< "Content-Type: text/html; charset=utf-8\r\n"
-					<< "Content-Length: " << response_body.str().length()
-					<< "\r\n\r\n"
-					<< response_body.str();
+// 					std::stringstream response;
+// 					// if (flag == 1)
+// 						response << "HTTP/1.1 200 OK\r\n"
+// 						 << "Version: HTTP/1.1\r\n"
+// 					<< "Content-Type: text/html; charset=utf-8\r\n"
+// 					<< "Content-Length: " << response_body.str().length()
+// 					<< "\r\n\r\n"
+// 					<< response_body.str();
 
-					if(-1 == send(pfd_array[1 + i].fd, response.str().c_str(), response.str().length(), 0))
-					{
-						printf("Error on call 'send': %s\n", strerror(errno));
-						return -1;
-					}
-					}
-					return 0;
+// 					if(-1 == send(pfd_array[1 + i].fd, response.str().c_str(), response.str().length(), 0))
+// 					{
+// 						printf("Error on call 'send': %s\n", strerror(errno));
+// 						return -1;
+// 					}
+// 					}
+// 					return 0;
 
-}
+// }
 
 
 
