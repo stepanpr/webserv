@@ -240,7 +240,7 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 				std::cout << WHITE <<"Client " WHITE_B << i << WHITE << " has been disconnected | clients total: " << WHITE_B << clients_count << RESET << std::endl;
 			} else if (ret > 0)
 			{
-				// buf[ret] = '\0';
+				buf[ret] = '\0';
 
 				std::cout << WHITE_B << ret << WHITE << " bytes received from client " << WHITE_B << i << RESET << std::endl;
 				std::cout << GREEN << buf << RESET << std::endl;
@@ -297,7 +297,7 @@ int Server::responseSend(std::string response, struct pollfd *pfd_array, int &i)
 {
 
 
-	// std::cout << response;
+	std::cout << response << '\n';
 		if(-1 == send(pfd_array[1 + i].fd, response.c_str(), response.length(), 0))
 		{
 			printf("Error on call 'send': %s\n", strerror(errno));

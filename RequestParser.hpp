@@ -31,6 +31,7 @@ private:
 	bool _is_chunked;		// есть ли хедер Content-encoding: chunked
 	bool _is_length;		// есть ли хедер Content-length:
 	bool _is_headers_ok;	// все ли хедеры пришли?
+	bool _is_body;				// все ли хедеры пришли?
 	bool _is_startline_ok;	// есть ли стартлайн
 
 	std::stringstream _ss;
