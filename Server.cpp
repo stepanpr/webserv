@@ -19,10 +19,10 @@ Server::Server(const Server &copy)
 
 Server	&Server::operator=(const Server &copy)
 {
-	this->listen_sock_fd = copy.listen_sock_fd;
-	this->servaddr.sin_addr = copy.servaddr.sin_addr;
-	this->servaddr.sin_family = copy.servaddr.sin_family;
-	this->servaddr.sin_port = copy.servaddr.sin_port;
+	this->_listen_sock_fd = copy._listen_sock_fd;
+	this->_servaddr.sin_addr = copy._servaddr.sin_addr;
+	this->_servaddr.sin_family = copy._servaddr.sin_family;
+	this->_servaddr.sin_port = copy._servaddr.sin_port;
 	return (*this);
 }
 
@@ -32,7 +32,7 @@ Server	&Server::operator=(const Server &copy)
 
 
 
-/* START SERVER WITH POLL */
+
 int Server::startServer(struct s_config *config)
 {
 
@@ -44,38 +44,42 @@ int Server::startServer(struct s_config *config)
 
 
 
-	//SERVER_CODE
-	listen_sock_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	//создание сокета от которого мы будем ожидать входящих данных
-	if (listen_sock_fd < 0)
-	{
-		printf("server: Cannot create TCP socket: %s\n", strerror(errno));
-		return -1;
-	}
+	_listen_sock_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	//создание сокета от которого мы будем ожидать входящих данных
+	if (this->_listen_sock_fd == -1)
+		throw Exceptions();
+	if (fcntl(_listen_sock_fd, F_SETFL, O_NONBLOCK) == -1)
+		throw Exceptions();
 
-	opt = 1;
-	if (0 != setsockopt(listen_sock_fd, SOL_SOCKET, SO_REUSEADDR, (const void*) &opt, sizeof(opt))) //опции сокета
-	{
-		printf("server: Error: could not allow reuse address on socket: %s\n", strerror(errno));
-		close(listen_sock_fd);
-		return 0;
-	}
 
+<<<<<<< HEAD
 	// servaddr = {0};											//заполняем структуру sockaddr_in
 	servaddr.sin_family = AF_INET;							// AF_INET определяет, что используется сеть для работы с сокетом
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 			//связывает сокет со всеми доступными интерфейсами
+=======
+	opt = 1;
+	int opt1 = 1;
+	int opt2 = BUFFERSIZE;
+
+	if (setsockopt(_listen_sock_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) < 0)
+		throw Exceptions();
+	if (setsockopt(_listen_sock_fd, SOL_SOCKET, SO_KEEPALIVE, &opt1, sizeof(int)) < 0)
+		throw Exceptions();
+	if (setsockopt(_listen_sock_fd, SOL_SOCKET, SO_RCVBUF, &opt2, sizeof(int)) < 0)
+		throw Exceptions();
+
+	// _servaddr = {0};											//заполняем структуру sockaddr_in
+	_servaddr.sin_family = AF_INET;							// AF_INET определяет, что используется сеть для работы с сокетом
+	_servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 			//связывает сокет со всеми доступными интерфейсами
+>>>>>>> emabel
 	const char *port = config->listen.c_str();
-	servaddr.sin_port = htons(atoi(port)); 					//port
+	_servaddr.sin_port = htons(atoi(port)); 					//port
 
-	if (-1 == bind(listen_sock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr))) //Bind: Привязка сокета к адресу
-	{
-		printf("server: Error on call 'bind': %s\n", strerror(errno));
-		return -1;
-	}
+	if (bind(_listen_sock_fd, (struct sockaddr*) &_servaddr, sizeof(_servaddr)) < 0) //Bind: Привязка сокета к адресу
+		throw Exceptions();
 
-	if (-1 == listen(listen_sock_fd, SOMAXCONN)) //1		//Listen: Подготовка сокета к принятию входящих соединений, SOMAXCONN - максимально возможное число одновременных TCP-соединений, можно указать нужное число
+	if (listen(_listen_sock_fd, SOMAXCONN) == -1) //1		//Listen: Подготовка сокета к принятию входящих соединений, SOMAXCONN - максимально возможное число одновременных TCP-соединений, можно указать нужное число
 	{
-		printf("server: Error on call 'listen': %s\n", strerror(errno));
-		return -1;
+		throw Exceptions();
 	}
 
 
@@ -105,7 +109,7 @@ int Server::pollLoop(struct s_config &config)
 	struct pollfd pfd_array[1 /* listen */ + MAX_CLIENTS] =
 		{
 			{
-				.fd = listen_sock_fd,
+				.fd = _listen_sock_fd,
 				.events = POLLIN		// запрошенные события (POLLIN: 0x0001 Можно считывать данные)
 			}
 		};
@@ -115,6 +119,7 @@ int Server::pollLoop(struct s_config &config)
 	{
 		pfd_array[1 + i].fd = -1;
 	}
+
 	struct pollfd *listen_sock = pfd_array;
 
 	int clients_count = 0;
@@ -146,10 +151,19 @@ int Server::pollLoop(struct s_config &config)
 			{
 				listen_sock->revents &= ~POLLIN;
 
+<<<<<<< HEAD
 				// struct sockaddr_in cliaddr;
 				socklen_t clilen = sizeof(struct sockaddr_in);
 				int sock_fd = accept(listen_sock_fd, (struct sockaddr*)&cliaddr, &clilen);	//Accept: Ожидание входящего соединения
 				if (sock_fd > 0)
+=======
+				// struct sockaddr_in _cliaddr;
+				socklen_t clilen = sizeof(struct sockaddr_in);
+				int sock_fd = accept(_listen_sock_fd, (struct sockaddr*)&_cliaddr, &clilen);	//Accept: Ожидание входящего соединения
+				if (sock_fd == -1)
+					throw Exceptions();
+				else if (sock_fd > 0)
+>>>>>>> emabel
 				{
 					// ограничение числа подключений
 					if (clients_count == MAX_CLIENTS)
@@ -163,7 +177,8 @@ int Server::pollLoop(struct s_config &config)
 						clients_count++;
 						opt = 1;
 						setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, (const void*)&opt, sizeof(opt));
-
+						if (fcntl(sock_fd, F_SETFL, O_NONBLOCK) == -1)
+							throw Exceptions();
 						for (i = 0; i < MAX_CLIENTS; i++)
 						{
 							if (pfd_array[1 + i].fd == -1)
@@ -171,15 +186,21 @@ int Server::pollLoop(struct s_config &config)
 								pfd_array[1 + i].fd = sock_fd;
 								pfd_array[1 + i].events = POLLIN;
 
+<<<<<<< HEAD
 								std::cout << WHITE <<"!client " << WHITE_B << i << WHITE << " has been connected from " << WHITE_B
 								<< inet_ntoa((in_addr)cliaddr.sin_addr) << ":" << config.listen << WHITE << " | clients total: "
+=======
+								std::cout << WHITE <<"!client " << WHITE_B << i << WHITE << " has been connected from " << WHITE_B
+								<< inet_ntoa((in_addr)_cliaddr.sin_addr) << ":" << config.listen << WHITE << " | clients total: "
+>>>>>>> emabel
 								<< WHITE_B << clients_count << RESET << std::endl;
-								// std::cout << "!got connection from " << inet_ntoa((in_addr)cliaddr.sin_addr) << std::endl;
+								// std::cout << "!got connection from " << inet_ntoa((in_addr)_cliaddr.sin_addr) << std::endl;
 								break;
 							}
 						}
 					}
 				}
+
 			}
 			request(&(*pfd_array), clients_count, i, config);
 
@@ -187,7 +208,6 @@ int Server::pollLoop(struct s_config &config)
 	}
 
 }
-
 
 
 
@@ -204,12 +224,13 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 			pfd_array[1 + i].revents &= ~POLLIN;
 			Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
 			uint8_t buf[1024];
-			int ret = recv(pfd_array[1 + i].fd, buf, 1024, 0);	/* Возврат из функции recv происходит, когда модуль TCP решает передать процессу полученные от клиента данные. Данные возвращается в буфере buf, размер которого передается в третьем аргументе. В четвертом аргументе могут передаваться дополнительные опциипараметры. Функция возвращает число байтов, которые модуль TCP записал в буфер buf; если функция возвращает ноль, то клиент данных для передачи больше не имеет.*/
+			int ret = recv(pfd_array[1 + i].fd, buf, 1024, 0); //read (pfd_array[1 + i].fd , buf, 1024); /* Возврат из функции recv происходит, когда модуль TCP решает передать процессу полученные от клиента данные. Данные возвращается в буфере buf, размер которого передается в третьем аргументе. В четвертом аргументе могут передаваться дополнительные опциипараметры. Функция возвращает число байтов, которые модуль TCP записал в буфер buf; если функция возвращает ноль, то клиент данных для передачи больше не имеет.*/
 
 
 			if (ret < 0)
 			{
 				// printf("Error on call 'recv': %s\n", strerror(errno));
+<<<<<<< HEAD
         		if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) //некритические
             		continue;
 				if (errno == ECONNRESET) //фатальная
@@ -217,6 +238,16 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 				// return -1;
 				close(pfd_array[1 + i].fd);        //https://stackoverflow.com/questions/24916937/how-to-catch-a-connection-reset-by-peer-error-in-c-socket
 				break ; //continue
+=======
+        		// if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) //некритические
+            	// 	continue;
+				// if (errno == ECONNRESET) //фатальная
+				// 	std::cout << YELLOW_B << " ! " << YELLOW << "error on call \'recv\': " << WHITE << strerror(errno) << std::endl;
+				// // return -1;
+				// close(pfd_array[1 + i].fd);        //https://stackoverflow.com/questions/24916937/how-to-catch-a-connection-reset-by-peer-error-in-c-socket
+				// break ;
+				// continue;
+>>>>>>> emabel
 			} else if (ret == 0)
 			{
 				close(pfd_array[1 + i].fd);
@@ -271,34 +302,23 @@ int Server::response(struct pollfd *pfd_array, int &i, RequestParser &HTTPreques
 // 300 для перенаправления.
 // 400 используются, если возникла проблема с запросом.
 // 500 используются, если возникла проблема с сервером.
-
 //Хедеры на возврат:
 //Content-Type: text/html; charset=UTF-8  //Content-Type: image/gif //ТИП ОТВЕТНЫХ ДАННЫХ
-
 // Content-Type: application/zip
 // Content-Disposition: attachment; filename="download.zip" //ЕСЛИ ЗАПРОСИЛИ ФАЙЛ
-
 // Content-Length: 89123 //ДЛИНА КОНТЕНТА В БАЙТАХ
-
 // Etag: "pub1259380237;gz" КЕШИРОВАНИЕ ??
-
 // Last-Modified: Sat, 28 Nov 2009 03:50:37 GMT //ДАТА ПОСЛЕДНЕГО ИЗМЕНЕНИЯ
-
 // HTTP/1.x 301 Moved Permanently
 // ...
 // Location: https://net.tutsplus.com/	//ПЕРЕНАПРАВЛЕНИЕ (также если код 301 или 302)
-
 // Set-Cookie: skin=noskin; path=/; domain=.amazon.com; expires=Sun, 29-Nov-2009 21:42:28 GMT 			//УСТАНОВКА КУКИ
 // Set-Cookie: session-id=120-7333518-8165026; path=/; domain=.amazon.com; expires=Sat Feb 27 08:00:00 2010 GMT
-
 // WWW-Authenticate: Basic realm="Restricted Area" //АУТЕНТИФИКАЦИЯ ПО HTTP - браузер запрашивает аутентификацию
-
 // Content-Encoding: gzip // ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ СЖИМАЕТСЯ
+// func parcerPath (если находим знак ?), то обрабатываем его, если обработать не получается, то рет 0
 
-
-	// func parcerPath (если находим знак ?), то обрабатываем кего, если обработать не получается, то рет 0
-
-
+// ResponsePreparing response;
 
 	std::map<std::string, std::string> headers = HTTPrequest.getHeaders();
 	// std::cout << parseHTTPrequest.getMetod() << " " << parseHTTPrequest.getPath() << " " << parseHTTPrequest.getProtokol() <<'\n';
@@ -335,21 +355,18 @@ int Server::response(struct pollfd *pfd_array, int &i, RequestParser &HTTPreques
 	/* обработка заголовков */
 	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end() ; it++)
 	{
-		// std::cout << it->first << " " << it->second << '\n';
-
-		// if (it->first == "Connection:")
-			// std::cout << "GOOD"<< it->first << " : " << it->second << '\n';
-
-
+		std::cout << it->first << " " << it->second << '\n';
+		// if (it->first == "Connection:" && it->second == "close")
+		// {
+		// 	// close(pfd_array[1 + i].fd);
+		// 	std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
+		// }
 	}
 
 
 	// std::map<std::string, std::string>::iterator it;
 	// it = headers.find("Connection:");
 	// std::cout << it->first << " " << it->second << '\n';
-
-
-
 
 
 /* формирование ответа на основе обработанного запроса */

@@ -22,9 +22,10 @@
 # include "Server.hpp"
 # include "Config.hpp"
 # include "RequestParser.hpp"
+# include "Exceptions.hpp"
 
 
-
+# define MAX_THREADS 3 /* ограничение допустимого количества потоков */
 
 # define RED  "\e[0;31m"
 # define GREEN "\033[0;32m"
