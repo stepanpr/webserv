@@ -211,7 +211,7 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 			/* !!!NEW_VERSION
 			** Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
 			*/
-			// Connection tempConnect = _mapConnection.find(pfd_array[1 + i].fd)->second;
+			Connection tempConnect = _mapConnection.find(pfd_array[1 + i].fd)->second;
 
 
 			uint8_t buf[1024];
@@ -255,9 +255,9 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 				** if _request.isOk => connection.state = WRITE
 				** connection.makeResponse
 				*/
-				// tempConnect.bufHandler((char*)buf, ret);
-				// if (tempConnect.get_isOk())
-				// 	responseSend(tempConnect.responsePrepare());
+				tempConnect.bufHandler((char*)buf, ret);
+				if (tempConnect.get_isOk())
+					responseSend(tempConnect.responsePrepare());
 
 
 		
@@ -293,10 +293,10 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 
 
 
-// int responseSend(std::string response)
-// {
+int responseSend(std::string response)
+{
 
-// }
+}
 
 
 
