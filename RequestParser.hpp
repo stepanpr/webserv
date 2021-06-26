@@ -13,7 +13,7 @@ public:
 	RequestParser();
 	// RequestParser(std::string);
 	void addRequest(std::string);
-	void RequestWaiter(const char *, int);
+	int RequestWaiter(const char *, int);
 	void PrintMap();
 
 	std::string getMetod();
@@ -41,7 +41,7 @@ private:
 	std::map<std::string,std::string> _headers;
 	std::string _body;
 	std::string _fullRequest;
-	bool		_isOk;
+	int		_isOk;
 };
 
 #endif
