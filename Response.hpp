@@ -13,7 +13,7 @@ public:
 
 private:
 	_finalResponse;
-	
+
 };
 
 #endif

@@ -36,9 +36,11 @@ int main()
 			<< "Sec-Fetch-Dest: document\r\n"
 			<< "Accept-Encoding: gzip, deflate, br\r\n"
 			<< "Accept-Language: en-US,en;q=0.9\r\n"
-			<< "Transfer-Encoding: chunked\r\n\r\n"
-			<< "7\r\n"
-			<< "Mozilla\r\n" << std::endl;
+			// << "Transfer-Encoding: chunked\r\n\r\n"
+			// << "7\r\n"
+			// << "Mozilla\r\n"
+			// << "0\r\n"
+			<< "\r\n" << std::endl;
 
 	zapros_chunked2	<< "9\r\n"
 			<< "Developer\r\n"
@@ -54,17 +56,18 @@ int main()
 	// std::cout << zapros.str() << std::endl;
 
 
-	char str[] = {"G"};
-	char str2[] = {"ET / HT"};
-	char str3[] = {"TP/1.1\r\nHost: localho"};
-	char str4[] = {"st:5006\r\nConnection: keep-alive\r\n"};
-	char str5[] = {"Cache-Control: max-age=0\r\n"};
-	char str6[] = {"Accept-Language: en-US,en;q=0.9\r\n\r\n"};
+	// char str[] = {"G"};
+	// char str2[] = {"ET / HT"};
+	// char str3[] = {"TP/1.1\r\nHost: localho"};
+	// char str4[] = {"st:5006\r\nConnection: keep-alive\r\n"};
+	// char str5[] = {"Cache-Control: max-age=0\r\n"};
+	// char str6[] = {"Accept-Language: en-US,en;q=0.9\r\n\r\n"};
 
+	int digit;
 
 	RequestParser a;
-	a.RequestWaiter(zapros.str().c_str());
-
+	digit = a.RequestWaiter(zapros_chunked.str().c_str(), strlen(zapros_chunked.str().c_str()));
+	std::cout << digit << '\n';
 
 	// a.RequestWaiter(str2);
 	// a.RequestWaiter(str3);
@@ -76,6 +79,6 @@ int main()
 	// a.addRequest(zapros_chunked2.str());
 	// a.addRequest(zapros_chunked3.str());
 	// a.addRequest(zapros_chunked4.str());
-	a.PrintMap();
+	// a.PrintMap();
 
 }
