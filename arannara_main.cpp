@@ -36,10 +36,10 @@ int main()
 			<< "Sec-Fetch-Dest: document\r\n"
 			<< "Accept-Encoding: gzip, deflate, br\r\n"
 			<< "Accept-Language: en-US,en;q=0.9\r\n"
-			// << "Transfer-Encoding: chunked\r\n\r\n"
-			// << "7\r\n"
-			// << "Mozilla\r\n"
-			// << "0\r\n"
+			<< "Transfer-Encoding: chunked\r\n\r\n"
+			<< "7\r\n"
+			<< "Mozilla\r\n"
+			<< "0\r\n"
 			<< "\r\n" << std::endl;
 
 	zapros_chunked2	<< "9\r\n"
@@ -64,9 +64,12 @@ int main()
 	// char str6[] = {"Accept-Language: en-US,en;q=0.9\r\n\r\n"};
 
 	int digit;
+	int len = strlen(zapros_chunked.str().c_str());
+	std::cout << len << '\n' ;
 
+	// std::cout << zapros_chunked.str().c_str() << std::endl;
 	RequestParser a;
-	digit = a.RequestWaiter(zapros_chunked.str().c_str(), strlen(zapros_chunked.str().c_str()));
+	digit = a.RequestWaiter(zapros_chunked.str().c_str(), len);
 	std::cout << digit << '\n';
 
 	// a.RequestWaiter(str2);

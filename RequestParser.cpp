@@ -26,9 +26,12 @@ int RequestParser::RequestWaiter(const char *str, int len)
 		tmp[i] = str[i];
 		i++;
 	}
+	tmp[i] = '\0';
 
 	std::string new_str = (char*)tmp;	//  Приводим к стрингу
 	buf.append(new_str);				//  Добавляем приходящую строку в буфер
+
+		std::cout  <<  buf << '\n';
 
 	pos = buf.find(separator);
 	//	Стартлайн
@@ -88,31 +91,33 @@ int RequestParser::RequestWaiter(const char *str, int len)
 		}
 	}
 
-	//  начинаем читать тело
-	if ( (_is_chunked == true) || (_is_length == true) )
-	{
-		std::string bodydigit;
 
-		long int bodydigit_dec;
-		char * pEnd;
 
-		pos = buf.find(separator);		// Нашли цифру
-		bodydigit = buf.substr(0, pos);
-		bodydigit_dec = strtol(bodydigit.c_str(), &pEnd, 16);
+	// //  начинаем читать тело
+	// if ( (_is_chunked == true) || (_is_length == true) )
+	// {
+	// 	std::string bodydigit;
 
-		if (bodydigit_dec > 0)
-		{
-			buf.erase(buf.begin(), buf.begin() + bodydigit.length() + separator.length());
-			_bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
-		}
-		if (bodydigit_dec == 0)
-		{
-			_is_ok = true;
-			std::cout << _bodybuffer.str() << std::endl;
-		}
-	}
+	// 	long int bodydigit_dec;
+	// 	char * pEnd;
 
-	std::cout << "_is_chunked:" << _is_chunked << " _is_length:" << _is_length << " _is_body:" << _is_body << '\n';
+	// 	pos = buf.find(separator);		// Нашли цифру
+	// 	bodydigit = buf.substr(0, pos);
+	// 	bodydigit_dec = strtol(bodydigit.c_str(), &pEnd, 16);
+
+	// 	if (bodydigit_dec > 0)
+	// 	{
+	// 		buf.erase(buf.begin(), buf.begin() + bodydigit.length() + separator.length());
+	// 		_bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
+	// 	}
+	// 	if (bodydigit_dec == 0)
+	// 	{
+	// 		_is_ok = true;
+	// 		// std::cout << _bodybuffer.str() << std::endl;
+	// 	}
+	// }
+
+	// std::cout << "_is_chunked:" << _is_chunked << " _is_length:" << _is_length << " _is_body:" << _is_body << '\n';
 
 	if (!(_metod.empty()) && !(_path.empty()) && !(_protokol.empty()) && (_is_headers_ok == true) )  //  проверяем стартлайн, мапу с хедерами и выставляем флаг is_ok
 	{
