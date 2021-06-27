@@ -12,7 +12,7 @@ class RequestParser
 public:
 	RequestParser();
 	// RequestParser(std::string);
-	void addRequest(std::string);
+	// void addRequest(std::string);
 	int RequestWaiter(const char *, int);
 	void PrintMap();
 
