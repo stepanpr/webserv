@@ -31,7 +31,6 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	std::string new_str = (char*)str;	//  Приводим к стрингу
 	buf.append(new_str);				//  Добавляем приходящую строку в буфер
 
-		// std:: cout  <<  buf << '\n';
 
 	pos = buf.find(separator);
 	//	Стартлайн
@@ -50,8 +49,6 @@ int RequestParser::RequestWaiter(const char *str, int len)
 		startline.erase();
 		_is_startline_ok = true;
 	}
-
-
 
 	//	Стартлайн спарсили, парсим хедеры
 	if ((pos = buf.find(double_separator)) != std::string::npos)  // если есть \r\n\r\n парсим и удаляем все что до него
@@ -77,6 +74,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	}
 
 
+
 	if (_is_headers_ok == true) // понимаем будет ли тело?
 	{
 		std::map<std::string,std::string>::iterator it = _headers.begin();
@@ -91,31 +89,34 @@ int RequestParser::RequestWaiter(const char *str, int len)
 		}
 	}
 
+	//  начинаем читать тело Chunked
+	if  (_is_chunked == true)
+		{
+			while (_is_body != true)
+			{
+				std::string bodydigit;
 
+				long int bodydigit_dec;
+				char * pEnd;
 
-	// //  начинаем читать тело
-	// if ( (_is_chunked == true) || (_is_length == true) )
-	// {
-	// 	std::string bodydigit;
+				pos = buf.find(separator);		// Нашли цифру
+				bodydigit = buf.substr(0, pos);
+				bodydigit_dec = strtol(bodydigit.c_str(), &pEnd, 16);
+				if (bodydigit_dec > 0)
+				{
+					buf.erase(buf.begin(), buf.begin() + bodydigit.length() + separator.length());
+					_bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
+					buf.erase(buf.begin(), buf.begin() + bodydigit_dec + separator.length());
+				}
+				if (bodydigit_dec == 0)
+				{
+					_is_body = true;
+					buf.erase(buf.begin(), buf.end());
+				}
+			}
+		}
 
-	// 	long int bodydigit_dec;
-	// 	char * pEnd;
-
-	// 	pos = buf.find(separator);		// Нашли цифру
-	// 	bodydigit = buf.substr(0, pos);
-	// 	bodydigit_dec = strtol(bodydigit.c_str(), &pEnd, 16);
-
-	// 	if (bodydigit_dec > 0)
-	// 	{
-	// 		buf.erase(buf.begin(), buf.begin() + bodydigit.length() + separator.length());
-	// 		_bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
-	// 	}
-	// 	if (bodydigit_dec == 0)
-	// 	{
-	// 		_is_ok = true;
-	// 		// std::cout << _bodybuffer.str() << std::endl;
-	// 	}
-	// }
+		// std::cout << _bodybuffer.str() << '\n';
 
 	// std::cout << "_is_chunked:" << _is_chunked << " _is_length:" << _is_length << " _is_body:" << _is_body << '\n';
 
@@ -127,34 +128,8 @@ int RequestParser::RequestWaiter(const char *str, int len)
 					_isOk = 1;
 	}
 
-
 	// std::cout << buf << '\n';
 	return (_isOk);
-}
-
-void RequestParser::addRequest(std::string buf) // добавляем чанки в боди
-{
-	size_t pos = 0;
-	std::string separator = "\r\n";
-	std::string bodydigit;
-	long int bodydigit_dec;
-	char * pEnd;
-
-	pos = buf.find(separator);		// Нашли цифру
-	bodydigit = buf.substr(0, pos);
-	bodydigit_dec = strtol(bodydigit.c_str(), &pEnd, 16);
-
-	if (bodydigit_dec > 0)
-	{
-		buf.erase(buf.begin(), buf.begin() + bodydigit.length() + separator.length());
-		_bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
-	}
-
-	if (bodydigit_dec == 0)
-	{
-		_is_ok = true;
-		// std::cout << _bodybuffer.str() << std::endl;
-	}
 
 }
 
