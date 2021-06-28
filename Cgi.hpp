@@ -2,6 +2,9 @@
 
 
 
+
+// https://habr.com/ru/post/254621/
+// http://angel07.webservis.ru/perl/env.html
 // https://bez-logiki.ru/web-zapisi/zagolovki-zaprosov-i-otvetov-cgi
 // http://massnet.narod.ru/chapter7.html
 // https://russianblogs.com/article/48051026604/
