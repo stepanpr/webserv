@@ -3,7 +3,8 @@
 # define RESPONSE_HPP
 # include "main.hpp"
 
-/* https://zametkinapolyah.ru/servera-i-protokoly/tema-9-http-kody-sostoyaniya-klassy-kodov-sostoyaniya-http-servera.html */
+/* 	https://zametkinapolyah.ru/servera-i-protokoly/tema-9-http-kody-sostoyaniya-klassy-kodov-sostoyaniya-http-servera.html 
+	https://ru.wikipedia.org/wiki/%D0%A1%D0%BF%D0%B8%D1%81%D0%BE%D0%BA_%D0%B7%D0%B0%D0%B3%D0%BE%D0%BB%D0%BE%D0%B2%D0%BA%D0%BE%D0%B2_HTTP */
 # define OK 			"200 OK"
 # define CREATED		"201 Created"
 # define NOCONTENT 		"204 No Content"
@@ -29,7 +30,7 @@ public:
 	std::string responseInit();
 	void readBody(std::string &path);
 	std::string fileToStr(char const filename[]);
-	void writeHeaders();
+	void writeHeaders(std::string &method);
 	void setDate();
 	void responseCompose();
 

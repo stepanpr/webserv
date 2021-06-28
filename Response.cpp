@@ -47,17 +47,16 @@ std::string Response::fileToStr(char const filename[])
 	return buf;
 }
 
-/*-------------------------------------------------------------------------------*/
 
 void Response::readBody(std::string &path)
 {
 	try
 	{
-		this->_body = fileToStr(path.c_str());
+		_body = fileToStr(path.c_str());
 	}
 	catch (std::exception &e)
 	{
-		// this->_statusCode = INTERNALERROR;
+		this->_statusCode = INTERNALERROR;
 	}
 }
 /*-------------------------------------------------------------------------------*/
@@ -75,36 +74,44 @@ void Response::setDate()
 	this->_date = buf;
 }
 
-void Response::writeHeaders()
+void Response::writeHeaders(std::string &method)
 {
-	this->_headers["Server"] = "webserv";
-	this->setDate();
-	this->_headers["Date"] = _date + " GMT";
-	this->_headers["Retry-After"] = "1";
+	if (method == "GET")
+	{
+		_headers["Server"] = "webserv/1.0";
+		setDate();
+		_headers["Content-Type"] = "text/html; charset=UTF-8";
+		_headers["Title"] = "webserv (project for 21 school)";
+		_headers["Content-Language"] = "en,ru";
+		_headers["Date"] = _date + " GMT";
+		_headers["Retry-After"] = "1";
+	}
 }
+
+/*-------------------------------------------------------------------------------*/
 
 void Response::responseCompose()
 {
-	this->_response = "HTTP/1.1 ";
-	this->_response += this->_statusCode;
-	this->_response += "\r\n";
+	_response = "HTTP/1.1 ";
+	_response += _statusCode;
+	_response += "\r\n";
 	// if (this->getBody().size() == 0)
 	// 	checkBody();
-	writeHeaders();
-	std::map<std::string, std::string>::iterator it = this->_headers.begin();
-	std::map<std::string, std::string>::iterator ite = this->_headers.end();
+	writeHeaders(this->_requestMethod);
+	std::map<std::string, std::string>::iterator it = _headers.begin();
+	std::map<std::string, std::string>::iterator ite = _headers.end();
 	while (it != ite)
 	{
-		this->_response += (*it).first;
-		this->_response += ": ";
-		this->_response += (*it).second;
-		this->_response += "\r\n";
+		_response += (*it).first;
+		_response += ": ";
+		_response += (*it).second;
+		_response += "\r\n";
 		it++;
 	}
-	this->_response += "Content-Length: ";
-	this->_response += toString(_body.size());
-	this->_response += "\r\n\r\n";
-	this->_response += _body;
+	_response += "Content-Length: ";
+	_response += toString(_body.size());
+	_response += "\r\n\r\n";
+	_response += _body;
 }
 
 /*-------------------------------------------------------------------------------*/
@@ -122,11 +129,6 @@ std::string Response::responseInit()
 	// 	std::cout << it->first << " " << it->second << '\n';
 	// }
 
-	/* обработка method */
-	// std::string method = HTTPrequest.getMetod();
-
-	/* обработка path */
-	// std::string path;
 	if (_requestMethod == "GET")
 	{
 
@@ -173,6 +175,10 @@ std::string Response::responseInit()
 	{
 
 	}
+	if (_requestMethod == "DELETE")
+	{
+
+	}
 
 
 
@@ -180,7 +186,7 @@ std::string Response::responseInit()
 	if (_statusCode == OK)
 		std::cout << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 	else if (_statusCode == NOTFOUND)
-		std::cout  << RED_B << "KO: " << WHITE <<"content not found, error-page will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+		std::cout  << RED_B << "KO: " << WHITE <<"content not found, error \"404\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 
 // 	// std::map<std::string, std::string>::iterator it;
 // 	// it = headers.find("Connection:");
