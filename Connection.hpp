@@ -30,7 +30,7 @@ public:
 
 private:
 	RequestParser		_request;
-	Response			*_response;
+	// Response			*_response;
 	int					_state;
 	int					_sock_fd;
 	int 	_isOK;
