@@ -83,7 +83,10 @@ int RequestParser::RequestWaiter(const char *str, int len)
 			if ((it->first.compare("Transfer-Encoding:") == 0) && (it->second.compare("chunked") == 0))
 				_is_chunked = true;
 			if ((it->first.compare("Content-Length:") == 0))
+			{
+				_contentLength = std::stoi(it->second);
 				_is_length = true;
+			}
 			if ((it->first.compare("Host:") == 0))
 				_is_host = true;
 		}
@@ -116,7 +119,32 @@ int RequestParser::RequestWaiter(const char *str, int len)
 			}
 		}
 
-		// std::cout << _bodybuffer.str() << '\n';
+
+
+	// контент length обработка
+	if  (_is_length == true)
+		{
+			while (_is_body != true)
+			{
+				if ((pos = buf.find(double_separator)) != std::string::npos) 		// Нашли конец тела)
+				{
+					if (_contentLength > 0)
+					{
+						_bodybuffer << buf.substr(0, _contentLength); // Положили в буфер
+						buf.erase(buf.begin(), buf.begin() + _contentLength + separator.length());
+					}
+					_is_body = true;
+				}
+				else
+				{
+					_bodybuffer << buf;
+					break;
+
+				}
+			}
+		}
+	std::cout << _bodybuffer.str() << '\n';
+
 
 	// std::cout << "_is_chunked:" << _is_chunked << " _is_length:" << _is_length << " _is_body:" << _is_body << '\n';
 
@@ -172,4 +200,4 @@ std::map<std::string,std::string> RequestParser::getHeaders()
 // }
 
 RequestParser::~RequestParser()
-{ } 
+{ }

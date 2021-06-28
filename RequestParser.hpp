@@ -16,6 +16,7 @@ public:
 	int RequestWaiter(const char *, int);
 	void PrintMap();
 
+	size_t _contentLength;
 	std::string getMetod();
 	std::string getPath();
 	std::string getProtokol();
@@ -46,4 +47,3 @@ private:
 };
 
 #endif
- 
