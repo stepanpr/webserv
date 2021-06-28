@@ -36,8 +36,9 @@ void Connection::bufHandler(char *buf, int	len)
 std::string Connection::responsePrepare()
 {
 
-	std::string responseString = _response->responseInit(_request, _config);
-
+	Response response(_request, _config);
+	// std::string responseString = response.responseInit(_request, _config);
+	std::string responseString = response.responseInit();
 
 	return responseString;
 }
