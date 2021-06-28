@@ -116,7 +116,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 			}
 		}
 
-		std::cout << _bodybuffer.str() << '\n';
+		// std::cout << _bodybuffer.str() << '\n';
 
 	// std::cout << "_is_chunked:" << _is_chunked << " _is_length:" << _is_length << " _is_body:" << _is_body << '\n';
 
