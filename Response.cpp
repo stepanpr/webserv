@@ -8,9 +8,7 @@ Response::Response()
 Response::Response(RequestParser &HTTPrequest, struct s_config *config)
 : _requestHeaders(HTTPrequest.getHeaders()), _requestMethod(HTTPrequest.getMetod()), _requestPath(HTTPrequest.getPath()), _requestProtocol(HTTPrequest.getProtokol()), _config(config)
 {
-
 }
-
 
 Response::~Response()
 {
@@ -85,7 +83,7 @@ void Response::writeHeaders(std::string &method)
 		_headers["Title"] = "webserv (project for 21 school)";
 		_headers["Content-Language"] = "en,ru";
 		_headers["Retry-After"] = "1";
-		_headers["Authorization"] = "Basic qqq : www";
+		// _headers["Authorization"] = "Basic qqq : www";
 	}
 	if (method == "DELETE")
 	{
@@ -184,6 +182,10 @@ std::string Response::responseInit()
 
 	if (_requestMethod == "POST")
 	{
+
+
+
+
 
 	}
 
