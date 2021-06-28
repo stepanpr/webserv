@@ -60,9 +60,20 @@ int Server::startServer(struct s_config *config)
 		return 0;
 	}
 
-	// servaddr = {0};											//заполняем структуру sockaddr_in
-	servaddr.sin_family = AF_INET;							// AF_INET определяет, что используется сеть для работы с сокетом
-	servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 			//связывает сокет со всеми доступными интерфейсами
+	opt = 1;
+	int opt1 = 1;
+	int opt2 = 65536;
+
+	if (setsockopt(_listen_sock_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) < 0)
+		throw Exceptions();
+	if (setsockopt(_listen_sock_fd, SOL_SOCKET, SO_KEEPALIVE, &opt1, sizeof(int)) < 0)
+		throw Exceptions();
+	if (setsockopt(_listen_sock_fd, SOL_SOCKET, SO_RCVBUF, &opt2, sizeof(int)) < 0)
+		throw Exceptions();
+
+	// _servaddr = {0};											//заполняем структуру sockaddr_in
+	_servaddr.sin_family = AF_INET;							// AF_INET определяет, что используется сеть для работы с сокетом
+	_servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 			//связывает сокет со всеми доступными интерфейсами
 	const char *port = config->listen.c_str();
 	servaddr.sin_port = htons(atoi(port)); 					//port
 
@@ -146,10 +157,12 @@ int Server::pollLoop(struct s_config &config)
 			{
 				listen_sock->revents &= ~POLLIN;
 
-				// struct sockaddr_in cliaddr;
+				// struct sockaddr_in _cliaddr;
 				socklen_t clilen = sizeof(struct sockaddr_in);
-				int sock_fd = accept(listen_sock_fd, (struct sockaddr*)&cliaddr, &clilen);	//Accept: Ожидание входящего соединения
-				if (sock_fd > 0)
+				int sock_fd = accept(_listen_sock_fd, (struct sockaddr*)&_cliaddr, &clilen);	//Accept: Ожидание входящего соединения
+				if (sock_fd == -1)
+					throw Exceptions();
+				else if (sock_fd > 0)
 				{
 					// ограничение числа подключений
 					if (clients_count == MAX_CLIENTS)
@@ -172,7 +185,7 @@ int Server::pollLoop(struct s_config &config)
 								pfd_array[1 + i].events = POLLIN;
 
 								std::cout << WHITE <<"!client " << WHITE_B << i << WHITE << " has been connected from " << WHITE_B
-								<< inet_ntoa((in_addr)cliaddr.sin_addr) << ":" << config.listen << WHITE << " | clients total: "
+								<< inet_ntoa((in_addr)_cliaddr.sin_addr) << ":" << config.listen << WHITE << " | clients total: "
 								<< WHITE_B << clients_count << RESET << std::endl;
 								// std::cout << "!got connection from " << inet_ntoa((in_addr)cliaddr.sin_addr) << std::endl;
 								break;
@@ -202,7 +215,18 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 		if (pfd_array[1 + i].fd != -1 && (pfd_array[1 + i].revents & POLLIN) != 0)
 		{
 			pfd_array[1 + i].revents &= ~POLLIN;
-			Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
+
+
+
+
+			/* !!!NEW_VERSION
+			** Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
+			*/
+			Connection tempConnect = _mapConnection.find(pfd_array[1 + i].fd)->second;
+			tempConnect.setConfig(config);
+
+
+
 			uint8_t buf[1024];
 			int ret = recv(pfd_array[1 + i].fd, buf, 1024, 0);	/* Возврат из функции recv происходит, когда модуль TCP решает передать процессу полученные от клиента данные. Данные возвращается в буфере buf, размер которого передается в третьем аргументе. В четвертом аргументе могут передаваться дополнительные опциипараметры. Функция возвращает число байтов, которые модуль TCP записал в буфер buf; если функция возвращает ноль, то клиент данных для передачи больше не имеет.*/
 
@@ -210,13 +234,14 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 			if (ret < 0)
 			{
 				// printf("Error on call 'recv': %s\n", strerror(errno));
-        		if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) //некритические
-            		continue;
-				if (errno == ECONNRESET) //фатальная
-					std::cout << YELLOW_B << " ! " << YELLOW << "error on call \'recv\': " << WHITE << strerror(errno) << std::endl;
-				// return -1;
-				close(pfd_array[1 + i].fd);        //https://stackoverflow.com/questions/24916937/how-to-catch-a-connection-reset-by-peer-error-in-c-socket
-				break ; //continue
+        		// if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) //некритические
+            	// 	continue;
+				// if (errno == ECONNRESET) //фатальная
+				// 	std::cout << YELLOW_B << " ! " << YELLOW << "error on call \'recv\': " << WHITE << strerror(errno) << std::endl;
+				// // return -1;
+				// close(pfd_array[1 + i].fd);        //https://stackoverflow.com/questions/24916937/how-to-catch-a-connection-reset-by-peer-error-in-c-socket
+				// break ;
+				// continue;
 			} else if (ret == 0)
 			{
 				close(pfd_array[1 + i].fd);
@@ -226,27 +251,37 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 				std::cout << WHITE <<"Client " WHITE_B << i << WHITE << " has been disconnected | clients total: " << WHITE_B << clients_count << RESET << std::endl;
 			} else if (ret > 0)
 			{
-				// buf[ret] = '\0';
-
-
-				temp.bufAnalize((char*)buf, ret);
-			//if _request.isOk => connection.state = WRITE
-			//connection.makeResponse
-
-
+				buf[ret] = '\0';
 
 				std::cout << WHITE_B << ret << WHITE << " bytes received from client " << WHITE_B << i << RESET << std::endl;
 				std::cout << GREEN << buf << RESET << std::endl;
 
+
+				/* !!!NEW_VERSION
+				**
+				**
+				** arranara:
+				** temp.bufAnalize((char*)buf, ret);
+				**
+				**
+				** emabel:
+				** if _request.isOk => connection.state = WRITE
+				** connection.makeResponse
+				*/
+				tempConnect.bufHandler((char*)buf, ret);
+				if (tempConnect.get_isOk())
+					responseSend(tempConnect.responsePrepare(), &(*pfd_array), i);
+
+
 				/*
 				** ЗАПУСК ОБРАБОТЧИКА ЗАПРОСА!
 				*/
-				RequestParser HTTPrequest((char*)buf);
+				// RequestParser HTTPrequest((char*)buf);
 
 				/*
 				** ОТПРАВКА ОБРАБОТАННОГО ЗАПРОСА В RESPONSE - response(&(*pfd_array), i, MAP_with_values);
 				*/
-				response(&(*pfd_array), i, HTTPrequest, config);
+				// response(&(*pfd_array), i, HTTPrequest, config);
 			}
 		}
 	}
@@ -263,6 +298,27 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 				// {
 				// 	std::cout << it->first << " : " << it->second << '\n';
 				// }
+
+	return 0;
+}
+
+
+
+int Server::responseSend(std::string response, struct pollfd *pfd_array, int &i)
+{
+
+
+	std::cout << response << '\n';
+		if(-1 == send(pfd_array[1 + i].fd, response.c_str(), response.length(), 0))
+		{
+			printf("Error on call 'send': %s\n", strerror(errno));
+			return -1;
+		}
+	return 0;
+}
+
+
+
 
 
 int Server::response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config)
@@ -357,7 +413,7 @@ if (HTTPrequest.getPath() != "/favicon.ico")
 {
 	std::stringstream response_body;////////////////////////////////////
 	std::ifstream file; // создаем объект класса ifstream
-	char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;    //поменять!
+	char *file_buffer = new char[10000 + 1]; file_buffer[10000] = 0;    //поменять!
 
 // www/site.com/index.html
 	file.open(path.c_str()); 	//пытаемся открыть файл по запросу
@@ -372,7 +428,7 @@ if (HTTPrequest.getPath() != "/favicon.ico")
 		}
 		else
 		{
-			error_404.read(file_buffer, 300);
+			error_404.read(file_buffer, 10000);
 			response_body << file_buffer;
 		}
 		return -1;
@@ -387,7 +443,7 @@ if (HTTPrequest.getPath() != "/favicon.ico")
 		// std::string file_buffer;
 		// char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;
 		// response_body << file;
-		file.read(file_buffer, 300);
+		file.read(file_buffer, 100000);
 		// for(file >> file_buffer; !file.eof(); file >> file_buffer)
 		// 	std::cout << file_buffer;
 		response_body << file_buffer;
@@ -418,61 +474,61 @@ if (HTTPrequest.getPath() != "/favicon.ico")
 
 
 
-int Server::response(struct pollfd *pfd_array, int &i)
-{
-			std::stringstream response_body;////////////////////////////////////
-				std::ifstream file; // создаем объект класса ifstream
-				char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;    //поменять!
+// int Server::response(struct pollfd *pfd_array, int &i)
+// {
+// 			std::stringstream response_body;////////////////////////////////////
+// 				std::ifstream file; // создаем объект класса ifstream
+// 				char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;    //поменять!
 
 
-				file.open("www/site.com/index.html"); 	//пытаемся открыть файл по запросу
+// 				file.open("www/site.com/index.html"); 	//пытаемся открыть файл по запросу
 
-				if (!file) 								//нужного контента нету
-				{
-					std::ifstream error_404;
-					file.open("www/default/404.html");
-					if (!file)
-					{
-						std::cout << YELLOW << "error: content not found!" << RESET << std::endl;
-					}
-					else
-					{
-						error_404.read(file_buffer, 300);
-						response_body << file_buffer;
-					}
-					return -1;
-				}
-				else									//контейнт найден
-				{
-					std::cout << std::endl << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl;
-					// std::string file_buffer;
-					// char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;
-					// response_body << file;
-					file.read(file_buffer, 300);
-					// for(file >> file_buffer; !file.eof(); file >> file_buffer)
-					// 	std::cout << file_buffer;
-					response_body << file_buffer;
-				// }
+// 				if (!file) 								//нужного контента нету
+// 				{
+// 					std::ifstream error_404;
+// 					file.open("www/default/404.html");
+// 					if (!file)
+// 					{
+// 						std::cout << YELLOW << "error: content not found!" << RESET << std::endl;
+// 					}
+// 					else
+// 					{
+// 						error_404.read(file_buffer, 300);
+// 						response_body << file_buffer;
+// 					}
+// 					return -1;
+// 				}
+// 				else									//контейнт найден
+// 				{
+// 					std::cout << std::endl << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl;
+// 					// std::string file_buffer;
+// 					// char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;
+// 					// response_body << file;
+// 					file.read(file_buffer, 300);
+// 					// for(file >> file_buffer; !file.eof(); file >> file_buffer)
+// 					// 	std::cout << file_buffer;
+// 					response_body << file_buffer;
+// 				// }
 
 
-					std::stringstream response;
-					// if (flag == 1)
-						response << "HTTP/1.1 200 OK\r\n"
-						 << "Version: HTTP/1.1\r\n"
-					<< "Content-Type: text/html; charset=utf-8\r\n"
-					<< "Content-Length: " << response_body.str().length()
-					<< "\r\n\r\n"
-					<< response_body.str();
+// 					std::stringstream response;
+// 					// if (flag == 1)
+// 						response << "HTTP/1.1 200 OK\r\n"
+// 						 << "Version: HTTP/1.1\r\n"
+// 					<< "Content-Type: text/html; charset=utf-8\r\n"
+// 					<< "Content-Length: " << response_body.str().length()
+// 					<< "\r\n\r\n"
+// 					<< response_body.str();
 
-					if(-1 == send(pfd_array[1 + i].fd, response.str().c_str(), response.str().length(), 0))
-					{
-						printf("Error on call 'send': %s\n", strerror(errno));
-						return -1;
-					}
-					}
-					return 0;
+// 					if(-1 == send(pfd_array[1 + i].fd, response.str().c_str(), response.str().length(), 0))
+// 					{
+// 						printf("Error on call 'send': %s\n", strerror(errno));
+// 						return -1;
+// 					}
+// 					}
+// 					return 0;
 
-}
+// }
 
 
 

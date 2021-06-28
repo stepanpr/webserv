@@ -39,6 +39,7 @@ typedef struct 	s_config
 	int serverID;
 	std::string listen;
 	std::string server_name;
+	std::string max_body_size;
 	std::string error_page;
 	std::vector<t_location> location;	
 }				t_config;
