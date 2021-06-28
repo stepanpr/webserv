@@ -80,11 +80,21 @@ void Response::writeHeaders(std::string &method)
 	{
 		_headers["Server"] = "webserv/1.0";
 		setDate();
+		_headers["Date"] = _date + " GMT";
 		_headers["Content-Type"] = "text/html; charset=UTF-8";
 		_headers["Title"] = "webserv (project for 21 school)";
 		_headers["Content-Language"] = "en,ru";
-		_headers["Date"] = _date + " GMT";
 		_headers["Retry-After"] = "1";
+		_headers["Authorization"] = "Basic qqq : www";
+	}
+	if (method == "DELETE")
+	{
+		_headers["Server"] = "webserv/1.0";
+		setDate();
+		_headers["Date"] = _date + " GMT";
+		_headers["Content-Type"] = "text/html; charset=UTF-8";
+		// _headers["Title"] = "webserv (project for 21 school)";
+		// _headers["Authorization"] = "Basic qqq : www";
 	}
 }
 
@@ -171,13 +181,28 @@ std::string Response::responseInit()
 			std::cout << _response << '\n';
 		}
 	}
+
 	if (_requestMethod == "POST")
 	{
 
 	}
+
 	if (_requestMethod == "DELETE")
 	{
-
+		if (remove(_requestPath.c_str()) == 0)
+		{
+			_statusCode = OK;
+			_fullPath = "путь к странице уведомляющей об удалении";
+			readBody(_fullPath);
+			// std::cout <<
+		}
+		else
+		{
+			_statusCode = NOTFOUND;
+			_fullPath = _config->error_page + '/' + "404.html";
+		}
+		readBody(_fullPath);
+		responseCompose();
 	}
 
 
