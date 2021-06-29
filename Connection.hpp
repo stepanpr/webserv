@@ -6,6 +6,8 @@
 # include "RequestParser.hpp"
 # include "Response.hpp"
 
+
+class Response;
 class Connection
 {
 public:
@@ -17,14 +19,22 @@ public:
 	/*
 	 * for Arannara
 	 */
-	int	parseRequest(char *buf, int	len); 	// эта функция принимает char *buf и длину buf, считанного в данной итерации
+	void	bufHandler(char *buf, int	len); 	// эта функция принимает char *buf и длину buf, считанного в данной итерации
 											// добавляет buf к _response и
+
+	std::string	responsePrepare();
+
+
+	int get_isOk();
+	void setConfig(struct  s_config &s_config);
 
 private:
 	RequestParser		_request;
-	Response			_response;
+	// Response			*_response;
 	int					_state;
 	int					_sock_fd;
+	int 	_isOK;
+	struct s_config			*_config;
 };
 
 #endif

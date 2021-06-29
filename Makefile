@@ -4,9 +4,9 @@ NAME = webserv
 CC = clang++
 
 # -Wall -Wextra -Werror
-CFLAGS = -std=c++98
+CFLAGS = -std=c++98  
 
-SRCS = main.cpp Config.cpp Server.cpp RequestParser.cpp Connection.cpp Response.cpp
+SRCS = main.cpp Config.cpp Server.cpp RequestParser.cpp Response.cpp Connection.cpp 
 
 OBJS = $(SRCS:.cpp=.o)
 
@@ -21,6 +21,7 @@ CYAN = \033[0;36m
 PURPLE = \033[0;35m
 PURPLE_BOLD = \033[1;35m
 RESET = \033[0m
+#-fsanitize=address
 
 all: $(NAME)
 	
@@ -30,7 +31,7 @@ all: $(NAME)
 	@$(CC) $(CFLAGS)  -c $< -o $@
 
 $(NAME): $(OBJS)
-	@$(CC) $(OBJS) -o $(NAME) -pthread
+	@$(CC) $(OBJS) -o $(NAME) -pthread 
 	@echo "$(GREEN_BOLD)Completed!$(RESET)"
 	@echo "$(BLUE_BOLD)=======WEBSERV/arannara_team/21school=======$(RESET)"
 	@echo " $(PURPLE)Directories:$(RESET)"
