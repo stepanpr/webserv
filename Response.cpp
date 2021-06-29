@@ -8,6 +8,8 @@ Response::Response()
 Response::Response(RequestParser &HTTPrequest, struct s_config *config)
 : _requestHeaders(HTTPrequest.getHeaders()), _requestMethod(HTTPrequest.getMetod()), _requestPath(HTTPrequest.getPath()), _requestProtocol(HTTPrequest.getProtokol()), _config(config)
 {
+	this->_statusCode = "";
+	this->_autoindex = false;
 }
 
 Response::~Response()
@@ -134,6 +136,14 @@ void Response::autoindexOn()
 	std::string relativePath = _path + '.';
 
 	dir = opendir(relativePath.c_str());
+	if (dir == NULL)
+	{
+		this->_statusCode = INTERNALERROR;
+		this->_fullPath = _config->error_page + '/' + "404.html";
+		this->readBody(_fullPath);
+		std::cout << "!!!!!!!33333\n";
+		return ;
+	}
 	body = "<html>\n<body>\n";
 	body += "<h1>Directory listing:</h1>\n";
 	// current = readdir(dir);
@@ -238,7 +248,7 @@ std::string Response::responseInit()
 			if (isExist == 0)				//если не найден файл
 			{
 					_statusCode = NOTFOUND;
-					_fullPath = _config->error_page + '/' + "404.html";
+					// _fullPath = _config->error_page + '/' + "404.html";
 			}
 
 			/* обработка заголовков */
@@ -251,42 +261,67 @@ std::string Response::responseInit()
 			// 	// 	std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
 			// 	// }
 			// }
-			if (isExist && _autoindex)				//если включен автоиндекс
+
+			if (_statusCode == OK && _autoindex == true)				/* если автоиндекс включен */	
 				this->autoindexOn();
-			else
+			else if (_statusCode == OK && _autoindex == false)			/* если автоиндекс выключен */		
 				this->readBody(_fullPath);
+			
+			
+			
+			if (_statusCode != OK)								/* если статускод содержит ошибку */	
+			{
+				if (_statusCode == NOTFOUND)
+					_fullPath = _config->error_page + '/' + "404.html";
+				if (_statusCode == INTERNALERROR)
+					_fullPath = _config->error_page + '/' + "500.html";
+				this->readBody(_fullPath);
+
+			}
+
 			// std::cout << _body << '\n';
 			// std::cout << _statusCode << '\n';
 			responseCompose();
 		}
 	}
 
-	if (_requestMethod == "POST")
-	{
+
+
+
+
+	// if (_requestMethod == "POST")
+	// {
+
+
+	// }
+
+	// if (_requestMethod == "DELETE")
+	// {
+	// 	if (remove(_requestPath.c_str()) == 0)
+	// 	{
+	// 		_statusCode = OK;
+	// 		_fullPath = "путь к странице уведомляющей об удалении";
+	// 		readBody(_fullPath);
+	// 		// std::cout <<
+	// 	}
+	// 	else
+	// 	{
+	// 		_statusCode = NOTFOUND;
+	// 		_fullPath = _config->error_page + '/' + "404.html";
+	// 	}
+	// 	readBody(_fullPath);
+	// 	responseCompose();
+	// }
 
 
 
 
 
-	}
 
-	if (_requestMethod == "DELETE")
-	{
-		if (remove(_requestPath.c_str()) == 0)
-		{
-			_statusCode = OK;
-			_fullPath = "путь к странице уведомляющей об удалении";
-			readBody(_fullPath);
-			// std::cout <<
-		}
-		else
-		{
-			_statusCode = NOTFOUND;
-			_fullPath = _config->error_page + '/' + "404.html";
-		}
-		readBody(_fullPath);
-		responseCompose();
-	}
+
+
+
+
 
 
 
@@ -296,6 +331,8 @@ std::string Response::responseInit()
 			std::cout << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 		else if (_statusCode == NOTFOUND)
 			std::cout  << RED_B << "KO: " << WHITE <<"content not found, error \"404\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+		else if (_statusCode == INTERNALERROR)
+			std::cout  << RED_B << "KO: " << WHITE <<"problems with server settings, error \"500\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 	}
 
 
@@ -303,7 +340,6 @@ std::string Response::responseInit()
 	{ /* запись ответа в лог-файл */
 		std::cout << _response << '\n'; //вывод ответа
 
-		
 		std::ofstream save_response("www/response.log", std::ios::app);
 
 		if (!save_response)
