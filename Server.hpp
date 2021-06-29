@@ -16,8 +16,8 @@
 #include <string>
 #include <map>
 #define MAX_CLIENTS 20
-#include <string.h>
 #include <fcntl.h>
+#include "Socket.hpp"
 // #define BACKLOG 10
 
 class Config;
@@ -27,17 +27,19 @@ class Connection;
 class Server
 {
 	private:
-		int _listen_sock_fd;
-		struct sockaddr_in _servaddr;
-		struct sockaddr_in _cliaddr;	//структура clnt_addr, в которую мы будем записывать адрес и порт подсоединившегося клиента
-		// int clients_count;
-		int opt;
 
-		std::map<int, Connection> _mapConnection; //key = fd, value = Connection этого fd
+		Socket						_listenSock;
+//		int							_listen_sock_fd;
+//		struct sockaddr_in			_servaddr;
+//		struct sockaddr_in			_cliaddr;	//структура clnt_addr, в которую мы будем записывать адрес и порт подсоединившегося клиента
+//		int							opt;
+		t_config					*_config;
+//		std::map<int, Connection>	_mapConnection; //key = fd, value = Connection этого fd
 
 
 		// int i; //итератор (количество клиентов)
-
+		/********* Private methods *******/
+		void	_createListenSocket();
 
 
 
@@ -48,7 +50,7 @@ class Server
 		Server &operator=(const Server &copy);
 
 		int startServer(struct s_config *config);
-		int pollLoop(struct s_config &config);
+		int pollLoop();
 		int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config); //&
 		int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
 

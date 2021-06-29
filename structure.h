@@ -19,6 +19,7 @@ typedef struct 	s_config
 	std::string listen;
 	std::string server_name;
 	std::string error_page;
+	std::string max_body_size;
 	std::vector<t_location> location;
 }				t_config;
 

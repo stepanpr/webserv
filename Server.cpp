@@ -23,6 +23,8 @@ Server	&Server::operator=(const Server &copy)
 	this->_servaddr.sin_addr = copy._servaddr.sin_addr;
 	this->_servaddr.sin_family = copy._servaddr.sin_family;
 	this->_servaddr.sin_port = copy._servaddr.sin_port;
+	this->_config = copy._config;
+	this->_mapConnection = copy._mapConnection;
 	return (*this);
 }
 
@@ -33,23 +35,19 @@ Server	&Server::operator=(const Server &copy)
 
 
 
-int Server::startServer(struct s_config *config)
+int Server::startServer(t_config *config)
 {
-
-
+	this->_config = config;
 	pthread_mutex_lock(&lock);
 	std::cout << std::endl << GREEN_B << "Server started! " << WHITE <<"(ID: "
-	<< config->serverID << "; port: " << config->listen << ")" << RESET << std::endl;
+	<< _config->serverID << "; port: " << _config->listen << ")" << RESET << std::endl;
 	pthread_mutex_unlock(&lock);
-
-
 
 	_listen_sock_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	//создание сокета от которого мы будем ожидать входящих данных
 	if (this->_listen_sock_fd == -1)
 		throw Exceptions();
 	if (fcntl(_listen_sock_fd, F_SETFL, O_NONBLOCK) == -1)
 		throw Exceptions();
-
 
 	opt = 1;
 	int opt1 = 1;
@@ -65,7 +63,7 @@ int Server::startServer(struct s_config *config)
 	// _servaddr = {0};											//заполняем структуру sockaddr_in
 	_servaddr.sin_family = AF_INET;							// AF_INET определяет, что используется сеть для работы с сокетом
 	_servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 			//связывает сокет со всеми доступными интерфейсами
-	const char *port = config->listen.c_str();
+	const char *port = _config->listen.c_str();
 	_servaddr.sin_port = htons(atoi(port)); 					//port
 
 	if (bind(_listen_sock_fd, (struct sockaddr*) &_servaddr, sizeof(_servaddr)) < 0) //Bind: Привязка сокета к адресу
@@ -78,7 +76,7 @@ int Server::startServer(struct s_config *config)
 
 
 
-	pollLoop(*config);
+	pollLoop();
 
 	std::cout << "EXIT SERV\n";
 	return 0;
@@ -88,7 +86,7 @@ int Server::startServer(struct s_config *config)
 
 
 
-int Server::pollLoop(struct s_config &config)
+int Server::pollLoop()
 {
 
 
@@ -174,7 +172,7 @@ int Server::pollLoop(struct s_config &config)
 								pfd_array[1 + i].events = POLLIN;
 
 								std::cout << WHITE <<"!client " << WHITE_B << i << WHITE << " has been connected from " << WHITE_B
-								<< inet_ntoa((in_addr)_cliaddr.sin_addr) << ":" << config.listen << WHITE << " | clients total: "
+								<< inet_ntoa((in_addr)_cliaddr.sin_addr) << ":" << _config->listen << WHITE << " | clients total: "
 								<< WHITE_B << clients_count << RESET << std::endl;
 								// std::cout << "!got connection from " << inet_ntoa((in_addr)_cliaddr.sin_addr) << std::endl;
 								break;
@@ -198,7 +196,6 @@ int Server::pollLoop(struct s_config &config)
 
 int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config)
 {
-
 	for (i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (pfd_array[1 + i].fd != -1 && (pfd_array[1 + i].revents & POLLIN) != 0)
@@ -283,7 +280,10 @@ int Server::responseSend(std::string response, struct pollfd *pfd_array, int &i)
 
 /*-------------------------------------------------------------------------------*/
 
-
+void Server::_createListenSocket()
+{
+	_listenSock = Socket(_config);
+}
 
 
 
