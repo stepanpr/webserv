@@ -21,6 +21,7 @@ public:
 	std::string getPath();
 	std::string getProtokol();
 	std::map<std::string,std::string> getHeaders();
+	std::string getBody();
 
 	// RequestParser(const RequestParser &copy);
 	~RequestParser();
