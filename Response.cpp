@@ -1,33 +1,25 @@
 
 #include "Response.hpp"
 
-Response::Response()
-{
-}
+Response::Response() {}
 
 Response::Response(RequestParser &HTTPrequest, struct s_config *config)
-: _requestHeaders(HTTPrequest.getHeaders()), _requestMethod(HTTPrequest.getMetod()), _requestPath(HTTPrequest.getPath()), _requestProtocol(HTTPrequest.getProtokol()), _config(config)
+: _requestHeaders(HTTPrequest.getHeaders()), _requestBody(HTTPrequest.getBody()), _requestMethod(HTTPrequest.getMetod()), _requestPath(HTTPrequest.getPath()), _requestProtocol(HTTPrequest.getProtokol()), _config(config)
 {
 	this->_statusCode = "";
 	this->_autoindex = false;
 }
 
-Response::~Response()
-{
-}
+Response::~Response() {}
 
-Response::Response(const Response &copy)
-{
-}
+Response::Response(const Response &copy){}
 
-Response	&Response::operator=(const Response &copy)
-{
-	return (*this);
-}
+Response	&Response::operator=(const Response &copy) { return (*this); }
 
 
 /*-------------------------------------------------------------------------------*/
 
+/* чтение из файла */
 std::string Response::fileToStr(char const filename[])
 {
 	int fd;
@@ -47,7 +39,7 @@ std::string Response::fileToStr(char const filename[])
 	return buf;
 }
 
-
+/* чтение из файла в _body */
 void Response::readBody(std::string &path)
 {
 	try
@@ -61,7 +53,7 @@ void Response::readBody(std::string &path)
 }
 /*-------------------------------------------------------------------------------*/
 
-
+/* текущее время */
 void Response::setDate()
 {
 	struct tm tm;
@@ -74,6 +66,7 @@ void Response::setDate()
 	this->_date = buf;
 }
 
+/* установка хедеров */
 void Response::writeHeaders(std::string &method)
 {
 	if (method == "GET")
@@ -100,6 +93,7 @@ void Response::writeHeaders(std::string &method)
 
 /*-------------------------------------------------------------------------------*/
 
+/* финальная сборка ответа */
 void Response::responseCompose()
 {
 	_response = "HTTP/1.1 ";
@@ -127,6 +121,7 @@ void Response::responseCompose()
 /*-------------------------------------------------------------------------------*/
 
 // https://www.youtube.com/watch?v=j9yL30R6npk
+/* создание _body при включенном автоиндексе */
 void Response::autoindexOn()
 {
 	DIR *dir;
@@ -139,77 +134,62 @@ void Response::autoindexOn()
 	if (dir == NULL)
 	{
 		this->_statusCode = INTERNALERROR;
-		this->_fullPath = _config->error_page + '/' + "404.html";
-		this->readBody(_fullPath);
-		std::cout << "!!!!!!!33333\n";
+		// this->_fullPath = _config->error_page + '/' + "404.html";
+		// this->readBody(_fullPath);
+		// std::cout << "!!!!!!!33333\n";
 		return ;
 	}
-	body = "<html>\n<body>\n";
-	body += "<h1>Directory listing:</h1>\n";
+	body = "<html>\n<head>";
+	body += "<title>webserv - AutoIndexOn</title>\n"
+			"<style> "
+			" * { margin: 0; padding: 0; }"
+			"h1 { text-align: center; font-size: 25px; margin-top: 30px;}"
+			"a { text-decoration: none; color: black; font-size: 20px;}"
+			"body { background: rgb(238,174,202); background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%); }"
+			"ul { display: flex; flex-wrap: wrap; flex-direction: column; border-radius: 5px; text-align: center; padding-left: 0; margin-top: 30px;}"
+			"li { display: block; border-bottom: 1px solid #673ab7; padding-bottom: 5px;}"
+			"</style>\n</head>\n<body>\n";
+	body += "<h1>Directory listing:</h1>\n<ul>";
 	// current = readdir(dir);
 	while ((current = readdir(dir)) != NULL)
 	{
-		printf("%s\n", current->d_name);
-		body += "<a href=\"" + _path + current->d_name + "\">";
-		body += current->d_name;
-		body += "</a><br>";
+		if (current->d_name[0] != '.')
+		{
+			// printf("%s\n", current->d_name);
+			// body += "<a href=\"" + _path + current->d_name + "\">";
+			body += "<li><a href=\"";
+			body += current->d_name;
+			body += "\">";
+
+			body += current->d_name;
+			body += "</a></li>";
+		}
 		// current = readdir(dir);
 	}
 	closedir(dir);
-	// while ((current = readdir(dir)) != NULL)
-	// {
-	// 	body += current->d_name;
-	// 	// std::cout << current->d_name << "\n";
-	// // 	if (current->d_name[0] != '.')
-	// // 	{
-	// // 		body += "<a href=\"" + this->getFileName();
-	// // 		if (!this->getFileName().empty() && this->getFileName()[this->getFileName().size() - 1] != '/')
-	// // 			body += "/";
-	// // 		body += current->d_name;
-	// // 		body += "\">";
-	// // 		body += current->d_name;
-	// // 		body += "</a><br>\n";
-	// // 	}
-	// }
-	// closedir(dir);
-	body += "</body>\n</html>\n";
+	body += "</ul></body>\n</html>\n";
 	this->_body = body;
-	
 }
 
-	// body = "<html>\n<body>\n";
-	// // body += "<title>Webserv kioiioioiAutoIndex</title>"
-	// // 	"<style>"
-	// // 	"a{"
-	// // 	"	text-decoration: none;"
-	// // 	"	color: black; font-size: 25px;}"
-	// // 	"body {"
-	// // 	"	background: rgb(238,174,202);"
-	// // 	"	background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);}"
-	// // 	"ul {"
-	// // 	"	display: flex;"
-	// // 	"	flex-wrap: wrap;"
-	// // 	"	flex-direction: column;"
-	// // 	"	border-radius: 5px;"
-	// // 	"	text-align: center;"
-	// // 	"	padding-left: 0;}"
-	// // 	"li {"
-	// // 	"	display: block;"
-	// // 	"	border-bottom: 1px solid #673ab7;"
-	// // 	"	padding-bottom: 5px;}"
-	// // 	"</style>";
-	// // body += "<ul class=\"dir\"><li><h1>KinGinx Index</h1><p></li>";
-	// body += "<h1>Directory listing:</h1>\n";
 
 
 
 
 /*-------------------------------------------------------------------------------*/
 
+/* функция возвращает запрос без .html если есть расширение */
+std::string Response::requestPathWithoutHTML(std::string &pathWithHTML)
+{
+	std::size_t pos = pathWithHTML.find(".html");
+	// std::string result = pathWithHTML.substr(0, pos);
+	return pathWithHTML.substr(0, pos);
+}
+
+/*-------------------------------------------------------------------------------*/
 
 std::string Response::responseInit()
 {
-	int isExist = 0; //существует ли location с таким запросом
+	// int isExist = 0; //существует ли location с таким запросом
 
 	// _headers = HTTPrequest.getHeaders();
 	// std::cout << _method << " " << _path << " " << _protocol <<'\n';
@@ -218,6 +198,35 @@ std::string Response::responseInit()
 	// {
 	// 	std::cout << it->first << " " << it->second << '\n';
 	// }
+// https://github.com.cnpmjs.org/42Curriculum/ft_webserv/blob/master/http_serv.cpp
+// https://github.com/t0mm4rx/webserv/blob/main/sources/RequestInterpretor.cpp
+	/* обработка заголовков */
+	// for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
+	// {
+	// 	// std::cout << it->first << " " << it->second << '\n';
+	// 	// if (it->first == "Connection:" && it->second == "close")
+	// 	// {
+	// 	// 	// close(pfd_array[1 + i].fd);
+	// 	// 	std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
+	// 	// }
+	// 	// if (it->first == "")
+	// }
+
+
+	/* проверка max_body_size */
+	if (atoi(_requestBody.c_str()) > atoi(_config->max_body_size.c_str()))
+	{
+		std::cout << "GOOD!!!!!!!!!!!!!!!!!!!!!!@!@!@!@!@!!@!@!!!!@!@!@!@!@!@!@!!@!@!@" << '\n';
+		std::cout << atoi(_requestBody.c_str()) << " " << atoi(_config->max_body_size.c_str()) << " \n";
+		_statusCode = REQTOOLARGE;
+	}
+	/* проверка допустимых methods */
+	// if 
+
+
+
+
+
 
 	if (_requestMethod == "GET")
 	{
@@ -227,7 +236,7 @@ std::string Response::responseInit()
 			// std::cout << config->listen << '\n';
 			for (int i = 0; i < _config->location.size(); i++)
 			{
-				if (_config->location[i].location == _requestPath)			//если, у нас не корень и запрос совпадает с каким-то локейшеном (с маской локейшена)
+				if (_config->location[i].location == _requestPath || _config->location[i].location == requestPathWithoutHTML(_requestPath))		//если, запрос совпадает с каким-то локейшеном (с маской локейшена); сравниваем также возвтратом функциии, которая образает .html в конце запроса
 				{
 					_statusCode = OK;
 					if (_config->location[i].autoindex == "on")				//если включен автоиндекс
@@ -240,12 +249,12 @@ std::string Response::responseInit()
 					_fullPath = _config->location[i].root + '/' + _config->location[i].index; //_path
 					std::cout << _config->location[i].location << " "  << _requestPath << '\n';
 					std::cout << _fullPath << '\n';
-					isExist = 1;
+					// isExist = 1;
 					break ;
 					// }
 				}
 			}
-			if (isExist == 0)				//если не найден файл
+			if (_statusCode != OK)				//если не найден файл
 			{
 					_statusCode = NOTFOUND;
 					// _fullPath = _config->error_page + '/' + "404.html";
@@ -273,6 +282,8 @@ std::string Response::responseInit()
 			{
 				if (_statusCode == NOTFOUND)
 					_fullPath = _config->error_page + '/' + "404.html";
+				if (_statusCode == REQTOOLARGE)
+					_fullPath = _config->error_page + '/' + "413.html";
 				if (_statusCode == INTERNALERROR)
 					_fullPath = _config->error_page + '/' + "500.html";
 				this->readBody(_fullPath);

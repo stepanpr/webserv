@@ -191,6 +191,11 @@ std::map<std::string,std::string> RequestParser::getHeaders()
 	return (_headers);
 }
 
+std::string RequestParser::getBody()
+{
+	return (_bodybuffer.str());
+}
+
 // RequestParser::RequestParser(const RequestParser &copy)
 // {
 // }
