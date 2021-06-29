@@ -26,35 +26,35 @@ class Connection;
 
 class Server
 {
-	private:
+private:
 
-		Socket						_listenSock;
-//		int							_listen_sock_fd;
-//		struct sockaddr_in			_servaddr;
-//		struct sockaddr_in			_cliaddr;	//структура clnt_addr, в которую мы будем записывать адрес и порт подсоединившегося клиента
-//		int							opt;
-		t_config					*_config;
-//		std::map<int, Connection>	_mapConnection; //key = fd, value = Connection этого fd
+	int							_clientsCount;
+	Socket						_listenSock;
+	t_config					*_config;
+	struct pollfd				_fd_array[1 /* listen */ + MAX_CLIENTS];
+	std::map<int, Connection>	_mapConnections; //key = fd, value = Connection этого fd
 
 
-		// int i; //итератор (количество клиентов)
-		/********* Private methods *******/
-		void	_createListenSocket();
+	/********* Private methods *******/
+	void	_createListenSocket();
+	int		_pollLoop();
+	void	_initPollfdStruct();
+	void	_copyPollfdStruct(struct pollfd *array);
 
 
 
-	public:
-		Server();
-		Server(const Server &copy);
-		~Server();
-		Server &operator=(const Server &copy);
+	// int i; //итератор (количество клиентов)
+public:
+	Server();
+	Server(const Server &copy);
+	~Server();
 
-		int startServer(struct s_config *config);
-		int pollLoop();
-		int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config); //&
-		int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
+	Server &operator=(const Server &copy);
+	int startServer(struct s_config *config);
+	int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config); //&
+	int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
 
-		int responseSend(std::string response, struct pollfd *pfd_array, int &i);
+	int responseSend(std::string response, struct pollfd *pfd_array, int &i);
 
 
 

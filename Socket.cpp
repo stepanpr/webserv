@@ -7,14 +7,19 @@ Socket::Socket()
 
 Socket::~Socket()
 {
+	close(_fd);
 }
 
 Socket::Socket(const Socket &copy)
 {
+	*this = copy;
 }
 
 Socket	&Socket::operator=(const Socket &copy)
 {
+	this->_fd = copy._fd;
+	this->_port = copy._port;
+	_copySockaddr(copy._sock_addr);
 	return (*this);
 }
 
@@ -24,6 +29,25 @@ Socket::Socket(t_config *config)
 	if (this->_fd == -1)
 		throw Exceptions();
 	_setSocketFlags();
+	_setSockaddr(config->listen);
+}
+
+int Socket::bind()
+{
+	return ::bind(_fd, (struct sockaddr *) &_sock_addr, sizeof(_sock_addr));
+}
+
+int Socket::listen()
+{
+	return ::listen(_fd, SOMAXCONN);
+}
+
+int Socket::*accept()
+{
+	Socket *connection = new Socket;
+	//TODO finish .accept method
+
+	return 0;
 }
 
 void Socket::_setSocketFlags(void)
@@ -37,8 +61,28 @@ void Socket::_setSocketFlags(void)
 
 	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) < 0)
 		throw Exceptions();
-	if (setsockopt(_fd, SOL_SOCKET, SO_KEEPALIVE, &opt1, sizeof(int)) < 0)
-		throw Exceptions();
-	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, &opt2, sizeof(int)) < 0)
-		throw Exceptions();
+//	if (setsockopt(_fd, SOL_SOCKET, SO_KEEPALIVE, &opt1, sizeof(int)) < 0)
+//		throw Exceptions();
+//	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, &opt2, sizeof(int)) < 0)
+//		throw Exceptions();
+}
+
+void Socket::_setSockaddr(std::string listen)
+{
+	_sock_addr.sin_family = AF_INET;
+	_port = atoi(listen.c_str());
+	_sock_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	_sock_addr.sin_port = htons(_port);
+}
+
+void Socket::_copySockaddr(struct sockaddr_in addr)
+{
+	_sock_addr.sin_port = addr.sin_port;
+	_sock_addr.sin_family = addr.sin_family;
+	_sock_addr.sin_addr.s_addr = addr.sin_addr.s_addr;
+}
+
+int Socket::getFd() const
+{
+	return _fd;
 }

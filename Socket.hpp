@@ -9,10 +9,16 @@ class Socket
 {
 public:
 	Socket();
-	Socket(t_config *config);
+	Socket(t_config *config); //constructor for listen socket
 	Socket(const Socket &copy);
 	~Socket();
 	Socket &operator=(const Socket &copy);
+
+	int		bind();
+	int		listen();
+	Socket	*accept();
+
+	int getFd() const;
 
 private:
 
@@ -21,7 +27,10 @@ private:
 	struct sockaddr_in	_sock_addr;
 
 	/*private methods*/
+
 	void	_setSocketFlags(void);
+	void	_setSockaddr(std::string listen);
+	void	_copySockaddr(struct sockaddr_in addr);
 };
 
 #endif

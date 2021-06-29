@@ -6,6 +6,9 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 Server::Server()
 {
+	_initPollfdStruct();
+	_config = NULL;
+	_clientsCount = 0;
 }
 
 Server::~Server()
@@ -19,12 +22,10 @@ Server::Server(const Server &copy)
 
 Server	&Server::operator=(const Server &copy)
 {
-	this->_listen_sock_fd = copy._listen_sock_fd;
-	this->_servaddr.sin_addr = copy._servaddr.sin_addr;
-	this->_servaddr.sin_family = copy._servaddr.sin_family;
-	this->_servaddr.sin_port = copy._servaddr.sin_port;
+	this->_listenSock = copy._listenSock;
 	this->_config = copy._config;
-	this->_mapConnection = copy._mapConnection;
+	this->_mapConnections = copy._mapConnections;
+	_copyPollfdStruct(const_cast<pollfd *>(copy._fd_array));
 	return (*this);
 }
 
@@ -43,40 +44,9 @@ int Server::startServer(t_config *config)
 	<< _config->serverID << "; port: " << _config->listen << ")" << RESET << std::endl;
 	pthread_mutex_unlock(&lock);
 
-	_listen_sock_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	//создание сокета от которого мы будем ожидать входящих данных
-	if (this->_listen_sock_fd == -1)
-		throw Exceptions();
-	if (fcntl(_listen_sock_fd, F_SETFL, O_NONBLOCK) == -1)
-		throw Exceptions();
+	_createListenSocket();
 
-	opt = 1;
-	int opt1 = 1;
-	int opt2 = 65536;
-
-	if (setsockopt(_listen_sock_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) < 0)
-		throw Exceptions();
-	if (setsockopt(_listen_sock_fd, SOL_SOCKET, SO_KEEPALIVE, &opt1, sizeof(int)) < 0)
-		throw Exceptions();
-	if (setsockopt(_listen_sock_fd, SOL_SOCKET, SO_RCVBUF, &opt2, sizeof(int)) < 0)
-		throw Exceptions();
-
-	// _servaddr = {0};											//заполняем структуру sockaddr_in
-	_servaddr.sin_family = AF_INET;							// AF_INET определяет, что используется сеть для работы с сокетом
-	_servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 			//связывает сокет со всеми доступными интерфейсами
-	const char *port = _config->listen.c_str();
-	_servaddr.sin_port = htons(atoi(port)); 					//port
-
-	if (bind(_listen_sock_fd, (struct sockaddr*) &_servaddr, sizeof(_servaddr)) < 0) //Bind: Привязка сокета к адресу
-		throw Exceptions();
-
-	if (listen(_listen_sock_fd, SOMAXCONN) == -1) //1		//Listen: Подготовка сокета к принятию входящих соединений, SOMAXCONN - максимально возможное число одновременных TCP-соединений, можно указать нужное число
-	{
-		throw Exceptions();
-	}
-
-
-
-	pollLoop();
+	_pollLoop();
 
 	std::cout << "EXIT SERV\n";
 	return 0;
@@ -86,35 +56,9 @@ int Server::startServer(t_config *config)
 
 
 
-int Server::pollLoop()
+int Server::_pollLoop()
 {
-
-
-	/*
-	**	struct pollfd {
-	**   	int fd;			- описатель файла
-	**  	short events;	- запрошенные события
-	**		short revents;	- возвращенные события
-	**	};
-	**	https://www.opennet.ru/man.shtml?category=2&topic=poll
-	*/
-	struct pollfd pfd_array[1 /* listen */ + MAX_CLIENTS] =
-		{
-			{
-				.fd = _listen_sock_fd,
-				.events = POLLIN		// запрошенные события (POLLIN: 0x0001 Можно считывать данные)
-			}
-		};
-
-	int i;
-	for (i = 0; i < MAX_CLIENTS; i++)
-	{
-		pfd_array[1 + i].fd = -1;
-	}
-
-	struct pollfd *listen_sock = pfd_array;
-
-	int clients_count = 0;
+	_fd_array[0].fd = _listenSock.getFd();
 
 	while (1)
 	{
@@ -125,7 +69,7 @@ int Server::pollLoop()
 		** nfds - параметр типа nfds_t, используемый для обозначения бщее количества элементов (клиентов);
 		** timeout - время блокировки (в миллисекундах)
 		*/
-		int ret = poll(pfd_array, 1 + MAX_CLIENTS, -1); //-1 (infinity) или значние TIMEOUT
+		int ret = poll(_fd_array, 1 + MAX_CLIENTS, -1); //-1 (infinity) или значние TIMEOUT
 		if (ret == -1)
 		{
 			std::cout << YELLOW_B << " ! " << YELLOW << "error on call \'poll\': " << WHITE << strerror(errno) << std::endl;
@@ -139,10 +83,11 @@ int Server::pollLoop()
 		else
 		{
 			// обработка попытки подключения клиента
-			if ((listen_sock->revents & POLLIN) != 0)
+			if ((_fd_array->revents & POLLIN) != 0)
 			{
-				listen_sock->revents &= ~POLLIN;
+				_fd_array->revents &= ~POLLIN;
 
+				Socket *temp = _listenSock.accept();
 				// struct sockaddr_in _cliaddr;
 				socklen_t clilen = sizeof(struct sockaddr_in);
 				int sock_fd = accept(_listen_sock_fd, (struct sockaddr*)&_cliaddr, &clilen);	//Accept: Ожидание входящего соединения
@@ -283,8 +228,40 @@ int Server::responseSend(std::string response, struct pollfd *pfd_array, int &i)
 void Server::_createListenSocket()
 {
 	_listenSock = Socket(_config);
+	if (_listenSock.bind() < 0)
+		throw Exceptions();
+	if (_listenSock.listen() < 0)
+		throw Exceptions();
 }
 
+void Server::_initPollfdStruct()
+{
+	/*
+	**	struct pollfd {
+	**   	int fd;			- описатель файла
+	**  	short events;	- запрошенные события
+	**		short revents;	- возвращенные события
+	**	};
+	**	https://www.opennet.ru/man.shtml?category=2&topic=poll
+	*/
+
+	for (int i = 0; i < MAX_CLIENTS + 1; i++)
+	{
+		_fd_array[i].fd = -1;
+		_fd_array[i].events = POLLIN;
+		_fd_array[i].revents = 0;
+	}
+}
+
+void Server::_copyPollfdStruct(struct pollfd *array)
+{
+	for (int i = 0; i < MAX_CLIENTS + 1; i++)
+	{
+		_fd_array[i].fd = array[i].fd;
+		_fd_array[i].events = array[i].events;
+		_fd_array[i].revents = array[i].revents;
+	}
+}
 
 
 
