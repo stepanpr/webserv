@@ -2,6 +2,11 @@
 #ifndef RESPONSE_HPP
 # define RESPONSE_HPP
 # include "main.hpp"
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <io.h>
+#include <dirent.h>
+// #include <time.h>
 
 /* 	https://zametkinapolyah.ru/servera-i-protokoly/tema-9-http-kody-sostoyaniya-klassy-kodov-sostoyaniya-http-servera.html 
 	https://ru.wikipedia.org/wiki/%D0%A1%D0%BF%D0%B8%D1%81%D0%BE%D0%BA_%D0%B7%D0%B0%D0%B3%D0%BE%D0%BB%D0%BE%D0%B2%D0%BA%D0%BE%D0%B2_HTTP 
@@ -33,6 +38,7 @@ public:
 	std::string fileToStr(char const filename[]);
 	void writeHeaders(std::string &method);
 	void setDate();
+	void autoindexOn();
 	void responseCompose();
 
 
@@ -49,11 +55,13 @@ private:
 
 
 	/* поля ответа*/
-	std::string _fullPath;
+	std::string _path; 
+	std::string _fullPath; //с index-файлом
 	std::string _statusCode;
 	std::string _date;
 	std::map<std::string, std::string> _headers;
 	std::string _body;
+	bool 		_autoindex;
 
 
 	/* укомплектовынный ответ */

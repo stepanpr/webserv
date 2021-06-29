@@ -124,6 +124,78 @@ void Response::responseCompose()
 
 /*-------------------------------------------------------------------------------*/
 
+// https://www.youtube.com/watch?v=j9yL30R6npk
+void Response::autoindexOn()
+{
+	DIR *dir;
+	struct dirent *current;
+	std::string body;
+	// std::string path_to_open = this->_config->location[i].root
+	std::string relativePath = _path + '.';
+
+	dir = opendir(relativePath.c_str());
+	body = "<html>\n<body>\n";
+	body += "<h1>Directory listing:</h1>\n";
+	// current = readdir(dir);
+	while ((current = readdir(dir)) != NULL)
+	{
+		printf("%s\n", current->d_name);
+		body += "<a href=\"" + _path + current->d_name + "\">";
+		body += current->d_name;
+		body += "</a><br>";
+		// current = readdir(dir);
+	}
+	closedir(dir);
+	// while ((current = readdir(dir)) != NULL)
+	// {
+	// 	body += current->d_name;
+	// 	// std::cout << current->d_name << "\n";
+	// // 	if (current->d_name[0] != '.')
+	// // 	{
+	// // 		body += "<a href=\"" + this->getFileName();
+	// // 		if (!this->getFileName().empty() && this->getFileName()[this->getFileName().size() - 1] != '/')
+	// // 			body += "/";
+	// // 		body += current->d_name;
+	// // 		body += "\">";
+	// // 		body += current->d_name;
+	// // 		body += "</a><br>\n";
+	// // 	}
+	// }
+	// closedir(dir);
+	body += "</body>\n</html>\n";
+	this->_body = body;
+	
+}
+
+	// body = "<html>\n<body>\n";
+	// // body += "<title>Webserv kioiioioiAutoIndex</title>"
+	// // 	"<style>"
+	// // 	"a{"
+	// // 	"	text-decoration: none;"
+	// // 	"	color: black; font-size: 25px;}"
+	// // 	"body {"
+	// // 	"	background: rgb(238,174,202);"
+	// // 	"	background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);}"
+	// // 	"ul {"
+	// // 	"	display: flex;"
+	// // 	"	flex-wrap: wrap;"
+	// // 	"	flex-direction: column;"
+	// // 	"	border-radius: 5px;"
+	// // 	"	text-align: center;"
+	// // 	"	padding-left: 0;}"
+	// // 	"li {"
+	// // 	"	display: block;"
+	// // 	"	border-bottom: 1px solid #673ab7;"
+	// // 	"	padding-bottom: 5px;}"
+	// // 	"</style>";
+	// // body += "<ul class=\"dir\"><li><h1>KinGinx Index</h1><p></li>";
+	// body += "<h1>Directory listing:</h1>\n";
+
+
+
+
+/*-------------------------------------------------------------------------------*/
+
 
 std::string Response::responseInit()
 {
@@ -148,11 +220,19 @@ std::string Response::responseInit()
 				if (_config->location[i].location == _requestPath)			//если, у нас не корень и запрос совпадает с каким-то локейшеном (с маской локейшена)
 				{
 					_statusCode = OK;
+					if (_config->location[i].autoindex == "on")				//если включен автоиндекс
+					{
+						this->_autoindex = true;
+					}
+					// else	
+					// {
+					_path = _config->location[i].root + '/';
 					_fullPath = _config->location[i].root + '/' + _config->location[i].index; //_path
 					std::cout << _config->location[i].location << " "  << _requestPath << '\n';
 					std::cout << _fullPath << '\n';
 					isExist = 1;
 					break ;
+					// }
 				}
 			}
 			if (isExist == 0)				//если не найден файл
@@ -171,12 +251,13 @@ std::string Response::responseInit()
 			// 	// 	std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
 			// 	// }
 			// }
-		
-			readBody(_fullPath);
+			if (isExist && _autoindex)				//если включен автоиндекс
+				this->autoindexOn();
+			else
+				this->readBody(_fullPath);
 			// std::cout << _body << '\n';
 			// std::cout << _statusCode << '\n';
 			responseCompose();
-			std::cout << _response << '\n';
 		}
 	}
 
@@ -209,87 +290,38 @@ std::string Response::responseInit()
 
 
 
-	/* вывод сообщения в соответствии со _statusCode*/
-	if (_statusCode == OK)
-		std::cout << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl; //изменить если 404
-	else if (_statusCode == NOTFOUND)
-		std::cout  << RED_B << "KO: " << WHITE <<"content not found, error \"404\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+	{ /* вывод сообщения в соответствии со _statusCode*/
+		
+		if (_statusCode == OK)
+			std::cout << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+		else if (_statusCode == NOTFOUND)
+			std::cout  << RED_B << "KO: " << WHITE <<"content not found, error \"404\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+	}
 
-// 	// std::map<std::string, std::string>::iterator it;
-// 	// it = headers.find("Connection:");
-// 	// std::cout << it->first << " " << it->second << '\n';
 
-	// std::stringstream response;
-// 	std::stringstream response_body;////////////////////////////////////
 
-// /* формирование ответа на основе обработанного запроса */
-// if (_requestPath != "/favicon.ico")
-// {
-// 	std::ifstream file; // создаем объект класса ifstream
-// 	char *file_buffer = new char[10000 + 1]; file_buffer[10000] = 0;    //поменять! просчтитать длину файла и выделить столько памяти.
-
-// // www/site.com/index.html
-// 	file.open(_fullPath.c_str()); 	//пытаемся открыть файл по запросу
-
-// 	if (!file) 								//нужного контента нету
-// 	{
-// 		std::ifstream error_404;
-// 		file.open("www/default/404.html");
-// 		if (!file)
-// 		{
-// 			std::cout << YELLOW << "error: content not found!" << RESET << std::endl;  //обработать
-// 		}
-// 		else
-// 		{
-// 			error_404.read(file_buffer, 10000);
-// 			response_body << file_buffer;
-// 		}
-// 		// return -1;
-// 	}
-// 	else									//контейнт найден
-// 	{
-// 		std::cout << isExist <<'\n';
-// 		if (isExist)
-// 			std::cout << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl; //изменить если 404
-// 		else
-// 			std::cout  << RED_B << "KO: " << WHITE <<"content not found, error-page will be send to client" << RESET << std::endl << std::endl; //изменить если 404
-// 		// std::string file_buffer;
-// 		// char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;
-// 		// response_body << file;
-// 		file.read(file_buffer, 100000);
-// 		// for(file >> file_buffer; !file.eof(); file >> file_buffer)
-// 		// 	std::cout << file_buffer;
-// 		response_body << file_buffer;
-// 	// }
-
+	{ /* запись ответа в лог-файл */
+		std::cout << _response << '\n'; //вывод ответа
 
 		
-// 		response << "HTTP/1.1 200 OK\r\n"
-// 			<< "Version: HTTP/1.1\r\n"
-// 		<< "Content-Type: text/html; charset=utf-8\r\n"
-// 		<< "Content-Length: " << response_body.str().length()
-// 		<< "\r\n\r\n"
-// 		<< response_body.str();
+		std::ofstream save_response("www/response.log", std::ios::app);
 
-// 		// if(-1 == send(pfd_array[1 + i].fd, response.str().c_str(), response.str().length(), 0))
-// 		// {
-// 		// 	printf("Error on call 'send': %s\n", strerror(errno));
-// 		// 	return -1;
-// 		// }
-// 		file.close();
-// 		response_body.clear();
-// 	}
-
-// }
-// 	_fullPath.clear();
+		if (!save_response)
+		{
+			std::cout << "Uh oh, SomeText.txt could not be opened for writing!" << std::endl;
+		}
+		else
+		{
+			save_response << _response << std::endl << std::endl;
+			save_response << "=================================================================" << std::endl;
+		}
+	}
 
 
 
 
 
-// return response.str();
 return _response;
-
 
 }
 

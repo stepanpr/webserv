@@ -84,7 +84,8 @@ int RequestParser::RequestWaiter(const char *str, int len)
 				_is_chunked = true;
 			if ((it->first.compare("Content-Length:") == 0))
 			{
-				_contentLength = std::stoi(it->second);
+				// _contentLength = std::stoi(it->second);
+				_contentLength = atoi(it->second.c_str());
 				_is_length = true;
 			}
 			if ((it->first.compare("Host:") == 0))
