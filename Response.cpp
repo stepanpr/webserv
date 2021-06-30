@@ -187,6 +187,39 @@ std::string Response::requestPathWithoutHTML(std::string &pathWithHTML)
 
 /*-------------------------------------------------------------------------------*/
 
+/* проверка допустимых methods */
+bool Response::checkMethod(int &i)
+{
+	std::cout << _requestMethod << " : " << _config->location[i].methods << '\n';
+	if(_requestMethod != _config->location[i].methods)
+	{
+
+		this->_statusCode = NOTALLOWED;
+						std::cout << _statusCode << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
+
+		return false;
+	}
+
+	return true;
+}
+
+/* проверка max_body_size */
+bool Response::checkMaxBodySize()
+{
+	if (atoi(_requestBody.c_str()) > atoi(_config->max_body_size.c_str()))
+	{
+		// std::cout << "GOOD!!!!!!!!!!!!!!!!!!!!!!@!@!@!@!@!!@!@!!!!@!@!@!@!@!@!@!!@!@!@" << '\n';
+		// std::cout << atoi(_requestBody.c_str()) << " " << atoi(_config->max_body_size.c_str()) << " \n";
+		this->_statusCode = REQTOOLARGE;
+		return false;
+	}
+	return true;
+}
+
+
+/*-------------------------------------------------------------------------------*/
+
+
 std::string Response::responseInit()
 {
 	// int isExist = 0; //существует ли location с таким запросом
@@ -213,21 +246,6 @@ std::string Response::responseInit()
 	// }
 
 
-	/* проверка max_body_size */
-	if (atoi(_requestBody.c_str()) > atoi(_config->max_body_size.c_str()))
-	{
-		std::cout << "GOOD!!!!!!!!!!!!!!!!!!!!!!@!@!@!@!@!!@!@!!!!@!@!@!@!@!@!@!!@!@!@" << '\n';
-		std::cout << atoi(_requestBody.c_str()) << " " << atoi(_config->max_body_size.c_str()) << " \n";
-		_statusCode = REQTOOLARGE;
-	}
-	/* проверка допустимых methods */
-	// if 
-
-
-
-
-
-
 	if (_requestMethod == "GET")
 	{
 
@@ -238,10 +256,15 @@ std::string Response::responseInit()
 			{
 				if (_config->location[i].location == _requestPath || _config->location[i].location == requestPathWithoutHTML(_requestPath))		//если, запрос совпадает с каким-то локейшеном (с маской локейшена); сравниваем также возвтратом функциии, которая образает .html в конце запроса
 				{
-					_statusCode = OK;
 					if (_config->location[i].autoindex == "on")				//если включен автоиндекс
 					{
 						this->_autoindex = true;
+					}
+					if (!checkMethod(i) || !checkMaxBodySize())
+					{
+						// std::cout << _statusCode << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
+						break ;
+						
 					}
 					// else	
 					// {
@@ -249,16 +272,17 @@ std::string Response::responseInit()
 					_fullPath = _config->location[i].root + '/' + _config->location[i].index; //_path
 					std::cout << _config->location[i].location << " "  << _requestPath << '\n';
 					std::cout << _fullPath << '\n';
+					_statusCode = OK;
 					// isExist = 1;
 					break ;
 					// }
 				}
 			}
-			if (_statusCode != OK)				//если не найден файл
-			{
-					_statusCode = NOTFOUND;
-					// _fullPath = _config->error_page + '/' + "404.html";
-			}
+			// if (_statusCode != OK)				//если не найден файл
+			// {
+			// 		_statusCode = NOTFOUND;
+			// 		// _fullPath = _config->error_page + '/' + "404.html";
+			// }
 
 			/* обработка заголовков */
 			// for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
@@ -277,11 +301,22 @@ std::string Response::responseInit()
 				this->readBody(_fullPath);
 			
 			
+
+
+
+
+
 			
 			if (_statusCode != OK)								/* если статускод содержит ошибку */	
 			{
+				if (_statusCode != NOTALLOWED && _statusCode != REQTOOLARGE && _statusCode != INTERNALERROR)
+				{
+					_statusCode = NOTFOUND;
+				}
 				if (_statusCode == NOTFOUND)
 					_fullPath = _config->error_page + '/' + "404.html";
+				if (_statusCode == NOTALLOWED)
+					_fullPath = _config->error_page + '/' + "405.html";
 				if (_statusCode == REQTOOLARGE)
 					_fullPath = _config->error_page + '/' + "413.html";
 				if (_statusCode == INTERNALERROR)

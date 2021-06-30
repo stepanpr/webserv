@@ -18,7 +18,7 @@
 // # define BADREQUEST		"400 Bad Request"
 // # define UNAUTHORIZED	"401 Unauthorized"
 # define NOTFOUND 		"404 Not Found"
-// # define NOTALLOWED		"405 Method Not Allowed"
+# define NOTALLOWED		"405 Method Not Allowed"
 # define REQTOOLARGE	"413 Request Entity Too Large"
 # define INTERNALERROR	"500 Internal Server Error"
 // # define NOTIMPLEMENTED	"501 Not Implemented"
@@ -36,6 +36,8 @@ public:
 
 	std::string responseInit();
 	std::string requestPathWithoutHTML(std::string &path);
+	bool checkMethod(int &i);
+	bool checkMaxBodySize();
 	void readBody(std::string &path);
 	std::string fileToStr(char const filename[]);
 	void writeHeaders(std::string &method);

@@ -172,7 +172,10 @@ void Config::read(std::vector<std::string> &data)
 						if (data[l] == "autoindex")
 							new_location.autoindex = data[l + 1];
 						if (data[l] == "methods")
+						{
+							// if (data[l + 1])
 							new_location.methods = data[l + 1];
+						}
 						if (data[l] == "root")
 							new_location.root = data[l + 1];
 						if (data[l] == "}")

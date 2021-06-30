@@ -35,11 +35,14 @@ int	main(int argc, char **argv)
 		if (cmd == "n") { break ;}
 		else { std::cout  << CYAN_B << "webserv: " << CYAN << "please, enter \"y\" or \"n\"" << RESET << std::endl; }
 	}
+	std::ifstream iff("www/response.log");
+	if(iff.bad() == false) /* удаляем старый log-файл если он существует */
+		std::remove("www/response.log");
 
 	/*-------------------------------------------------------------------------------*/
 	
 
-	config.createServers();  //запускаем сервера
+	config.createServers();  /* запускаем сервера */
 
 
 	return 0;
