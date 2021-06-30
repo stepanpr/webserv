@@ -190,17 +190,29 @@ std::string Response::requestPathWithoutHTML(std::string &pathWithHTML)
 /* проверка допустимых methods */
 bool Response::checkMethod(int &i)
 {
-	std::cout << _requestMethod << " : " << _config->location[i].methods << '\n';
-	if(_requestMethod != _config->location[i].methods)
+	int ok = 0;
+
+	for (int f = 0; f < _config->location[i].methods.size(); f++)
 	{
+			std::cout << this->_config->location[i].methods[f] << '\n';
 
-		this->_statusCode = NOTALLOWED;
-						std::cout << _statusCode << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
-
-		return false;
+		if(this->_requestMethod == this->_config->location[i].methods[f])
+		{
+			std::cout << this->_requestMethod << " : " << this->_config->location[i].methods[f] << '\n';
+			return true;
+		}
 	}
+	// std::cout << _requestMethod << " : " << _config->location[i].methods[0] << '\n';
+	// if(_requestMethod != _config->location[i].methods)
+	// {
 
-	return true;
+	// 	this->_statusCode = NOTALLOWED;
+	// 					std::cout << _statusCode << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
+
+	// 	return false;
+	// }
+	this->_statusCode = NOTALLOWED;
+	return false;
 }
 
 /* проверка max_body_size */
@@ -384,7 +396,7 @@ std::string Response::responseInit()
 
 
 	{ /* запись ответа в лог-файл */
-		std::cout << _response << '\n'; //вывод ответа
+		// std::cout << _response << '\n'; //вывод ответа
 
 		std::ofstream save_response("www/response.log", std::ios::app);
 

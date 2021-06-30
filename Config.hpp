@@ -30,7 +30,8 @@ typedef struct 	s_location
 	std::string location;
 	std::string index;
 	std::string autoindex;
-	std::string methods;
+	// std::string methods;
+	std::vector<std::string> methods;
 	std::string root;
 }				t_location;
 

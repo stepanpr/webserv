@@ -173,8 +173,11 @@ void Config::read(std::vector<std::string> &data)
 							new_location.autoindex = data[l + 1];
 						if (data[l] == "methods")
 						{
-							// if (data[l + 1])
-							new_location.methods = data[l + 1];
+							for (int m = 1; data[l+m] == "GET" || data[l + m] == "POST" || data[l + m] == "DELETE" || data[l + m] == "PUT"; m++)
+							{
+								new_location.methods.push_back(data[l + m]);
+								// std::cout << data[l+m];
+							}	
 						}
 						if (data[l] == "root")
 							new_location.root = data[l + 1];
@@ -221,7 +224,11 @@ void Config::showConfig()
 			std::cout << std::setw(11)<< BLUE  << "location: " << RESET << _configs[k].location[l].location  << "\n";
 			std::cout << std::setw(14)<< BLUE  << "index: " << RESET << _configs[k].location[l].index  << "\n";
 			std::cout << std::setw(10)<< BLUE  << "autoindex: " << RESET << _configs[k].location[l].autoindex  << "\n";
-			std::cout << std::setw(12)<< BLUE  << "methods: " << RESET << _configs[k].location[l].methods  << "\n";
+			std::cout << std::setw(12)<< BLUE  << "methods: " << RESET;
+			for(unsigned long m = 0; m < _configs[k].location[l].methods.size(); m++)
+				std::cout << _configs[k].location[l].methods[m] << " ";
+			std::cout << "\n";
+			// std::cout << std::setw(12)<< BLUE  << "methods: " << RESET << _configs[k].location[l].methods  << "\n";
 			std::cout << std::setw(15)<< BLUE  << "root: " << RESET << _configs[k].location[l].root  << "\n";
 		}
 		// std::cout << PURPLE  << "==================\n" << RESET;
