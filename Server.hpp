@@ -22,12 +22,9 @@
 
 class Config;
 
-class Connection;
-
 class Server
 {
 private:
-
 	int							_clientsCount;
 	Socket						_listenSock;
 	t_config					*_config;
@@ -40,6 +37,9 @@ private:
 	int		_pollLoop();
 	void	_initPollfdStruct();
 	void	_copyPollfdStruct(struct pollfd *array);
+	void	_addSocketToConnections(Socket *newConnect);
+	void	_addToPollfd(int new_fd);
+	void	_addToMap(Socket *newSocket);
 
 
 
@@ -51,6 +51,7 @@ public:
 
 	Server &operator=(const Server &copy);
 	int startServer(struct s_config *config);
+
 	int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config); //&
 	int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
 

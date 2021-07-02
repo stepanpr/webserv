@@ -6,9 +6,9 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 Server::Server()
 {
-	_initPollfdStruct();
 	_config = NULL;
 	_clientsCount = 0;
+	_initPollfdStruct();
 }
 
 Server::~Server()
@@ -62,7 +62,6 @@ int Server::_pollLoop()
 
 	while (1)
 	{
-
 		/*
 		** int poll(struct pollfd fds[], nfds_t nfds, int timeout)
 		** pollfd fds[] - используется для хранения файлового дескриптора сокета, статус которого необходимо проверить;
@@ -83,24 +82,23 @@ int Server::_pollLoop()
 		else
 		{
 			// обработка попытки подключения клиента
-			if ((_fd_array->revents & POLLIN) != 0)
+			if ((_fd_array[0].revents & POLLIN) != 0)
 			{
-				_fd_array->revents &= ~POLLIN;
+				_fd_array[0].revents &= ~POLLIN;
 
 				Socket *temp = _listenSock.accept();
-				// struct sockaddr_in _cliaddr;
-				socklen_t clilen = sizeof(struct sockaddr_in);
-				int sock_fd = accept(_listen_sock_fd, (struct sockaddr*)&_cliaddr, &clilen);	//Accept: Ожидание входящего соединения
-				if (sock_fd == -1)
-					throw Exceptions();
-				else if (sock_fd > 0)
+				if (_clientsCount == MAX_CLIENTS)
 				{
-					// ограничение числа подключений
-					if (clients_count == MAX_CLIENTS)
-					{
-						close(sock_fd);
-						std::cout << WHITE_B << MAX_CLIENTS << WHITE
-						<<" clients already connected, unexpected new connection have discarded" << RESET << std::endl;
+					delete temp;
+					std::cout << WHITE_B << MAX_CLIENTS;
+					std::cout << WHITE <<" clients already connected, unexpected new connection have discarded" << RESET;
+					std::cout << std::endl;
+				}
+				else
+				{
+					_clientsCount++;
+					_addSocketToConnections(temp);
+
 
 					} else
 					{
@@ -228,10 +226,14 @@ int Server::responseSend(std::string response, struct pollfd *pfd_array, int &i)
 void Server::_createListenSocket()
 {
 	_listenSock = Socket(_config);
+	_listenSock.setSockNonblock();
+	_listenSock.setSockReuseaddr();
+	_listenSock.setSocketFlags();
 	if (_listenSock.bind() < 0)
 		throw Exceptions();
 	if (_listenSock.listen() < 0)
 		throw Exceptions();
+
 }
 
 void Server::_initPollfdStruct()
@@ -263,6 +265,26 @@ void Server::_copyPollfdStruct(struct pollfd *array)
 	}
 }
 
+void Server::_addSocketToConnections(Socket *newSocket)
+{
+	_addToPollfd(newSocket->getFd());
+	_addToMap(newSocket); //TODO
+}
 
+void Server::_addToPollfd(int new_fd)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (_fd_array[i + 1].fd == -1)
+		{
+			_fd_array[i + 1].fd = new_fd;
+			_fd_array[i + 1].events = POLLIN;
+			break ;
+		}
+	}
+}
 
-
+void Server::_addToMap(Socket *newSocket)
+{
+	Connection *newConnect = new Connection(newSocket);//TODO
+}

@@ -17,6 +17,9 @@ public:
 	int		bind();
 	int		listen();
 	Socket	*accept();
+	void	setSockNonblock();
+	void	setSockReuseaddr();
+	void	setSocketFlags();
 
 	int getFd() const;
 
@@ -28,7 +31,6 @@ private:
 
 	/*private methods*/
 
-	void	_setSocketFlags(void);
 	void	_setSockaddr(std::string listen);
 	void	_copySockaddr(struct sockaddr_in addr);
 };

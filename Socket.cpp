@@ -28,7 +28,6 @@ Socket::Socket(t_config *config)
 	_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (this->_fd == -1)
 		throw Exceptions();
-	_setSocketFlags();
 	_setSockaddr(config->listen);
 }
 
@@ -42,29 +41,41 @@ int Socket::listen()
 	return ::listen(_fd, SOMAXCONN);
 }
 
-int Socket::*accept()
+Socket *Socket::accept()
 {
 	Socket *connection = new Socket;
-	//TODO finish .accept method
-
-	return 0;
+	socklen_t cliLen = sizeof(struct sockaddr_in);
+	connection->_fd = ::accept(this->_fd, (struct sockaddr *) &connection->_sock_addr, &cliLen);
+	if (connection->_fd == -1)
+	{
+		delete connection;
+		throw Exceptions();
+	}
+	return connection;
 }
 
-void Socket::_setSocketFlags(void)
+void Socket::setSockNonblock()
 {
 	if (fcntl(_fd, F_SETFL, O_NONBLOCK) == -1)
 		throw Exceptions();
+}
 
+void Socket::setSockReuseaddr()
+{
 	int opt = 1;
-	int opt1 = 1;
-	int opt2 = 65536;
-
 	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) < 0)
 		throw Exceptions();
-//	if (setsockopt(_fd, SOL_SOCKET, SO_KEEPALIVE, &opt1, sizeof(int)) < 0)
-//		throw Exceptions();
-//	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, &opt2, sizeof(int)) < 0)
-//		throw Exceptions();
+}
+
+void Socket::setSocketFlags()
+{
+	int opt1 = 1;
+	int opt2 = 65536;
+	if (setsockopt(_fd, SOL_SOCKET, SO_KEEPALIVE, &opt1, sizeof(int)) < 0)
+		throw Exceptions();
+	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, &opt2, sizeof(int)) < 0)
+		throw Exceptions();
+
 }
 
 void Socket::_setSockaddr(std::string listen)

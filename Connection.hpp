@@ -1,9 +1,9 @@
-
 #ifndef CONNECTION_HPP
 # define CONNECTION_HPP
 # include <iostream>
 # include <map>
 # include "RequestParser.hpp"
+# include "Socket.hpp"
 # include "Response.hpp"
 
 
@@ -12,7 +12,10 @@ class Connection
 {
 public:
 	Connection();
+	Connection(Socket *sock);
+
 	Connection(const Connection &copy);
+
 	~Connection();
 	Connection &operator=(const Connection &copy);
 
@@ -34,6 +37,7 @@ private:
 	int					_state;
 	int					_sock_fd;
 	int 	_isOK;
+	Socket				*_sock;
 	struct s_config			*_config;
 };
 

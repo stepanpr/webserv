@@ -1,7 +1,10 @@
-
 #include "Connection.hpp"
 
 Connection::Connection()
+{
+}
+
+Connection::Connection(Socket *sock) : _sock(sock)
 {
 }
 
