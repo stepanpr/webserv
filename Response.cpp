@@ -17,7 +17,12 @@ Response::Response(const Response &copy){}
 Response	&Response::operator=(const Response &copy) { return (*this); }
 
 
-/*-------------------------------------------------------------------------------*/
+
+/*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
+
 
 /* чтение из файла */
 std::string Response::fileToStr(char const filename[])
@@ -48,10 +53,15 @@ void Response::readBody(std::string &path)
 	}
 	catch (std::exception &e)
 	{
+		std::cout << "!!!!!!!!!!!!!!!!!!READ BODY\n";
 		this->_statusCode = INTERNALERROR;
+		
 	}
 }
-/*-------------------------------------------------------------------------------*/
+
+
+
+
 
 /* текущее время */
 void Response::setDate()
@@ -69,12 +79,14 @@ void Response::setDate()
 /* установка хедеров */
 void Response::writeHeaders(std::string &method)
 {
+	if (_statusCode == NOTALLOWED) /* поля для кодов ошибок */
+		_headers["Allow"] = _allowedMethods;
 	if (method == "GET")
 	{
 		_headers["Server"] = "webserv/1.0";
 		setDate();
 		_headers["Date"] = _date + " GMT";
-		_headers["Content-Type"] = "text/html; charset=UTF-8";
+		// _headers["Content-Type"] = "text/html; charset=UTF-8";
 		_headers["Title"] = "webserv (project for 21 school)";
 		_headers["Content-Language"] = "en,ru";
 		_headers["Retry-After"] = "1";
@@ -118,7 +130,13 @@ void Response::responseCompose()
 	_response += _body;
 }
 
-/*-------------------------------------------------------------------------------*/
+
+/*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
+
+
 
 // https://www.youtube.com/watch?v=j9yL30R6npk
 /* создание _body при включенном автоиндексе */
@@ -134,6 +152,7 @@ void Response::autoindexOn()
 	if (dir == NULL)
 	{
 		this->_statusCode = INTERNALERROR;
+		std::cout << "!!!!!!!!!!!!!!!!!!AUTOINDEX\n";
 		// this->_fullPath = _config->error_page + '/' + "404.html";
 		// this->readBody(_fullPath);
 		// std::cout << "!!!!!!!33333\n";
@@ -149,7 +168,7 @@ void Response::autoindexOn()
 			"ul { display: flex; flex-wrap: wrap; flex-direction: column; border-radius: 5px; text-align: center; padding-left: 0; margin-top: 30px;}"
 			"li { display: block; border-bottom: 1px solid #673ab7; padding-bottom: 5px;}"
 			"</style>\n</head>\n<body>\n";
-	body += "<h1>Directory listing:</h1>\n<ul>";
+	body += "<h1>Autoindex On:</h1>\n<ul>";
 	// current = readdir(dir);
 	while ((current = readdir(dir)) != NULL)
 	{
@@ -175,17 +194,26 @@ void Response::autoindexOn()
 
 
 
-/*-------------------------------------------------------------------------------*/
+/*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
 
 /* функция возвращает запрос без .html если есть расширение */
 std::string Response::requestPathWithoutHTML(std::string &pathWithHTML)
 {
-	std::size_t pos = pathWithHTML.find(".html");
-	// std::string result = pathWithHTML.substr(0, pos);
-	return pathWithHTML.substr(0, pos);
+	std::size_t pos;
+	if ((pos = pathWithHTML.find("index.html")))
+		return pathWithHTML.substr(0, pos);
+	else if ((pos = pathWithHTML.find(".html")))
+		return pathWithHTML.substr(0, pos);
+	return NULL;
 }
 
-/*-------------------------------------------------------------------------------*/
+ /*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
 
 /* проверка допустимых methods */
 bool Response::checkMethod(int &i)
@@ -194,23 +222,14 @@ bool Response::checkMethod(int &i)
 
 	for (int f = 0; f < _config->location[i].methods.size(); f++)
 	{
-			std::cout << this->_config->location[i].methods[f] << '\n';
+			_allowedMethods += this->_config->location[i].methods[f];
+			std::cout << this->_config->location[i].methods[f] << " ddddd" << _allowedMethods << '\n';
 
 		if(this->_requestMethod == this->_config->location[i].methods[f])
 		{
-			std::cout << this->_requestMethod << " : " << this->_config->location[i].methods[f] << '\n';
 			return true;
 		}
 	}
-	// std::cout << _requestMethod << " : " << _config->location[i].methods[0] << '\n';
-	// if(_requestMethod != _config->location[i].methods)
-	// {
-
-	// 	this->_statusCode = NOTALLOWED;
-	// 					std::cout << _statusCode << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
-
-	// 	return false;
-	// }
 	this->_statusCode = NOTALLOWED;
 	return false;
 }
@@ -220,8 +239,6 @@ bool Response::checkMaxBodySize()
 {
 	if (atoi(_requestBody.c_str()) > atoi(_config->max_body_size.c_str()))
 	{
-		// std::cout << "GOOD!!!!!!!!!!!!!!!!!!!!!!@!@!@!@!@!!@!@!!!!@!@!@!@!@!@!@!!@!@!@" << '\n';
-		// std::cout << atoi(_requestBody.c_str()) << " " << atoi(_config->max_body_size.c_str()) << " \n";
 		this->_statusCode = REQTOOLARGE;
 		return false;
 	}
@@ -229,14 +246,13 @@ bool Response::checkMaxBodySize()
 }
 
 
-/*-------------------------------------------------------------------------------*/
-
+/*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
 
 std::string Response::responseInit()
 {
-	// int isExist = 0; //существует ли location с таким запросом
-
-	// _headers = HTTPrequest.getHeaders();
 	// std::cout << _method << " " << _path << " " << _protocol <<'\n';
 	// std::cout << _config->error_page << " " << _config->listen << " " << _config->location[0].methods <<'\n';
 	// for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end() ; it++)
@@ -261,12 +277,17 @@ std::string Response::responseInit()
 	if (_requestMethod == "GET")
 	{
 
-		if (_requestPath != "/favicon.ico")
-		{
+
+		// if (_requestPath != "/favicon.ico")
+		// if (_getMimeType("type.html") == "text/html")
+		// {
+			std::cout << _requestPath.substr(1, _requestPath.size()) << "THIS IS HTML\n";
+
 			// std::cout << config->listen << '\n';
 			for (int i = 0; i < _config->location.size(); i++)
 			{
-				if (_config->location[i].location == _requestPath || _config->location[i].location == requestPathWithoutHTML(_requestPath))		//если, запрос совпадает с каким-то локейшеном (с маской локейшена); сравниваем также возвтратом функциии, которая образает .html в конце запроса
+				if (_config->location[i].location == _requestPath || (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find(".html"))) 
+				|| (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find("index.html")))) // requestPathWithoutHTML(_requestPath))		//если, запрос совпадает с каким-то локейшеном (с маской локейшена); сравниваем также возвтратом функциии, которая образает .html в конце запроса
 				{
 					if (_config->location[i].autoindex == "on")				//если включен автоиндекс
 					{
@@ -275,51 +296,45 @@ std::string Response::responseInit()
 					if (!checkMethod(i) || !checkMaxBodySize())
 					{
 						// std::cout << _statusCode << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
-						break ;
-						
+						break ;	
 					}
 					// else	
 					// {
 					_path = _config->location[i].root + '/';
 					_fullPath = _config->location[i].root + '/' + _config->location[i].index; //_path
-					std::cout << _config->location[i].location << " "  << _requestPath << '\n';
-					std::cout << _fullPath << '\n';
+					_headers["Content-Type"] = _getMimeType(_config->location[i].index); /* устанавливаем MIME тип индекса */
+					// std::cout << _config->location[i].location << " "  << _requestPath << '\n';
+					// std::cout << _fullPath << '\n';
 					_statusCode = OK;
 					// isExist = 1;
+				
 					break ;
 					// }
 				}
+				else //if (_config->location[i].location != _requestPath && _config->location[i].location != _requestPath.substr(0, _requestPath.find(".html")))
+				{	//если это файл он существует и имеет mime тип, то также отправляем в респонс, записываем в ответ боди
+					if (stat("www/response.log", &_stat) == 0 && _getMimeType(_requestPath.substr(0, _requestPath.size())) != MIME_TYPE_NOT_FOUND)
+					{
+							_statusCode = OK; /* при отключенных locations сайта, покажет ошибку */
+							_fullPath = _requestPath.substr(1, _requestPath.size());
+							_headers["Content-Type"] = _getMimeType(_requestPath.substr(1, _requestPath.size()));
+					}
+					// std::cout <<stat("www/response.log", &_stat) << "STAT\n";
+					// if (_getMimeType(_requestPath.substr(0, _requestPath.size())) == MIME_TYPE_NOT_FOUND || stat("www/response.log", &_stat) == -1)
+					// {
+					// 	continue ;
+					// }
+				}
 			}
-			// if (_statusCode != OK)				//если не найден файл
-			// {
-			// 		_statusCode = NOTFOUND;
-			// 		// _fullPath = _config->error_page + '/' + "404.html";
-			// }
 
-			/* обработка заголовков */
-			// for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
-			// {
-			// 	std::cout << it->first << " " << it->second << '\n';
-			// 	// if (it->first == "Connection:" && it->second == "close")
-			// 	// {
-			// 	// 	// close(pfd_array[1 + i].fd);
-			// 	// 	std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
-			// 	// }
-			// }
-
+			/* проверка автоиндекса */
 			if (_statusCode == OK && _autoindex == true)				/* если автоиндекс включен */	
 				this->autoindexOn();
 			else if (_statusCode == OK && _autoindex == false)			/* если автоиндекс выключен */		
 				this->readBody(_fullPath);
 			
-			
-
-
-
-
-
-			
-			if (_statusCode != OK)								/* если статускод содержит ошибку */	
+			/* если статускод содержит ошибку */
+			if (_statusCode != OK)									
 			{
 				if (_statusCode != NOTALLOWED && _statusCode != REQTOOLARGE && _statusCode != INTERNALERROR)
 				{
@@ -333,25 +348,26 @@ std::string Response::responseInit()
 					_fullPath = _config->error_page + '/' + "413.html";
 				if (_statusCode == INTERNALERROR)
 					_fullPath = _config->error_page + '/' + "500.html";
+				_headers["Content-Type"] = _getMimeType("error.html");
 				this->readBody(_fullPath);
 
 			}
-
 			// std::cout << _body << '\n';
 			// std::cout << _statusCode << '\n';
+
+			/* сборка ответа */
 			responseCompose();
-		}
 	}
 
 
 
 
 
-	// if (_requestMethod == "POST")
-	// {
+	if (_requestMethod == "POST")
+	{
 
 
-	// }
+	}
 
 	// if (_requestMethod == "DELETE")
 	// {
@@ -389,6 +405,10 @@ std::string Response::responseInit()
 			std::cout << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 		else if (_statusCode == NOTFOUND)
 			std::cout  << RED_B << "KO: " << WHITE <<"content not found, error \"404\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+		else if (_statusCode == NOTALLOWED)
+			std::cout  << RED_B << "KO: " << WHITE <<"request method not allowed, error \"405\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+		else if (_statusCode == REQTOOLARGE)
+			std::cout  << RED_B << "KO: " << WHITE <<"request is too large, error \"404\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 		else if (_statusCode == INTERNALERROR)
 			std::cout  << RED_B << "KO: " << WHITE <<"problems with server settings, error \"500\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 	}
@@ -651,3 +671,121 @@ return _response;
 // 					return 0;
 
 // }
+
+
+
+
+
+
+
+
+
+
+/*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
+/*==================================================================================================*/
+
+std::string Response::_getMimeType(std::string filename)
+{
+
+	std::map<std::string, std::string> m;
+	// std::cout << filename << "!!!!!!!!!!!!init!!!!!!!!!!!\n";
+
+	int i;	
+	for(i = filename.size(); i >= 0 && filename[i] != '.' && filename[i] != '/'; --i)
+	{
+		// std::cout << i << " : " << filename[i] << "\n";
+		if ((i) == 0)
+		{
+			// std::cout << filename[i] << "\n";
+			// std::cout << "| " << filename << "!!!!!!!!!!!!init!!!!!!!!!!!\n";
+			
+			return ("text/html; charset=UTF-8");
+		}
+		// if (filename[i] !='.')
+	}
+
+	std::string extention = std::string(filename, i + 1, filename.size() - i);
+
+	m["aac"] = "audio/aac";
+	m["abw"] = "application/x-abiword";
+	m["arc"] = "application/octet-stream";
+	m["avi"] = "video/x-msvideo";
+	m["azw"] = "application/vnd.amazon.ebook";
+	m["bin"] = "application/octet-stream";
+	m["bmp"] = "image/bmp";
+	m["bz"] = "application/x-bzip";
+	m["bz2"] = "application/x-bzip2";
+	m["csh"] = "application/x-csh";
+	m["css"] = "text/css";
+	m["csv"] = "text/csv";
+	m["doc"] = "application/msword";
+	m["docx"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+	m["eot"] = "application/vnd.ms-fontobject";
+	m["epub"] = "application/epub+zip";
+	m["gif"] = "image/gif";
+	m["htm"] = "text/html";
+	m["html"] = "text/html";
+	m["ico"] = "image/x-icon";
+	m["ics"] = "text/calendar";
+	m["jar"] = "application/java-archive";
+	m["jpeg"] = "image/jpeg";
+	m["jpg"] = "image/jpeg";
+	m["js"] = "application/javascript";
+	m["json"] = "application/json";
+	m["mid"] = "audio/midi";
+	m["midi"] = "audio/midi";
+	m["mpeg"] = "video/mpeg";
+	m["mpkg"] = "application/vnd.apple.installer+xml";
+	m["odp"] = "application/vnd.oasis.opendocument.presentation";
+	m["ods"] = "application/vnd.oasis.opendocument.spreadsheet";
+	m["odt"] = "application/vnd.oasis.opendocument.text";
+	m["oga"] = "audio/ogg";
+	m["ogv"] = "video/ogg";
+	m["ogx"] = "application/ogg";
+	m["otf"] = "font/otf";
+	m["png"] = "image/png";
+	m["pdf"] = "application/pdf";
+	m["ppt"] = "application/vnd.ms-powerpoint";
+	m["pptx"] = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+	m["rar"] = "application/x-rar-compressed";
+	m["rtf"] = "application/rtf";
+	m["sh"] = "application/x-sh";
+	m["svg"] = "image/svg+xml";
+	m["swf"] = "application/x-shockwave-flash";
+	m["tar"] = "application/x-tar";
+	m["tif"] = "image/tiff";
+	m["tiff"] = "image/tiff";
+	m["ts"] = "application/typescript";
+	m["ttf"] = "font/ttf";
+	m["vsd"] = "application/vnd.visio";
+	m["wav"] = "audio/x-wav";
+	m["weba"] = "audio/webm";
+	m["webm"] = "video/webm";
+	m["webp"] = "image/webp";
+	m["woff"] = "font/woff";
+	m["woff2"] = "font/woff2";
+	m["xhtml"] = "application/xhtml+xml";
+	m["xls"] = "application/vnd.ms-excel";
+	m["xlsx"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+	m["xml"] = "application/xml";
+	m["xul"] = "application/vnd.mozilla.xul+xml";
+	m["zip"] = "application/zip";
+	m["3gp"] = "audio/3gpp";
+	m["3g2"] = "audio/3gpp2";
+	m["7z"] = "application/x-7z-compressed";
+	// std::cout << extention << " : " << m[extention] << "\n";
+	// return "type_not_found";
+
+	if (m.count(extention))
+	{	
+		_validMymeType = true;
+		return (m[extention]);
+	}
+	// return ("application/octet-stream");
+	// std::cout << "| " << filename << "!!$$$$$$$$$$$$$$$$$$$$$$$$\n";
+
+	_validMymeType = false;
+	return MIME_TYPE_NOT_FOUND;
+}

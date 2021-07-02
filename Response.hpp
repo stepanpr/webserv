@@ -5,6 +5,7 @@
 // #include <stdio.h>
 // #include <stdlib.h>
 // #include <io.h>
+#include <sys/stat.h>
 #include <dirent.h>
 // #include <time.h>
 
@@ -35,6 +36,7 @@ public:
 
 
 	std::string responseInit();
+	std::string _getMimeType(std::string filename);
 	std::string requestPathWithoutHTML(std::string &path);
 	bool checkMethod(int &i);
 	bool checkMaxBodySize();
@@ -58,14 +60,19 @@ private:
 	/* данные конфигурационного файла */
 	struct s_config			*_config;
 
+	/* получение данный о файле */
+	struct stat _stat; 	//https: //www.opennet.ru/man.shtml?topic=stat&category=2
 
-	/* поля ответа*/
+	bool _validMymeType;
+
+	/* поля  ответа*/
 	std::string _path; 
 	std::string _fullPath; //с index-файлом
 	std::string _statusCode;
 	std::string _date;
 	std::map<std::string, std::string> _headers;
 	std::string _body;
+	std::string _allowedMethods;
 	bool 		_autoindex;
 
 
@@ -83,4 +90,6 @@ std::string toString(T val)
 }
 
 
+
+#define MIME_TYPE_NOT_FOUND "MIME_type_not_found"
 #endif

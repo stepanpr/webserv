@@ -1,60 +1,45 @@
+
+
 <html>
 <head>
+	<meta charset="UTF-8">
 	<title>WebServ1.0</title>
-		<!-- <link rel="stylesheet" href="style.css" type="text/css"> -->
-	<style>
-		* {
-			margin: 0;
-			padding: 0;
-			font-family: Verdana, Geneva, Tahoma, sans-serif;
-		}
-		body { 
-			background-color: #fffff3; 
-		} 
-		h1 { 
-			font-size:2cm; text-align: center; margin-top: 70px; color: black; text-shadow: 0 0 2mm green 
-		}
-		h2 {
-			margin-left: 22px;
-		}
-		.menu {
-			background-color: coral;
-			display: flex;
-			width: 100%;
+		<link rel="stylesheet" href="www/site.com/style.css" type="text/css">
+		<link rel="shortcut icon" href="www/site.com/favicon.ico" type="image/x-icon">
 
-		}
-		.menu li {
-			border: 1px solid black;
-			list-style-type: none;
-			border-radius: 10%;
-			margin-left: 22px;
-		}
-		.menu li a 
-		{
-			border-radius: 10%;
-			display: block;
-			width: 100%;
-			font-size: 23px;
-			text-decoration: none;
-			color: #000;
-		}
-		.menu li a:hover 
-		{
-			background-color: #fffff3;
-		}
-		.loaded {
-			background-color: #fffff3;
-		}
-	</style>
 </head>
 <body>
 	<h1>WebServ 1.0</h1>
-	<h2>HOME PAGE</h2>
+	<span class="descript">21 school's project</span>
+	<h3>HOME PAGE</h3>
 	<ul class="menu">
 		<li class="loaded"><a href="#">HOME</a></li>
 		<li><a href="/about">ABOUT</a></li>
 		<li><a href="/gallery">GALLERY</a></li>
 		<li><a href="/contact">CONTACT</a></li>
 	</ul>
+
+	<!-- <a href="test.php" onclick="sendDelete(event)">test</a>
+<script>
+    function sendDelete(event){
+        event.preventDefault();
+        xhttp.open("DELETE", this.href, true);
+        xhttp.send();
+    }
+</script> -->
+<!-- <form:form method="DELETE" modelAttribute="person" action="${pageContext.request.contextPath}/person/${selectedOpportunity.id}" >
+<input type="submit" class="btn btn-success btn-lg" value="Delete"></input>
+</form:form> -->
+
+<br>
+<div class="img_code">
+	<img src="/www/site.com/img1.jpeg">
+	<div class="text_under_image">
+		Приветствуем на сайте проекта "WebServ" Школы 21.<br>
+		Предложения о сотрудничестве напраляйте через раздел Контакты.
+	</div>
+</div>
+
+
 </body>
 </html>
