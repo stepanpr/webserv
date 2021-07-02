@@ -52,26 +52,32 @@ h3 {
 	background-color: #fffff3;
 }
 
-.img_code {
-	margin: 0 auto;
+.bg_img_code {
+	/* background: url('/www/site.com/img1.jpeg') no-repeat; */
+	 margin: 0 auto;
 	/* opacity: .2; */
 	display: flex;
 	flex-basis: auto;
 	flex-direction: column;
 	width:100%;
-	/* height: 70%; */
+	height: 70%;
 	text-align: center;
 	position: relative;
 	/* z-index: 0; */
-	display: flex;  
+	/* display: flex;   */
 }
 
-.img_code img { opacity: .15; }
+.bg_img_code img { 
+	opacity: .15; 
+}
 
 .text_under_image {
 	color: rgb(97, 35, 12);
-	display: inline-block; 
+	/* display: inline-block;  */
 	/* z-index: 11; */
-	bottom: 100px; top: 50px; left: 10% ; 
+	line-height: 1.7;
+	font-size: 20px;
+	text-align: left;
+	bottom: 100px; top: 50px; left: 15% ; 
 	position: absolute;
 }
