@@ -29,7 +29,7 @@ private:
 	Socket						_listenSock;
 	t_config					*_config;
 	struct pollfd				_fd_array[1 /* listen */ + MAX_CLIENTS];
-	std::map<int, Connection>	_mapConnections; //key = fd, value = Connection этого fd
+	std::map<int, Connection *>	_mapConnections; //key = fd, value = Connection этого fd
 
 
 	/********* Private methods *******/
@@ -40,6 +40,8 @@ private:
 	void	_addSocketToConnections(Socket *newConnect);
 	void	_addToPollfd(int new_fd);
 	void	_addToMap(Socket *newSocket);
+	void	_checkNewConnection(int &ret);
+	void	_removeConnection(int fd);
 
 
 
@@ -52,7 +54,9 @@ public:
 	Server &operator=(const Server &copy);
 	int startServer(struct s_config *config);
 
-	int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config); //&
+	int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config);
+	int	request(Connection &conn);
+	//&
 	int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
 
 	int responseSend(std::string response, struct pollfd *pfd_array, int &i);

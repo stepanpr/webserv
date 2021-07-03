@@ -22,6 +22,7 @@ public:
 	void	setSocketFlags();
 
 	int getFd() const;
+	const sockaddr_in &getSockAddr() const;
 
 private:
 

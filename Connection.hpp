@@ -12,12 +12,16 @@ class Connection
 {
 public:
 	Connection();
-	Connection(Socket *sock);
+	Connection(Socket *sock, t_config *_config);
 
 	Connection(const Connection &copy);
 
 	~Connection();
 	Connection &operator=(const Connection &copy);
+
+	int getState() const;
+
+	void setState(int state);
 
 	/*
 	 * for Arannara
@@ -38,7 +42,7 @@ private:
 	int					_sock_fd;
 	int 	_isOK;
 	Socket				*_sock;
-	struct s_config			*_config;
+	struct s_config		*_config;
 };
 
 #endif

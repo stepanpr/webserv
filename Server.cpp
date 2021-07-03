@@ -4,10 +4,8 @@
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
-Server::Server()
+Server::Server(): _mapConnections(), _config(NULL), _clientsCount(0)
 {
-	_config = NULL;
-	_clientsCount = 0;
 	_initPollfdStruct();
 }
 
@@ -52,10 +50,6 @@ int Server::startServer(t_config *config)
 	return 0;
 }
 
-
-
-
-
 int Server::_pollLoop()
 {
 	_fd_array[0].fd = _listenSock.getFd();
@@ -82,60 +76,47 @@ int Server::_pollLoop()
 		else
 		{
 			// обработка попытки подключения клиента
-			if ((_fd_array[0].revents & POLLIN) != 0)
+			_checkNewConnection(ret);
+		}
+		// поиск всех событий
+		for (int i = 0; i < MAX_CLIENTS && ret > 0; i++)
+		{
+			struct pollfd pfd = _fd_array[i + 1];
+			if (pfd.fd != -1 && pfd.revents)
 			{
-				_fd_array[0].revents &= ~POLLIN;
-
-				Socket *temp = _listenSock.accept();
-				if (_clientsCount == MAX_CLIENTS)
+				Connection *tempConnect = _mapConnections.find(pfd.fd)->second;
+				if ((pfd.revents & POLLERR) || (pfd.revents & POLLHUP) || (pfd.revents & POLLNVAL))
 				{
-					delete temp;
-					std::cout << WHITE_B << MAX_CLIENTS;
-					std::cout << WHITE <<" clients already connected, unexpected new connection have discarded" << RESET;
-					std::cout << std::endl;
+					_removeConnection(pfd.fd);//TODO write this function
+					continue ;
 				}
-				else
+				if (tempConnect->getState() == READING)
 				{
-					_clientsCount++;
-					_addSocketToConnections(temp);
-
-
-					} else
+					int request_status = this->request(*tempConnect);
+					switch (request_status)
 					{
-						clients_count++;
-						opt = 1;
-						setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, (const void*)&opt, sizeof(opt));
-						if (fcntl(sock_fd, F_SETFL, O_NONBLOCK) == -1)
-							throw Exceptions();
-						for (i = 0; i < MAX_CLIENTS; i++)
-						{
-							if (pfd_array[1 + i].fd == -1)
-							{
-								pfd_array[1 + i].fd = sock_fd;
-								pfd_array[1 + i].events = POLLIN;
-
-								std::cout << WHITE <<"!client " << WHITE_B << i << WHITE << " has been connected from " << WHITE_B
-								<< inet_ntoa((in_addr)_cliaddr.sin_addr) << ":" << _config->listen << WHITE << " | clients total: "
-								<< WHITE_B << clients_count << RESET << std::endl;
-								// std::cout << "!got connection from " << inet_ntoa((in_addr)_cliaddr.sin_addr) << std::endl;
-								break;
-							}
-						}
+						case WAIT:
+							break;
+						case FULL:
+							tempConnect->setState(WRITING);// TODO I'm here
 					}
+					if (request_status == WAIT)
+						continue ;
+
 				}
 
 			}
-			request(&(*pfd_array), clients_count, i, config);
-
 		}
+
+	}
 	}
 
 }
 
-
-
-
-
+int Server::request(Connection &conn)
+{
+	return 0;
+}
 
 int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config)
 {
@@ -151,8 +132,8 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 			/* !!!NEW_VERSION
 			** Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
 			*/
-			Connection tempConnect = _mapConnection.find(pfd_array[1 + i].fd)->second;
-			tempConnect.setConfig(config);
+			Connection *tempConnect = _mapConnections.find(pfd_array[1 + i].fd)->second;
+			tempConnect->setConfig(config);
 			
 
 
@@ -268,7 +249,7 @@ void Server::_copyPollfdStruct(struct pollfd *array)
 void Server::_addSocketToConnections(Socket *newSocket)
 {
 	_addToPollfd(newSocket->getFd());
-	_addToMap(newSocket); //TODO
+	_addToMap(newSocket);
 }
 
 void Server::_addToPollfd(int new_fd)
@@ -286,5 +267,31 @@ void Server::_addToPollfd(int new_fd)
 
 void Server::_addToMap(Socket *newSocket)
 {
-	Connection *newConnect = new Connection(newSocket);//TODO
+	Connection *newConnect = new Connection(newSocket, _config);
+	_mapConnections.insert(std::pair<int, Connection *>(newSocket->getFd(), newConnect));
+	std::cout << WHITE <<"!client " << WHITE << " has been connected from " << WHITE_B
+			  << inet_ntoa((in_addr)newSocket->getSockAddr().sin_addr) << ":" << _config->listen << WHITE
+			  << " | clients total: " << WHITE_B << _clientsCount << RESET << std::endl;
+}
+
+void Server::_checkNewConnection(int &ret)
+{
+	if ((_fd_array[0].revents & POLLIN) != 0)
+	{
+		ret--;
+		_fd_array[0].revents &= ~POLLIN;
+		Socket *temp = _listenSock.accept();
+		if (_clientsCount == MAX_CLIENTS)
+		{
+			delete temp;
+			std::cout << WHITE_B << MAX_CLIENTS;
+			std::cout << WHITE << " clients already connected, unexpected new connection have discarded" << RESET;
+			std::cout << std::endl;
+		}
+		else
+		{
+			_clientsCount++;
+			_addSocketToConnections(temp);
+		}
+	}
 }

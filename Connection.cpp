@@ -4,7 +4,8 @@ Connection::Connection()
 {
 }
 
-Connection::Connection(Socket *sock) : _sock(sock)
+Connection::Connection(Socket *sock, t_config *config):
+	_sock(sock), _config(config), _state(READING), _sock_fd(sock->getFd())
 {
 }
 
@@ -18,6 +19,7 @@ Connection::Connection(const Connection &copy)
 
 Connection	&Connection::operator=(const Connection &copy)
 {
+	_
 	return (*this);
 }
 
@@ -59,4 +61,14 @@ void Connection::setConfig(struct  s_config &config)
 	this->_config = &config;
 	// std::cout << config.listen << '\n';
 
+}
+
+int Connection::getState() const
+{
+	return _state;
+}
+
+void Connection::setState(int state)
+{
+	_state = state;
 }

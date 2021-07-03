@@ -97,3 +97,8 @@ int Socket::getFd() const
 {
 	return _fd;
 }
+
+const sockaddr_in &Socket::getSockAddr() const
+{
+	return _sock_addr;
+}
