@@ -84,37 +84,36 @@ int Server::_pollLoop()
 			struct pollfd pfd = _fd_array[i + 1];
 			if (pfd.fd != -1 && pfd.revents)
 			{
+				ret--;
 				Connection *tempConnect = _mapConnections.find(pfd.fd)->second;
 				if ((pfd.revents & POLLERR) || (pfd.revents & POLLHUP) || (pfd.revents & POLLNVAL))
 				{
-					_removeConnection(pfd.fd);//TODO write this function
+					_removeConnection(tempConnect);//TODO write this function
 					continue ;
 				}
 				if (tempConnect->getState() == READING)
 				{
 					int request_status = this->request(*tempConnect);
-					switch (request_status)
+					if (request_status == FULL)
 					{
-						case WAIT:
-							break;
-						case FULL:
-							tempConnect->setState(WRITING);// TODO I'm here
+						tempConnect->responsePrepare();//TODO It must be function which make response to send
+						tempConnect->setState(WRITING);
 					}
-					if (request_status == WAIT)
-						continue ;
-
 				}
-
+				else if (tempConnect->getState() == WRITING)
+				{
+					int response_status = this->responseSend(*tempConnect);
+					if (response_status == FULL)
+						_removeConnection(tempConnect);
+				}
 			}
 		}
-
 	}
-	}
-
 }
 
 int Server::request(Connection &conn)
 {
+	//TODO
 	return 0;
 }
 
@@ -200,7 +199,10 @@ int Server::responseSend(std::string response, struct pollfd *pfd_array, int &i)
 	return 0;
 }
 
-
+int Server::responseSend(Connection &conn)
+{
+	return 0;//TODO
+}
 
 /*-------------------------------------------------------------------------------*/
 
@@ -294,4 +296,9 @@ void Server::_checkNewConnection(int &ret)
 			_addSocketToConnections(temp);
 		}
 	}
+}
+
+void Server::_removeConnection(Connection *conn)
+{
+//TODO
 }

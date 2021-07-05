@@ -41,7 +41,7 @@ private:
 	void	_addToPollfd(int new_fd);
 	void	_addToMap(Socket *newSocket);
 	void	_checkNewConnection(int &ret);
-	void	_removeConnection(int fd);
+	void _removeConnection(Connection *conn);
 
 
 
@@ -60,7 +60,7 @@ public:
 	int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
 
 	int responseSend(std::string response, struct pollfd *pfd_array, int &i);
-
+	int	responseSend(Connection &conn);
 
 
 
