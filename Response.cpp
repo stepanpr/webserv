@@ -92,13 +92,24 @@ void Response::writeHeaders(std::string &method)
 		_headers["Retry-After"] = "1";
 		// _headers["Authorization"] = "Basic qqq : www";
 	}
+	if (method == "POST")
+	{
+		_headers["Server"] = "webserv/1.0";
+		setDate();
+		_headers["Date"] = _date + " GMT";
+		// _headers["Content-Type"] = "text/html; charset=UTF-8";
+		_headers["Title"] = "webserv (project for 21 school)";
+		_headers["Content-Language"] = "en,ru";
+		_headers["Retry-After"] = "1";
+		// _headers["Authorization"] = "Basic qqq : www";
+	}
 	if (method == "DELETE")
 	{
 		_headers["Server"] = "webserv/1.0";
 		setDate();
 		_headers["Date"] = _date + " GMT";
 		_headers["Content-Type"] = "text/html; charset=UTF-8";
-		// _headers["Title"] = "webserv (project for 21 school)";
+		_headers["Title"] = "webserv (project for 21 school)";
 		// _headers["Authorization"] = "Basic qqq : www";
 	}
 }
@@ -365,7 +376,66 @@ std::string Response::responseInit()
 
 	if (_requestMethod == "POST")
 	{
+		if (_requestMethod == "POST") { std::cout << BLUE << "THIS IS POST!" << RESET << "\n"; }
 
+
+
+
+
+		for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
+		{
+		// std::cout << it->first << " " << it->second << '\n';
+		/* обработка формы */
+		if (it->first == "Content-Type:" && it->second == "application/x-www-form-urlencoded")
+		{
+			std::cout << it->first << " " << it->second << '\n';
+			std::cout <<RED <<_requestBody <<RESET <<std::endl;
+		}
+
+		/* обработка отправки файла  */
+		if (it->first == "Content-Type:" && it->second.find("multipart/form-data") != std::string::npos)
+		{
+			std::cout <<RED <<_requestBody <<RESET <<std::endl;
+			// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
+			// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
+
+
+
+			std::ofstream file;
+			file.open("file"); 
+
+			file << _requestBody;
+			// std::cout << it->first << " " << it->second << "OKOKOKOKOKOKOKOKOKKOK" << it->second.find("ddd") <<'\n';
+
+
+			// if ( it->second.find("multipart/form-data") == std::string::npos)
+			// 	std::cout << "NON FOUND!!!!!!!" <<'\n';
+
+		}
+
+
+
+	}
+	// for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
+	// {
+	// 	if (it->first == "Content-Disposition:")
+	// 		std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
+	// 	// 
+	// 	// std::cout << it->first << " " << it->second << '\n';
+	// 	if (it->first == "Connection:")
+	// 	 	 std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
+	// 	// {
+	// 	// 	// close(pfd_array[1 + i].fd);
+	// 	// 	std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
+	// 	// }
+	// 	// if (it->first == "")
+	// }
+	// 	// _requestHeaders.find("Content-Disposition");
+	// _statusCode = OK;
+	// 	std::cout << BLUE << _requestHeaders.find("Content-Disposition:")->second << RESET << "\n";
+	// 	std::cout << "BODY:" << BLUE << _requestBody << RESET << "\n";
+
+	// responseCompose();
 
 	}
 
