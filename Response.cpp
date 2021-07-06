@@ -379,7 +379,11 @@ std::string Response::responseInit()
 		if (_requestMethod == "POST") { std::cout << BLUE << "THIS IS POST!" << RESET << "\n"; }
 
 
-
+		/* 
+		** https://moskalukov.ru/articles/51-otpravka-fajlov-cherez-formu.html
+		** https://github.com.cnpmjs.org/42Curriculum/ft_webserv/blob/master/requests.cpp 
+		** https://routerus.com/curl-post-request/ //curl-post-request
+		*/
 
 
 		for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
@@ -395,16 +399,31 @@ std::string Response::responseInit()
 		/* обработка отправки файла  */
 		if (it->first == "Content-Type:" && it->second.find("multipart/form-data") != std::string::npos)
 		{
-			std::cout <<RED <<_requestBody <<RESET <<std::endl;
+			std::cout << it->first << " " << it->second << '\n';
+			std::cout << RED << "1" <<_requestBody << RESET << std::endl;
 			// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
 			// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
 
+			// char buff[100000];
+			std::string line;
+			std::ifstream r("www/file.tmp");
+			if (r.is_open())
+			{
+				std::ofstream w;
+				w.open("file"); 
+				while (getline(r, line))
+				{
+					w << line;
+					std::cout << line << std::endl;
+				}
+			}
+			std::remove("www/file.tmp");
+			std::cout <<RED << "1" << line <<RESET <<std::endl;
 
+			
+			
 
-			std::ofstream file;
-			file.open("file"); 
-
-			file << _requestBody;
+			// file << _requestBody;
 			// std::cout << it->first << " " << it->second << "OKOKOKOKOKOKOKOKOKKOK" << it->second.find("ddd") <<'\n';
 
 
