@@ -4,13 +4,14 @@
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
-Server::Server(): _mapConnections(), _config(NULL), _clientsCount(0)
+Server::Server(): _mapConnections(), _config(NULL), _clientsCount(0), _listenSock(NULL)
 {
 	_initPollfdStruct();
 }
 
 Server::~Server()
 {
+	delete _listenSock;
 }
 
 Server::Server(const Server &copy)
@@ -52,7 +53,7 @@ int Server::startServer(t_config *config)
 
 int Server::_pollLoop()
 {
-	_fd_array[0].fd = _listenSock.getFd();
+	_fd_array[0].fd = _listenSock->getFd();
 
 	while (1)
 	{
@@ -93,11 +94,16 @@ int Server::_pollLoop()
 				}
 				if (tempConnect->getState() == READING)
 				{
-					int request_status = this->request(*tempConnect);
-					if (request_status == FULL)
+					int request_status = this->request(*tempConnect, i + 1);
+					if (request_status == ERROR)
+						_removeConnection(tempConnect, i + 1);
+					else if (request_status == FULL)
 					{
-						tempConnect->responsePrepare();//TODO It must be function which make response to send
+						tempConnect->responsePrepare();
 						tempConnect->setState(WRITING);
+						int response_status = this->responseSend(*tempConnect);
+						if (response_status == FULL)
+							_removeConnection(tempConnect, i + 1);
 					}
 				}
 				else if (tempConnect->getState() == WRITING)
@@ -111,112 +117,142 @@ int Server::_pollLoop()
 	}
 }
 
-int Server::request(Connection &conn)
+int Server::request(Connection &conn, int i)
 {
-	//TODO
-	return 0;
-}
+	uint8_t buf[1024];
+	memset(buf, 0, 1024);
+	int ret = recv(conn.getSockFd(), buf, 1024, 0);/* Возврат из функции recv происходит, когда модуль TCP решает передать процессу полученные от клиента данные. Данные возвращается в буфере buf, размер которого передается в третьем аргументе. В четвертом аргументе могут передаваться дополнительные опциипараметры. Функция возвращает число байтов, которые модуль TCP записал в буфер buf; если функция возвращает ноль, то клиент данных для передачи больше не имеет.*/
 
-int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config)
-{
-	for (i = 0; i < MAX_CLIENTS; i++)
-	{
-		if (pfd_array[1 + i].fd != -1 && (pfd_array[1 + i].revents & POLLIN) != 0)
-		{
-			pfd_array[1 + i].revents &= ~POLLIN;
-
-
-
-
-			/* !!!NEW_VERSION
-			** Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
-			*/
-			Connection *tempConnect = _mapConnections.find(pfd_array[1 + i].fd)->second;
-			tempConnect->setConfig(config);
-			
-
-
-			uint8_t buf[1024];
-			int ret = recv(pfd_array[1 + i].fd, buf, 1024, 0); //read (pfd_array[1 + i].fd , buf, 1024); /* Возврат из функции recv происходит, когда модуль TCP решает передать процессу полученные от клиента данные. Данные возвращается в буфере buf, размер которого передается в третьем аргументе. В четвертом аргументе могут передаваться дополнительные опциипараметры. Функция возвращает число байтов, которые модуль TCP записал в буфер buf; если функция возвращает ноль, то клиент данных для передачи больше не имеет.*/
-
-
-			if (ret < 0)
-			{
-				// printf("Error on call 'recv': %s\n", strerror(errno));
-        		// if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) //некритические
-            	// 	continue;
-				// if (errno == ECONNRESET) //фатальная
-				// 	std::cout << YELLOW_B << " ! " << YELLOW << "error on call \'recv\': " << WHITE << strerror(errno) << std::endl;
-				// // return -1;
-				// close(pfd_array[1 + i].fd);        //https://stackoverflow.com/questions/24916937/how-to-catch-a-connection-reset-by-peer-error-in-c-socket
-				// break ;
-				// continue;
-			} else if (ret == 0)
-			{
-				close(pfd_array[1 + i].fd);
-				pfd_array[1 + i].fd = -1;
-				pfd_array[1 + i].events = 0;
-				clients_count--;
-				std::cout << WHITE <<"Client " WHITE_B << i << WHITE << " has been disconnected | clients total: " << WHITE_B << clients_count << RESET << std::endl;
-			} else if (ret > 0)
-			{
-				buf[ret] = '\0';
-
-				std::cout << WHITE_B << ret << WHITE << " bytes received from client " << WHITE_B << i << RESET << std::endl;
-				std::cout << GREEN << buf << RESET << std::endl;
-
-
-				/* !!!NEW_VERSION
-				**
-				**
-				** arranara:
-				** temp.bufAnalize((char*)buf, ret);
-				**
-				**
-				** emabel:
-				** if _request.isOk => connection.state = WRITE
-				** connection.makeResponse
-				*/
-				tempConnect.bufHandler((char*)buf, ret);
-				if (tempConnect.get_isOk())
-					responseSend(tempConnect.responsePrepare(), &(*pfd_array), i);
-
-			}
-		}
-	}
-
-
-	return 0;
-}
-
-
-
-int Server::responseSend(std::string response, struct pollfd *pfd_array, int &i)
-{
-	// std::cout << response << '\n';
-	if(-1 == send(pfd_array[1 + i].fd, response.c_str(), response.length(), 0))
+	if (ret < 0)
 		throw Exceptions();
-	return 0;
+
+	else if (ret == 0)
+		return ERROR;
+	else if (ret > 0)
+	{
+		std::cout << WHITE_B << ret << WHITE << " bytes received from client " << WHITE_B << i << RESET << std::endl;
+		std::cout << GREEN << buf << RESET << std::endl;
+		conn.bufHandler((char*)buf, ret);
+		if (conn.get_isOk())
+			return FULL;
+	}
+	return WAIT;
 }
+
+//int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config)
+//{
+//	for (i = 0; i < MAX_CLIENTS; i++)
+//	{
+//		if (pfd_array[1 + i].fd != -1 && (pfd_array[1 + i].revents & POLLIN) != 0)
+//		{
+//			pfd_array[1 + i].revents &= ~POLLIN;
+//
+//
+//
+//
+//			/* !!!NEW_VERSION
+//			** Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
+//			*/
+//			Connection *tempConnect = _mapConnections.find(pfd_array[1 + i].fd)->second;
+//			tempConnect->setConfig(config);
+//
+//
+//
+//			uint8_t buf[1024];
+//			int ret = recv(pfd_array[1 + i].fd, buf, 1024, 0); //read (pfd_array[1 + i].fd , buf, 1024); /* Возврат из функции recv происходит, когда модуль TCP решает передать процессу полученные от клиента данные. Данные возвращается в буфере buf, размер которого передается в третьем аргументе. В четвертом аргументе могут передаваться дополнительные опциипараметры. Функция возвращает число байтов, которые модуль TCP записал в буфер buf; если функция возвращает ноль, то клиент данных для передачи больше не имеет.*/
+//
+//
+//			if (ret < 0)
+//			{
+//				// printf("Error on call 'recv': %s\n", strerror(errno));
+//        		// if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) //некритические
+//            	// 	continue;
+//				// if (errno == ECONNRESET) //фатальная
+//				// 	std::cout << YELLOW_B << " ! " << YELLOW << "error on call \'recv\': " << WHITE << strerror(errno) << std::endl;
+//				// // return -1;
+//				// close(pfd_array[1 + i].fd);        //https://stackoverflow.com/questions/24916937/how-to-catch-a-connection-reset-by-peer-error-in-c-socket
+//				// break ;
+//				// continue;
+//			} else if (ret == 0)
+//			{
+//				close(pfd_array[1 + i].fd);
+//				pfd_array[1 + i].fd = -1;
+//				pfd_array[1 + i].events = 0;
+//				clients_count--;
+//				std::cout << WHITE <<"Client " WHITE_B << i << WHITE << " has been disconnected | clients total: " << WHITE_B << clients_count << RESET << std::endl;
+//			} else if (ret > 0)
+//			{
+//				buf[ret] = '\0';
+//
+//				std::cout << WHITE_B << ret << WHITE << " bytes received from client " << WHITE_B << i << RESET << std::endl;
+//				std::cout << GREEN << buf << RESET << std::endl;
+//
+//
+//				/* !!!NEW_VERSION
+//				**
+//				**
+//				** arranara:
+//				** temp.bufAnalize((char*)buf, ret);
+//				**
+//				**
+//				** emabel:
+//				** if _request.isOk => connection.state = WRITE
+//				** connection.makeResponse
+//				*/
+//				tempConnect.bufHandler((char*)buf, ret);
+//				if (tempConnect.get_isOk())
+//					responseSend(tempConnect.responsePrepare(), &(*pfd_array), i);
+//
+//			}
+//		}
+//	}
+
+//
+//	return 0;
+//}
+
+
+
+//int Server::responseSend(std::string response, struct pollfd *pfd_array, int &i)
+//{
+//	// std::cout << response << '\n';
+//	if(-1 == send(pfd_array[1 + i].fd, response.c_str(), response.length(), 0))
+//		throw Exceptions();
+//	return 0;
+//}
 
 int Server::responseSend(Connection &conn)
 {
-	return 0;//TODO
+	int sended;
+
+	std::string response = conn.getResponse();
+//	std::cout << RED << response << RESET << std::endl;
+	sended = send(conn.getSockFd(), response.c_str(), response.length(), 0);
+//	std::cout << BLUE << response.length() << RESET << std::endl;
+//	std::cout << GREEN << sended << RESET << std::endl;
+	if (sended < 0)
+		throw Exceptions();
+	if (sended < response.length())
+	{
+		conn.setResponse(response.substr(sended, response.length()));
+		return WAIT;
+	}
+	else
+		return FULL;
 }
 
 /*-------------------------------------------------------------------------------*/
 
 void Server::_createListenSocket()
 {
-	_listenSock = Socket(_config);
-	_listenSock.setSockNonblock();
-	_listenSock.setSockReuseaddr();
-	_listenSock.setSocketFlags();
-	if (_listenSock.bind() < 0)
+	_listenSock = new Socket(_config);
+	_listenSock->setSockNonblock();
+	_listenSock->setSockReuseaddr();
+	_listenSock->setSocketFlags();
+	if (_listenSock->bind() < 0)
 		throw Exceptions();
-	if (_listenSock.listen() < 0)
+	if (_listenSock->listen() < 0)
 		throw Exceptions();
-
 }
 
 void Server::_initPollfdStruct()
@@ -282,7 +318,7 @@ void Server::_checkNewConnection(int &ret)
 	{
 		ret--;
 		_fd_array[0].revents &= ~POLLIN;
-		Socket *temp = _listenSock.accept();
+		Socket *temp = _listenSock->accept();
 		if (_clientsCount == MAX_CLIENTS)
 		{
 			delete temp;
@@ -302,6 +338,8 @@ void Server::_removeConnection(Connection *conn, int i)
 {
 	_mapConnections.erase(_fd_array[i].fd);
 	delete conn;
+	std::cout << WHITE <<"Client " WHITE_B << i << WHITE << " has been disconnected | clients total: " << WHITE_B << _clientsCount << RESET << std::endl;
+	_clientsCount--;
 	_fd_array[i].fd = -1;
 	_fd_array[i].events = POLLIN;
 	_fd_array[i].revents = 0;

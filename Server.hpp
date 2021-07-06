@@ -2,7 +2,6 @@
 # define SERVER_HPP
 # include "main.hpp"
 # include "RequestParser.hpp"
-#include "Connection.hpp"
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -18,15 +17,21 @@
 #define MAX_CLIENTS 20
 #include <fcntl.h>
 #include "Socket.hpp"
+#include "Connection.hpp"
+#include "Response.hpp"
+
 // #define BACKLOG 10
 
 class Config;
+class Socket;
+class Connection;
+
 
 class Server
 {
 private:
 	int							_clientsCount;
-	Socket						_listenSock;
+	Socket						*_listenSock;
 	t_config					*_config;
 	struct pollfd				_fd_array[1 /* listen */ + MAX_CLIENTS];
 	std::map<int, Connection *>	_mapConnections; //key = fd, value = Connection этого fd
@@ -54,12 +59,12 @@ public:
 	Server &operator=(const Server &copy);
 	int startServer(struct s_config *config);
 
-	int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config);
-	int	request(Connection &conn);
+//	int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config);
+	int request(Connection &conn, int i);
 	//&
-	int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
+//	int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
 
-	int responseSend(std::string response, struct pollfd *pfd_array, int &i);
+//	int responseSend(std::string response, struct pollfd *pfd_array, int &i);
 	int	responseSend(Connection &conn);
 
 

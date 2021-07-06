@@ -19,11 +19,13 @@
 # include <string.h>
 # include <sys/time.h>
 
-
-# include "Server.hpp"
+# include "Socket.hpp"
+# include "Connection.hpp"
+//# include "Server.hpp"
 # include "Config.hpp"
 # include "RequestParser.hpp"
 # include "Response.hpp"
+# include "structure.h"
 
 
 # define MAX_THREADS 3 /* ограничение допустимого количества потоков */

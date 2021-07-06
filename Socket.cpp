@@ -1,7 +1,7 @@
 
 #include "Socket.hpp"
 
-Socket::Socket()
+Socket::Socket():_fd(-1), _port(-1)
 {
 }
 

@@ -1,7 +1,18 @@
 #include "RequestParser.hpp"
 
-RequestParser::RequestParser(void) : _is_ok(0), _is_host(false), _is_chunked(false), _is_length(false), _is_headers_ok(false), _is_startline_ok(false)
-{ }
+RequestParser::RequestParser(void)
+{
+	_is_startline_ok = false; 
+	_is_headers_ok = false;
+	_is_host = false;
+	_is_body = false;
+	_is_chunked = false;
+	_is_length = false;
+	_is_multipart = false;
+
+	// _is_post = false;
+
+}
 
 // RequestParser::RequestParser(std::string buf)
 // {
@@ -31,7 +42,11 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	std::string new_str = (char*)str;	//  Приводим к стрингу
 	buf.append(new_str);				//  Добавляем приходящую строку в буфер
 
+// std::cout << "!!!!!!!!" << new_str <<std::endl;
 
+	
+	
+	
 	pos = buf.find(separator);
 	//	Стартлайн
 	if ( (pos != std::string::npos) && _is_startline_ok != true ) // если есть \r\n и не было стартлайна, то парсим и удаляем все что до него
@@ -50,6 +65,8 @@ int RequestParser::RequestWaiter(const char *str, int len)
 		_is_startline_ok = true;
 	}
 
+	
+	
 	//	Стартлайн спарсили, парсим хедеры
 	if ((pos = buf.find(double_separator)) != std::string::npos)  // если есть \r\n\r\n парсим и удаляем все что до него
 	{
@@ -84,11 +101,16 @@ int RequestParser::RequestWaiter(const char *str, int len)
 				_is_chunked = true;
 			if ((it->first.compare("Content-Length:") == 0))
 			{
-				_contentLength = std::stoi(it->second);
+				// _contentLength = std::stoi(it->second);
+				_contentLength = atoi(it->second.c_str());
 				_is_length = true;
+				_global_len = 0;
 			}
 			if ((it->first.compare("Host:") == 0))
 				_is_host = true;
+			if ((it->first.compare("Content-Type:") == 0) && (it->second.find("multipart/form-data;") != std::string::npos))
+				_is_multipart = true;
+
 		}
 	}
 
@@ -121,32 +143,95 @@ int RequestParser::RequestWaiter(const char *str, int len)
 
 
 
-	// контент length обработка
-	if  (_is_length == true)
-		{
-			while (_is_body != true)
-			{
-				if ((pos = buf.find(double_separator)) != std::string::npos) 		// Нашли конец тела)
-				{
-					if (_contentLength > 0)
-					{
-						_bodybuffer << buf.substr(0, _contentLength); // Положили в буфер
-						buf.erase(buf.begin(), buf.begin() + _contentLength + separator.length());
-					}
-					_is_body = true;
-				}
-				else
-				{
-					_bodybuffer << buf;
-					break;
 
-				}
+
+
+
+	
+	/*------------------------------------------------------------------*/
+	if (buf.find("Content-Disposition:"))
+	{
+		//записывем навание файла
+		std::cout << "CONTENT OK!!!!!!!!!!!!!!!!!!!!1" << '\n';
+	}
+	/*
+		добваить проверку на WebKit - если нашли, то удаляем!
+	*/
+	//если находим типы соответствующие зпросу POST, то _is_post = true
+	if (_is_post == false)
+	{
+		for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
+		{
+			// std::cout << it->first << " " << it->second << '\n';
+			if ((it->first == "Content-Type:" && it->second == "application/x-www-form-urlencoded") 
+			|| (it->first == "Content-Type:" && it->second.find("multipart/form-data") != std::string::npos))
+			{
+				std::cout << it->first << " " << it->second << '\n';
+				_is_post = true;
 			}
 		}
+	}
+		// контент length обработка
+	else if  (((_is_length == true) || (_contentLength > 0)) && _is_post == true)
+	{
+		// if ((_contentLength > _global_len) ) //Content-Type: multipart/form-data;
+		// {
+			_bodybuffer << buf;
+			_global_len = _global_len + len;
+		// }
+		std::ofstream fileTmp("www/file.tmp", std::ios::app);
+		fileTmp << _bodybuffer.str();
+		if (_global_len >= _contentLength)
+		{
+			_is_post = false;
+		}
+	}
+	/*------------------------------------------------------------------*/
+
+
+
+
+
+
+
+			// if (it->first == "Content-Type:" && it->second.find("multipart/form-data") != std::string::npos)
+			// {
+				// std::cout << it->first << " " << it->second << '\n';
+				// std::ofstream fileTmp("www/file.tmp", std::ios::app);
+				// fileTmp << _bodybuffer.str();
+
+			// }
+			// break ;
+		// }
+
+
+	// }
+
+	// контент length обработка
+	// if  ((_is_length == true) || (_contentLength > 0))
+	// {
+	// 	if ((_contentLength > _global_len) ) //Content-Type: multipart/form-data;
+	// 	{
+	// 		// if ((pos = buf.find(double_separator)) != std::string::npos)
+	// 		// {
+	// 		// 	buf.erase(0, pos);
+	// 		// }
+	// 		_bodybuffer << buf;
+	// 		_global_len = _global_len + len;
+	// 	}
+	// }
+
+	std::cout<< "!!!!!!!! " << _contentLength << ' ' << len <<'\n';
+	std::cout << "_is_multipart:" << _is_multipart << ' ' << " _is_length:" << _is_length << " _global_len:" << _global_len << '\n' << '\n';
+
 	// std::cout << _bodybuffer.str() << '\n';
 
+	// std::ofstream fileTmp("www/file.tmp", std::ios::app);
+	// fileTmp << _bodybuffer.str();
 
-	// std::cout << "_is_chunked:" << _is_chunked << " _is_length:" << _is_length << " _is_body:" << _is_body << '\n';
+
+
+
 
 	if (!(_metod.empty()) && !(_path.empty()) && !(_protokol.empty()) && (_is_headers_ok == true) )  //  проверяем стартлайн, мапу с хедерами и выставляем флаг is_ok
 	{
@@ -156,10 +241,14 @@ int RequestParser::RequestWaiter(const char *str, int len)
 					_isOk = 1;
 	}
 
-	// std::cout << buf << '\n';
 	return (_isOk);
 
 }
+
+// std::string RequestParser::addBody()
+// {
+// 	return (_bodybuffer.str().c_str());
+// }
 
 void RequestParser::PrintMap()
 {
@@ -188,6 +277,11 @@ std::string RequestParser::getProtokol()
 std::map<std::string,std::string> RequestParser::getHeaders()
 {
 	return (_headers);
+}
+
+std::string RequestParser::getBody()
+{
+	return (_bodybuffer.str());
 }
 
 // RequestParser::RequestParser(const RequestParser &copy)
