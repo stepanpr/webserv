@@ -101,6 +101,9 @@ int Server::_pollLoop()
 					{
 						tempConnect->responsePrepare();
 						tempConnect->setState(WRITING);
+						int response_status = this->responseSend(*tempConnect);
+						if (response_status == FULL)
+							_removeConnection(tempConnect, i + 1);
 					}
 				}
 				else if (tempConnect->getState() == WRITING)
@@ -223,10 +226,10 @@ int Server::responseSend(Connection &conn)
 	int sended;
 
 	std::string response = conn.getResponse();
-	std::cout << RED << response << RESET << std::endl;
+//	std::cout << RED << response << RESET << std::endl;
 	sended = send(conn.getSockFd(), response.c_str(), response.length(), 0);
-	std::cout << BLUE << response.length() << RESET << std::endl;
-	std::cout << GREEN << sended << RESET << std::endl;
+//	std::cout << BLUE << response.length() << RESET << std::endl;
+//	std::cout << GREEN << sended << RESET << std::endl;
 	if (sended < 0)
 		throw Exceptions();
 	if (sended < response.length())
