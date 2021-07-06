@@ -31,8 +31,6 @@ void Connection::bufHandler(char *buf, int	len)
 
 
 
-
-
 std::string Connection::responsePrepare()
 {
 

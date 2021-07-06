@@ -284,10 +284,6 @@ std::string RequestParser::getBody()
 	return (_bodybuffer.str());
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> main
 // RequestParser::RequestParser(const RequestParser &copy)
 // {
 // }

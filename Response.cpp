@@ -400,7 +400,7 @@ std::string Response::responseInit()
 
 			if(PID == 0)
 			{
-				Cgi cgi;
+				// Cgi cgi;
 			}
 		}
 
