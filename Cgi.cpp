@@ -1,5 +1,22 @@
 #include "Cgi.hpp"
 
+
+
+
+
+
+
+Cgi::Cgi() {}
+
+Cgi::~Cgi() {}
+
+Cgi::Cgi(const Cgi &cgi) { *this = cgi; }
+
+Cgi &Cgi::operator=(const Cgi &copy)
+{
+	return *this;
+}
+
 // std::map<std::string, std::string> aka;
 
 // struct akaInit

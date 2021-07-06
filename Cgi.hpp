@@ -1,5 +1,33 @@
-#include "main.hpp"
 
+#ifndef CGI
+# define CGI
+# include "main.hpp"
+
+
+
+
+
+class Cgi
+{
+	private:
+		std::map<std::string, std::string> vars;
+
+	public:
+		Cgi();
+		Cgi(/* vars */);
+		Cgi(const Cgi &cgi);
+		~Cgi();
+		Cgi &operator=(const Cgi &copy);
+
+		void setVariables();
+
+
+};
+
+
+
+
+#endif
 
 
 

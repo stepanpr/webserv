@@ -394,6 +394,14 @@ std::string Response::responseInit()
 		{
 			std::cout << it->first << " " << it->second << '\n';
 			std::cout <<RED <<_requestBody <<RESET <<std::endl;
+			
+			pid_t PID;
+			PID = fork();
+
+			if(PID == 0)
+			{
+				Cgi cgi;
+			}
 		}
 
 		/* обработка отправки файла  */
@@ -457,6 +465,11 @@ std::string Response::responseInit()
 	// responseCompose();
 
 	}
+
+
+
+
+
 
 	// if (_requestMethod == "DELETE")
 	// {
