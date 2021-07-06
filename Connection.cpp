@@ -11,15 +11,17 @@ Connection::Connection(Socket *sock, t_config *config):
 
 Connection::~Connection()
 {
+	delete _sock;
 }
 
 Connection::Connection(const Connection &copy)
 {
+	*this = copy;
 }
 
 Connection	&Connection::operator=(const Connection &copy)
 {
-	_
+	//TODO
 	return (*this);
 }
 
@@ -71,4 +73,9 @@ int Connection::getState() const
 void Connection::setState(int state)
 {
 	_state = state;
+}
+
+int Connection::getSockFd() const
+{
+	return _sock_fd;
 }

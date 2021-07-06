@@ -41,7 +41,7 @@ private:
 	void	_addToPollfd(int new_fd);
 	void	_addToMap(Socket *newSocket);
 	void	_checkNewConnection(int &ret);
-	void _removeConnection(Connection *conn);
+	void	_removeConnection(Connection *conn, int i);
 
 
 

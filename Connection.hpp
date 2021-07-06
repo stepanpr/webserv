@@ -21,6 +21,8 @@ public:
 
 	int getState() const;
 
+	int getSockFd() const;
+
 	void setState(int state);
 
 	/*
@@ -40,7 +42,7 @@ private:
 	// Response			*_response;
 	int					_state;
 	int					_sock_fd;
-	int 	_isOK;
+	int 				_isOK;
 	Socket				*_sock;
 	struct s_config		*_config;
 };

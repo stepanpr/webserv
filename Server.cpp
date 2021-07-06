@@ -88,7 +88,7 @@ int Server::_pollLoop()
 				Connection *tempConnect = _mapConnections.find(pfd.fd)->second;
 				if ((pfd.revents & POLLERR) || (pfd.revents & POLLHUP) || (pfd.revents & POLLNVAL))
 				{
-					_removeConnection(tempConnect);//TODO write this function
+					_removeConnection(tempConnect, i + 1);
 					continue ;
 				}
 				if (tempConnect->getState() == READING)
@@ -104,7 +104,7 @@ int Server::_pollLoop()
 				{
 					int response_status = this->responseSend(*tempConnect);
 					if (response_status == FULL)
-						_removeConnection(tempConnect);
+						_removeConnection(tempConnect, i + 1);
 				}
 			}
 		}
@@ -298,7 +298,11 @@ void Server::_checkNewConnection(int &ret)
 	}
 }
 
-void Server::_removeConnection(Connection *conn)
+void Server::_removeConnection(Connection *conn, int i)
 {
-//TODO
+	_mapConnections.erase(_fd_array[i].fd);
+	delete conn;
+	_fd_array[i].fd = -1;
+	_fd_array[i].events = POLLIN;
+	_fd_array[i].revents = 0;
 }
