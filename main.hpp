@@ -19,11 +19,13 @@
 # include <string.h>
 # include <sys/time.h>
 
-
-# include "Server.hpp"
+# include "Socket.hpp"
+# include "Connection.hpp"
+//# include "Server.hpp"
 # include "Config.hpp"
 # include "RequestParser.hpp"
 # include "Response.hpp"
+# include "structure.h"
 
 
 # define MAX_THREADS 3 /* ограничение допустимого количества потоков */
@@ -58,7 +60,11 @@ class Exceptions: public std::exception
 # define WHITE_B "\e[1;37m"
 # define RESET "\033[0m"
 
+# define READING 1
+# define WRITING 2
 
-
+# define WAIT 1
+# define FULL 2
+# define ERROR 3
 
 #endif

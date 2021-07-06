@@ -398,10 +398,10 @@ std::string Response::responseInit()
 			pid_t PID;
 			PID = fork();
 
-			if(PID == 0)
-			{
-				Cgi cgi;
-			}
+//			if(PID == 0)
+//			{
+//				Cgi cgi;
+//			}
 		}
 
 		/* обработка отправки файла  */
