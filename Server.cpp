@@ -198,6 +198,7 @@ int Server::pollLoop(struct s_config &config)
 
 int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config)
 {
+Connection tempConnect = _mapConnection.find(pfd_array[1 + i].fd)->second;
 
 	for (i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -211,14 +212,13 @@ int Server::request(struct pollfd *pfd_array, int &clients_count, int &i, struct
 			/* !!!NEW_VERSION
 			** Connection temp = _mapConnection.find(pfd_array[1 + i].fd)->second;
 			*/
-			Connection tempConnect = _mapConnection.find(pfd_array[1 + i].fd)->second;
+			
 			tempConnect.setConfig(config);
 			
 
 
 			uint8_t buf[1024];
 			int ret = recv(pfd_array[1 + i].fd, buf, 1024, 0); //read (pfd_array[1 + i].fd , buf, 1024); /* Возврат из функции recv происходит, когда модуль TCP решает передать процессу полученные от клиента данные. Данные возвращается в буфере buf, размер которого передается в третьем аргументе. В четвертом аргументе могут передаваться дополнительные опциипараметры. Функция возвращает число байтов, которые модуль TCP записал в буфер buf; если функция возвращает ноль, то клиент данных для передачи больше не имеет.*/
-
 
 			if (ret < 0)
 			{

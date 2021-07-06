@@ -16,6 +16,7 @@ public:
 	// void addRequest(std::string);
 	int RequestWaiter(const char *, int);
 	void PrintMap();
+	void Vault(std::string str);
 
 	bool _is_post;
 	// std::string addBody();
@@ -25,6 +26,7 @@ public:
 	std::string getProtokol();
 	std::map<std::string,std::string> getHeaders();
 	std::string getBody();
+	
 
 	// RequestParser(const RequestParser &copy);
 	~RequestParser();
@@ -54,6 +56,8 @@ private:
 	std::string _body;
 	std::string _fullRequest;
 	int		_isOk;
+
+	std::string buf_all;
 };
 
 #endif

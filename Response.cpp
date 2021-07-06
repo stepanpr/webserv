@@ -490,17 +490,6 @@ std::string Response::responseInit()
 	// }
 
 
-
-
-
-
-
-
-
-
-
-
-
 	{ /* вывод сообщения в соответствии со _statusCode*/
 		
 		if (_statusCode == OK)
