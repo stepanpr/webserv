@@ -2,6 +2,8 @@
 #ifndef CGI
 # define CGI
 # include "main.hpp"
+#include "structure.h"
+#include "Response.hpp"
 
 
 
@@ -13,10 +15,10 @@ class Cgi
 		std::map<std::string, std::string> variables;
 
 	public:
-		Cgi();
-		Cgi(std::string &body, struct s_config *config);
+		// Cgi();
+		Cgi(std::string body, struct s_config *config);
 		Cgi(const Cgi &cgi);
-		~Cgi();
+		// ~Cgi();
 		Cgi &operator=(const Cgi &copy);
 
 		void setVariables();

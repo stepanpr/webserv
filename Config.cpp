@@ -157,6 +157,14 @@ void Config::read(std::vector<std::string> &data)
 					new_config.max_body_size = data[j+1];
 				if (data[j] == "error_page")
 					new_config.error_page = data[j+1];
+				if (data[j] == "cgi_alias")
+				{
+					for (int c = 1; data[j+c].find("/cgi_bin") != std::string::npos && c < 3; c++)
+					{
+						new_config.cgi_alias.push_back(data[j + c]);
+						// std::cout << data[j+c];
+					}	
+				}
 
 				// new_config.server_name = (data[j] == "server_name") ? data[j+1] : std::string();
 				if (data[j] == "location")//////////////
@@ -181,6 +189,14 @@ void Config::read(std::vector<std::string> &data)
 						}
 						if (data[l] == "root")
 							new_location.root = data[l + 1];
+						// if (data[l] == "cgi_alias")
+						// {
+						// 	for (int c = 1; data[l+c].find("/cgi_bin") != std::string::npos && c < 3; c++)
+						// 	{
+						// 		new_location.cgi_alias.push_back(data[l + c]);
+						// 		std::cout << data[l+c];
+						// 	}	
+						// }
 						if (data[l] == "}")
 							break ;
 					}
@@ -218,6 +234,10 @@ void Config::showConfig()
 		std::cout << std::setw(13) << BLUE  << "listen: " << RESET << _configs[k].listen << "\n";
 		std::cout << std::setw(8)<< BLUE  << "server_name: " << RESET << _configs[k].server_name  << "\n";
 		std::cout << std::setw(9)<< BLUE  << "error_page: " << RESET << _configs[k].error_page  << "\n";
+		std::cout << std::setw(10)<< BLUE  << "cgi_alias: " << RESET;
+		for(unsigned long c = 0; c < _configs[k].cgi_alias.size(); c++)
+			std::cout << _configs[k].cgi_alias[c] << " ";
+		std::cout << "\n";
 		for(unsigned long l = 0; l < _configs[k].location.size(); l++)
 		{
 			std::cout << std::setw(14)<<  BLUE << "-------LOCATION[" << l << "]-------\n" << RESET;
@@ -230,6 +250,10 @@ void Config::showConfig()
 			std::cout << "\n";
 			// std::cout << std::setw(12)<< BLUE  << "methods: " << RESET << _configs[k].location[l].methods  << "\n";
 			std::cout << std::setw(15)<< BLUE  << "root: " << RESET << _configs[k].location[l].root  << "\n";
+			// std::cout << std::setw(10)<< BLUE  << "cgi_alias: " << RESET;
+			// for(unsigned long c = 0; c < _configs[k].location[l].cgi_alias.size(); c++)
+			// 	std::cout << _configs[k].location[l].cgi_alias[c] << " ";
+			// std::cout << "\n";
 		}
 		// std::cout << PURPLE  << "==================\n" << RESET;
 		enter("press ENTER to continue");

@@ -15,7 +15,8 @@
 		<li class="loaded"><a href="#">CONTACT</a></li>
 	</ul>
 
-	<form action="" method="post" name="contact_form"><br>
+	<form action="/cgi_bin/form.cgi" method="post" name="contact_form"><br>
+		<input type="hidden" name="location" value="contact.html">
 		<input name = "name" type="text" size="25" value="your name"><br>
 		<input name="phone" type="tel" size="25" value="your phone"><br>
 		<textarea name="message" id="msg" cols="30" rows="10">dsd</textarea>
@@ -24,7 +25,8 @@
 	<br><br>
 
 	
-	<form enctype="multipart/form-data" method="post">
+	<form enctype="multipart/form-data" action="/cgi_bin/getfile.cgi" method="post">
+		<input type="hidden" name="location" value="contact.html">
 		<p><input type="file" name="f" >
 		<input type="submit" value="Send"></p>
 	</form> 

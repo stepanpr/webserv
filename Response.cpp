@@ -89,7 +89,7 @@ void Response::writeHeaders(std::string &method)
 		// _headers["Content-Type"] = "text/html; charset=UTF-8";
 		_headers["Title"] = "webserv (project for 21 school)";
 		_headers["Content-Language"] = "en,ru";
-		_headers["Retry-After"] = "1";
+		// _headers["Retry-After"] = "1";
 		// _headers["Authorization"] = "Basic qqq : www";
 	}
 	if (method == "POST")
@@ -100,7 +100,7 @@ void Response::writeHeaders(std::string &method)
 		// _headers["Content-Type"] = "text/html; charset=UTF-8";
 		_headers["Title"] = "webserv (project for 21 school)";
 		_headers["Content-Language"] = "en,ru";
-		_headers["Retry-After"] = "1";
+		// _headers["Retry-After"] = "1";
 		// _headers["Authorization"] = "Basic qqq : www";
 	}
 	if (method == "DELETE")
@@ -385,97 +385,186 @@ std::string Response::responseInit()
 		** https://routerus.com/curl-post-request/ //curl-post-request
 		*/
 
-			for (int i = 0; i < _config->location.size(); i++)
-			{
-				if (_config->location[i].location == _requestPath || (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find(".html"))) 
-				|| (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find("index.html")))) // requestPathWithoutHTML(_requestPath))		//если, запрос совпадает с каким-то локейшеном (с маской локейшена); сравниваем также возвтратом функциии, которая образает .html в конце запроса
-				{
-					if (_config->location[i].autoindex == "on")				//если включен автоиндекс
-					{
-						this->_autoindex = true;
-					}
-					if (!checkMethod(i) || !checkMaxBodySize())
-					{
-						// std::cout << _statusCode << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
-						break ;	
-					}
-					// else	
-					// {
-					_path = _config->location[i].root + '/';
-					_fullPath = _config->location[i].root + '/' + _config->location[i].index; //_path
-					_headers["Content-Type"] = _getMimeType(_config->location[i].index); /* устанавливаем MIME тип индекса */
-					// std::cout << _config->location[i].location << " "  << _requestPath << '\n';
-					// std::cout << _fullPath << '\n';
-					_statusCode = OK;
-					// isExist = 1;
-				
-					break ;
-					// }
-				}
-			}
-			
+
+	
+
+		/* проверяем существование скрипта */
+		std::string relativePathToScript = _requestPath.substr(1, _requestPath.length());
+		// std::cout << RED << relativePathToScript << RESET <<std::endl;
+		if (stat(relativePathToScript.c_str(), &_stat) >= 0)
+		{
+			// std::cout << RED << "STAT!!!!!!"<< RESET <<std::endl;
+			_statusCode = OK;
+		}
+		else	
+			_statusCode = NOTFOUND;
+
+		
+		//если в данном локейшене есть cgi_path  и  локейшн поддерживает пост
+		//и если файл cgi существует stat("www/response.log", &_stat) == 0
+
+
+		/* проверяем наличие location, а также доступных методов */
+		// for (int i = 0; i < _config->location.size(); i++)
+		// {
+		// 	if (_config->location[i].location == _requestPath || (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find(".html"))) 
+		// 	|| (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find("index.html")))) // requestPathWithoutHTML(_requestPath))		//если, запрос совпадает с каким-то локейшеном (с маской локейшена); сравниваем также возвтратом функциии, которая образает .html в конце запроса
+		// 	{
+		// 		if (_config->location[i].autoindex == "on")				//если включен автоиндекс
+		// 		{
+		// 			this->_autoindex = true;
+		// 		}
+		// 		if (!checkMethod(i) || !checkMaxBodySize())
+		// 		{
+		// 			break ;	
+		// 		}
+		// 		// else	
+		// 		// {
+		// 		_path = _config->location[i].root + '/';
+		// 		_fullPath = _config->location[i].root + '/' + _config->location[i].index; //_path
+		// 		_headers["Content-Type"] = _getMimeType(_config->location[i].index); /* устанавливаем MIME тип индекса */
+		// 		_statusCode = OK;
+		// 		break ;
+		// 		// }
+		// 	}
+		// 	// else //if (_config->location[i].location != _requestPath && _config->location[i].location != _requestPath.substr(0, _requestPath.find(".html")))
+		// 	// {	//если это файл он существует и имеет mime тип, то также отправляем в респонс, записываем в ответ боди
+		// 	// 	if (stat("www/response.log", &_stat) == 0 && _getMimeType(_requestPath.substr(0, _requestPath.size())) != MIME_TYPE_NOT_FOUND)
+		// 	// 	{
+		// 	// 			_statusCode = OK; /* при отключенных locations сайта, покажет ошибку */
+		// 	// 			_fullPath = _requestPath.substr(1, _requestPath.size());
+		// 	// 			_headers["Content-Type"] = _getMimeType(_requestPath.substr(1, _requestPath.size()));
+		// 	// 	}
+		// 	// 	// std::cout <<stat("www/response.log", &_stat) << "STAT\n";
+		// 	// 	// if (_getMimeType(_requestPath.substr(0, _requestPath.size())) == MIME_TYPE_NOT_FOUND || stat("www/response.log", &_stat) == -1)
+		// 	// 	// {
+		// 	// 	// 	continue ;
+		// 	// 	// }
+		// 	// }
+		// }
+
+		/* если хедер Content-Length отсутствует или его значение равно нулю то возвращаем меняем статус на BADREQUEST */
 		if (_requestHeaders.find("Content-Length:") == _requestHeaders.end() || _requestHeaders.at("Content-Length:") == "0")
 		{	
 			std::cout << RED << _requestHeaders.at("Content-Length:") << RESET<< std::endl;
 			_statusCode = BADREQUEST;
 		}
-		else
-			std::cout << RED << _requestHeaders.at("Content-Length:") << RESET<< std::endl;
+		// else
+		// 	std::cout << RED << _requestHeaders.at("Content-Length:") << RESET<< std::endl;
 
 
 		
 
-
-		for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
+		if (_statusCode == OK)
 		{
-
+			/* application/x-www-form-urlencoded * обработка формы c вызовом CGI */
+			if (_requestHeaders.count("Content-Type:") && _requestHeaders.at("Content-Type:") == "application/x-www-form-urlencoded")
+			{
+				std::cout << YELLOW << _requestHeaders.at("Content-Type:") << RESET<< std::endl;
+				std::cout << RED << "1"<<_requestBody <<RESET <<std::endl;
+					// if (_config->location[this].CGI)
+				Cgi cgi(_requestBody, _config);
+			}
 			
-			/* проверка на локейшн ?*/
-			// std::cout << it->first << " " << it->second << '\n';
-
-			/* обработка формы c вызовом CGI */
-			if (it->first == "Content-Type:" && it->second == "application/x-www-form-urlencoded")
+			/* multipart/form-data * обработка отправки файла */
+			if (_requestHeaders.count("Content-Type:") && _requestHeaders.at("Content-Type:").find("multipart/form-data") != std::string::npos)
 			{
-				std::cout << it->first << " " << it->second << '\n';
-				std::cout <<RED << "1"<<_requestBody <<RESET <<std::endl;
-				// if (_config->location[this].CGI)
-				// 	Cgi cgi(_requestBody, _config);
-			}
-
-			/* обработка отправки файла */
-			if (it->first == "Content-Type:" && it->second.find("multipart/form-data") != std::string::npos)
-			{
-				std::cout << it->first << " " << it->second << '\n';
+				std::cout << YELLOW << _requestHeaders.at("Content-Type:") << RESET<< std::endl;
 				std::cout << RED << "2" <<_requestBody << RESET << std::endl;
-				// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
-				// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
 
-				// char buff[100000];
-				std::string line;
-				std::ifstream r("www/file.tmp");
-				if (r.is_open())
-				{
-					std::ofstream w;
-					w.open("file"); 
-					while (getline(r, line))
-					{
-						w << line;
-						std::cout << line << std::endl;
-					}
-				}
-				std::remove("www/file.tmp");
-				std::cout <<RED << "1" << line <<RESET <<std::endl;
-				// file << _requestBody;
-				// std::cout << it->first << " " << it->second << "OKOKOKOKOKOKOKOKOKKOK" << it->second.find("ddd") <<'\n';
-				// if ( it->second.find("multipart/form-data") == std::string::npos)
-				// 	std::cout << "NON FOUND!!!!!!!" <<'\n';
 
+				//отезать вебкит и все что за ним следует
+				std::ofstream w;
+				w.open("file", std::ios::out | std::ios::binary);
+				w << _requestBody;
 			}
-			// if ()
 
 
+			// for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
+			// {
+
+				
+			// 	/* проверка на локейшн ?*/
+			// 	// std::cout << it->first << " " << it->second << '\n';
+
+			// 	/* обработка формы c вызовом CGI */
+			// 	if (it->first == "Content-Type:" && it->second == "application/x-www-form-urlencoded")
+			// 	{
+			// 		std::cout << it->first << " " << it->second << '\n';
+			// 		std::cout <<RED << "1"<<_requestBody <<RESET <<std::endl;
+			// 		// if (_config->location[this].CGI)
+			// 		// 	Cgi cgi(_requestBody, _config);
+			// 	}
+
+			// 	/* обработка отправки файла */
+			// 	if (it->first == "Content-Type:" && it->second.find("multipart/form-data") != std::string::npos)
+			// 	{
+			// 		std::cout << it->first << " " << it->second << '\n';
+			// 		std::cout << RED << "2" <<_requestBody << RESET << std::endl;
+			// 		// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
+			// 		// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
+
+			// 		// char buff[100000];
+			// 		// std::string line;
+			// 		// std::ifstream r("www/file.tmp");
+			// 		// if (r.is_open())
+			// 		// {
+			// 			std::ofstream w;
+			// 			w.open("file", std::ios::out | std::ios::binary); 
+			// 			// while (getline(_requestBody.c_str(), line))
+			// 			// {
+			// 				w << _requestBody;
+			// 				// std::cout << line << std::endl;
+			// 			// }
+			// 		// }
+			// 		// std::remove("www/file.tmp");
+			// 		// std::cout <<RED << "1" << line <<RESET <<std::endl;
+			// 		// file << _requestBody;
+			// 		// std::cout << it->first << " " << it->second << "OKOKOKOKOKOKOKOKOKKOK" << it->second.find("ddd") <<'\n';
+			// 		// if ( it->second.find("multipart/form-data") == std::string::npos)
+			// 		// 	std::cout << "NON FOUND!!!!!!!" <<'\n';
+
+			// 	}
+			// 	// if ()
+
+
+
+			// }
+		}
+
+
+		/* проверка автоиндекса */
+		if (_statusCode == OK && _autoindex == true)				/* если автоиндекс включен */	
+			this->autoindexOn();
+		else if (_statusCode == OK && _autoindex == false)			/* если автоиндекс выключен */		
+			this->readBody(_fullPath);
+		
+		/* если статускод содержит ошибку */
+		if (_statusCode != OK)									
+		{
+			if (_statusCode != BADREQUEST && _statusCode != NOTALLOWED && _statusCode != REQTOOLARGE && _statusCode != INTERNALERROR)
+			{	/* защита от возможных непредвиденных ошибок - в этом случае выводи 404 */
+				_statusCode = NOTFOUND;
+			}
+			if (_statusCode == BADREQUEST)
+				_fullPath = _config->error_page + '/' + "400.html";
+			if (_statusCode == NOTFOUND)
+				_fullPath = _config->error_page + '/' + "404.html";
+			if (_statusCode == NOTALLOWED)
+				_fullPath = _config->error_page + '/' + "405.html";
+			if (_statusCode == REQTOOLARGE)
+				_fullPath = _config->error_page + '/' + "413.html";
+			if (_statusCode == INTERNALERROR)
+				_fullPath = _config->error_page + '/' + "500.html";
+			_headers["Content-Type"] = _getMimeType("error.html");
+			this->readBody(_fullPath);
 
 		}
+			// std::cout << _body << '\n';
+			// std::cout << _statusCode << '\n';
+
+			/* сборка ответа */
+			responseCompose();
 		// for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
 		// {
 		// 	if (it->first == "Content-Disposition:")

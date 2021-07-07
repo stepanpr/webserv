@@ -10,20 +10,8 @@
 class Server;
 
 
-
-
-/*******************************************
-************STANDART CONFIGURATION**********
-********************************************
-**	server 						: сервер
-**		listen 					: порт
-**		server_name localhost	: адрес
-**		error_page /www/default	: путь к дикектории с ошибками
-**		location / 				: путь относительно корня (root)/
-**			index index.html	: индекс
-**			autoindex off		: автоиндекс
-**			methods GET			: метод
-**			root 				: путь к корню
+/*
+**	струкрура конфигурационного файла описана в "structure.h"
 */
 
 class Config
