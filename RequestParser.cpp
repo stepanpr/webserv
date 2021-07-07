@@ -2,6 +2,8 @@
 
 RequestParser::RequestParser(void) 
 {
+	_isOk = 0;
+	_global_len = 0;
 		_is_startline_ok = false; 
 		_is_headers_ok = false;
 		_is_host = false;
@@ -9,7 +11,7 @@ RequestParser::RequestParser(void)
 		_is_chunked = false;
 		_is_length = false;
 		_is_multipart = false;
-	// _is_post = false;
+	_is_post = false;
 }
 
 // RequestParser::RequestParser(std::string buf)
@@ -29,7 +31,10 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	std::string tmp_header_rigth;
 
 
-	std::string new_str = (char*)str;	//  Приводим к стрингу
+	std::string new_str ((char*)str, len);	//  Приводим к стрингу
+
+
+
 	buf.append(new_str);				//  Добавляем приходящую строку в буфер
 
 	buf_all.append(new_str);
@@ -61,7 +66,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	
 	
 	//	Стартлайн спарсили, парсим хедеры
-	if (((pos = buf.find(double_separator)) != std::string::npos))  // если есть \r\n\r\n парсим и удаляем все что до него
+	if ((((pos = buf.find(double_separator)) != std::string::npos)) && (_is_length == 0)) // если есть \r\n\r\n парсим и удаляем все что до него
 	{
 		if (_is_headers_ok != true) // если не было хедеров
 		{
@@ -97,7 +102,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 				// _contentLength = std::stoi(it->second);
 				_contentLength = atoi(it->second.c_str());
 				_is_length = true;
-				_global_len = 0;
+				
 			}
 			if ((it->first.compare("Host:") == 0))
 				_is_host = true;
@@ -135,45 +140,46 @@ int RequestParser::RequestWaiter(const char *str, int len)
 		}
 
 
-	/*------------------------------------------------------------------*/
-	if (buf.find("Content-Disposition:"))
-	{
-		//записывем навание файла
-		std::cout << "CONTENT OK!!!!!!!!!!!!!!!!!!!!1" << '\n';
-	}
-	/*
-		добваить проверку на WebKit - если нашли, то удаляем!
-	*/
-	//если находим типы соответствующие зпросу POST, то _is_post = true
-	if (_is_post == false)
-	{
-		for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
-		{
-			// std::cout << it->first << " " << it->second << '\n';
-			if ((it->first == "Content-Type:" && it->second == "application/x-www-form-urlencoded") 
-			|| (it->first == "Content-Type:" && it->second.find("multipart/form-data") != std::string::npos))
-			{
-				std::cout << it->first << " " << it->second << '\n';
-				_is_post = true;
-			}
-		}
-	}
-		// контент length обработка
-	else if  (((_is_length == true) || (_contentLength > 0)) && _is_post == true)
-	{
-		// if ((_contentLength > _global_len) ) //Content-Type: multipart/form-data;
-		// {
-			_bodybuffer << buf;
-			_global_len = _global_len + len;
-		// }
-		std::ofstream fileTmp("www/file.tmp", std::ios::app);
-		fileTmp << _bodybuffer.str();
-		if (_global_len >= _contentLength)
-		{
-			_is_post = false;
-		}
-	}
-	/*------------------------------------------------------------------*/
+	// /*------------------------------------------------------------------*/
+	// // if (buf.find("Content-Disposition:"))
+	// // {
+	// // 	//записывем навание файла
+	// // 	std::cout << "CONTENT OK!!!!!!!!!!!!!!!!!!!!1" << '\n';
+	// // }
+	// /*
+	// 	добваить проверку на WebKit - если нашли, то удаляем!
+	// */
+	// //если находим типы соответствующие зпросу POST, то _is_post = true
+	// if (_is_post == false)
+	// {
+	// 	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
+	// 	{
+	// 		// std::cout << it->first << " " << it->second << '\n';
+	// 		if ((it->first == "Content-Type:" && it->second == "application/x-www-form-urlencoded") 
+	// 		|| (it->first == "Content-Type:" && it->second.find("multipart/form-data") != std::string::npos))
+	// 		{
+	// 			std::cout << it->first << " " << it->second << '\n';
+	// 			_is_post = true;
+	// 		}
+	// 	}
+	// }
+	// 	// контент length обработка
+	// else if  (((_is_length == true) || (_contentLength > 0)) && _is_post == true)
+	// {
+	// 	if ((_contentLength > _global_len) ) //Content-Type: multipart/form-data;
+	// 	{
+	// 		_bodybuffer << buf;
+	// 		_global_len = _global_len + len;
+	// 	}
+	// 	// std::ofstream fileTmp("www/file.tmp", std::ios::app);
+	// 	// fileTmp << _bodybuffer.str();
+	// 	else 
+	// 	//(_global_len >= _contentLength)
+	// 	{
+	// 		_is_post = false;
+	// 	}
+	// }
+	// /*------------------------------------------------------------------*/
 
 			// if (it->first == "Content-Type:" && it->second.find("multipart/form-data") != std::string::npos)
 			// {
@@ -185,23 +191,23 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	
 
 	// контент length обработка
-	// if  ((_is_length == true) || (_contentLength > 0))
-	// {
-	// 	if ((_contentLength > _global_len) ) //Content-Type: multipart/form-data;
-	// 	{
-	// 		// if ((pos = buf.find(double_separator)) != std::string::npos)
-	// 		// {
-	// 		// 	buf.erase(0, pos);
-	// 		// }
-	// 		_bodybuffer << buf;
-	// 		_global_len = _global_len + len;
-	// 	}
-	// }
+	if  ((_is_length == true) || (_contentLength > 0))
+	{
+		// if ((_contentLength > _global_len) ) //Content-Type: multipart/form-data;
+		{
+			// if ((pos = buf.find(double_separator)) != std::string::npos)
+			// {
+			// 	buf.erase(0, pos);
+			// }
+			_bodybuffer << buf;
+			_global_len = _global_len + len;
+		}
+	}
 
-	std::cout<< "!!!!!!!! " << _contentLength << ' ' << len <<'\n';
-	std::cout << "_is_multipart:" << _is_multipart << ' ' << " _is_length:" << _is_length << " _global_len:" << _global_len << '\n' << '\n';
+	// std::cout<< "!!!!!!!! " << _contentLength << ' ' << len <<'\n';
+	// std::cout << "_is_multipart:" << _is_multipart << ' ' << " _is_length:" << _is_length << " _global_len:" << _global_len << '\n' << '\n';
 
-	std::cout << _bodybuffer.str() << '\n';
+	// std::cout << _bodybuffer.str() << '\n';
 
 	// std::ofstream fileTmp("www/file.tmp", std::ios::app);
 	// fileTmp << _bodybuffer.str();
@@ -213,7 +219,14 @@ int RequestParser::RequestWaiter(const char *str, int len)
 					_isOk = 1;
 		if ( (_is_host == true) && (_is_chunked == false) && (_is_length == false) ) // если есть тока хост
 					_isOk = 1;
+
 	}
+	// std::cout << "_global_len:" << _global_len << " _contentLength:" << _contentLength << '\n';
+
+	if ( _global_len >= _contentLength ) 
+		_isOk = 1;
+
+	// std::cout << "_isOk:" << _isOk << '\n';
 
 	return (_isOk);
 
