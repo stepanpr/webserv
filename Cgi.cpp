@@ -6,15 +6,26 @@
 
 
 
-Cgi::Cgi() {}
+// Cgi::Cgi() {}
 
-Cgi::~Cgi() {}
+// Cgi::~Cgi() {}
 
 Cgi::Cgi(const Cgi &cgi) { *this = cgi; }
 
 Cgi &Cgi::operator=(const Cgi &copy)
 {
 	return *this;
+}
+
+void Cgi::launchCGI()
+{
+	pid_t PID;
+	PID = fork();
+
+	if(PID == 0)
+	{
+		Cgi cgi;
+	}
 }
 
 // std::map<std::string, std::string> aka;
