@@ -27,6 +27,7 @@ h3 {
 	background-color: coral;
 	display: flex;
 	width: 100%;
+	margin-bottom: 20px;
 
 }
 .menu li {
@@ -81,3 +82,32 @@ h3 {
 	bottom: 100px; top: 50px; left: 15% ; 
 	position: absolute;
 }
+
+
+
+/* gallery */
+.gallery {
+	display: flex;
+	flex-basis: auto;
+	/* flex-direction: column; */
+	width: 80%;
+	/* border: 1px solid red; */
+	margin: 35px auto;
+}
+
+.gallery .picture {
+	/* border: 1px solid red; */
+	padding: 0 20px 0 20px;
+
+	/* width: 40%; */
+}
+
+.gallery .picture img {
+	width: 70%;
+	border-radius: 7%;
+	opacity: .7;
+}
+.gallery .picture img:hover {
+	opacity: .99;
+}
+

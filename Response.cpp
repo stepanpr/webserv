@@ -988,6 +988,8 @@ std::string Response::_getMimeType(std::string filename)
 	m["3gp"] = "audio/3gpp";
 	m["3g2"] = "audio/3gpp2";
 	m["7z"] = "application/x-7z-compressed";
+	m["txt"] = "text/plain";
+	m["txt"] = "text/*";
 	// std::cout << extention << " : " << m[extention] << "\n";
 	// return "type_not_found";
 
