@@ -7,6 +7,7 @@
 // #include <io.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include "Cgi.hpp"
 // #include <time.h>
 
 /* 	https://zametkinapolyah.ru/servera-i-protokoly/tema-9-http-kody-sostoyaniya-klassy-kodov-sostoyaniya-http-servera.html 
@@ -16,7 +17,7 @@
 # define OK 			"200 OK"
 // # define CREATED		"201 Created"
 // # define NOCONTENT 		"204 No Content"
-// # define BADREQUEST		"400 Bad Request"
+# define BADREQUEST		"400 Bad Request"
 // # define UNAUTHORIZED	"401 Unauthorized"
 # define NOTFOUND 		"404 Not Found"
 # define NOTALLOWED		"405 Method Not Allowed"
