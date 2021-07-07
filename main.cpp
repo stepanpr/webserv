@@ -40,10 +40,16 @@ int	main(int argc, char **argv)
 		std::remove("www/response.log");
 
 	/*-------------------------------------------------------------------------------*/
-	
 
-	config.createServers();  /* запускаем сервера */
-
+	try
+	{
+		config.createServers();  /* запускаем сервера */
+	}
+	catch (std::exception &e)
+	{
+		std::cout << RED << e.what() << RESET << std::endl;
+		return 1;
+	}
 
 	return 0;
 }

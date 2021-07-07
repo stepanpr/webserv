@@ -3,6 +3,7 @@
 # define CONFIG_HPP
 # include "main.hpp"
 # include "Server.hpp"
+# include "structure.h"
 # define DEFAULT_CONFIG_PATH "config/default.conf"
 # include "structure.h"
 

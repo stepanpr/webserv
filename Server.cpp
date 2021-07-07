@@ -101,9 +101,7 @@ int Server::_pollLoop()
 					{
 						tempConnect->responsePrepare();
 						tempConnect->setState(WRITING);
-						int response_status = this->responseSend(*tempConnect);
-						if (response_status == FULL)
-							_removeConnection(tempConnect, i + 1);
+						_fd_array[i + 1].events = POLLOUT;
 					}
 				}
 				else if (tempConnect->getState() == WRITING)
@@ -250,10 +248,12 @@ void Server::_createListenSocket()
 	_listenSock->setSockReuseaddr();
 	_listenSock->setSocketFlags();
 	if (_listenSock->bind() < 0)
-		throw Exceptions();
+	{
+		std::cout << RED_B << "Port for listen already in use" << RESET << std::endl;
+		exit(1);
+	}
 	if (_listenSock->listen() < 0)
 		throw Exceptions();
-
 }
 
 void Server::_initPollfdStruct()
