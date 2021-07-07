@@ -235,7 +235,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	// std::cout<< "!!!!!!!! " << _contentLength << ' ' << len <<'\n';
 	// std::cout << "_is_multipart:" << _is_multipart << ' ' << " _is_length:" << _is_length << " _global_len:" << _global_len << '\n' << '\n';
 
-	// std::cout << _bodybuffer.str() << '\n';
+	 std::cout << _bodybuffer.str() << '\n';
 
 	// std::ofstream fileTmp("www/file.tmp", std::ios::app);
 	// fileTmp << _bodybuffer.str();
@@ -254,7 +254,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	if ( _global_len >= _contentLength ) 
 		_isOk = 1;
 
-	// std::cout << "_isOk:" << _isOk << '\n';
+	 std::cout << "_isOk:" << _isOk << '\n';
 
 	return (_isOk);
 

@@ -446,7 +446,7 @@ std::string Response::responseInit()
 		/* если хедер Content-Length отсутствует или его значение равно нулю то возвращаем меняем статус на BADREQUEST */
 		if (_requestHeaders.find("Content-Length:") == _requestHeaders.end() || _requestHeaders.at("Content-Length:") == "0")
 		{	
-			std::cout << RED << _requestHeaders.at("Content-Length:") << RESET<< std::endl;
+//			std::cout << RED << _requestHeaders.at("Content-Length:") << RESET<< std::endl;
 			_statusCode = BADREQUEST;
 		}
 		// else
