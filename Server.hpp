@@ -47,6 +47,7 @@ private:
 	void	_addToMap(Socket *newSocket);
 	void	_checkNewConnection(int &ret);
 	void	_removeConnection(Connection *conn, int i);
+	void	_clearMap();
 
 
 
