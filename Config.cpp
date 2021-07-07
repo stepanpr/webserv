@@ -2,14 +2,16 @@
 #include "Config.hpp"
 # include <pthread.h>
 
-Config::Config() : _path(std::string(DEFAULT_CONFIG_PATH)), _isValid(true)
+Config::Config():
+	_path(std::string(DEFAULT_CONFIG_PATH)), _isValid(true), _numOfServers(0),
+	_configs(), _servers()
 {
-	_numOfServers = 0;
 }
 
-Config::Config(std::string const &path) : _path(path), _isValid(true)
+Config::Config(std::string const &path):
+	_path(path), _isValid(true), _numOfServers(0),
+	_configs(), _servers()
 {
-	_numOfServers = 0;
 }
 
 Config::~Config()
@@ -24,7 +26,10 @@ Config::Config(const Config &copy)
 Config	&Config::operator=(const Config &copy)
 {
 	this->_path = copy._path;
-	// for()COPY values
+	this->_isValid = copy._isValid;
+	this->_numOfServers = copy._numOfServers;
+	this->_configs = copy._configs;
+	this->_servers = copy._servers;
 	return (*this);
 }
 
