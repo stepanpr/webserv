@@ -10,20 +10,20 @@
 class Cgi
 {
 	private:
-		std::map<std::string, std::string> vars;
+		std::map<std::string, std::string> variables;
 
 	public:
 		Cgi();
-		Cgi(/* vars */);
+		Cgi(std::string &body, struct s_config *config);
 		Cgi(const Cgi &cgi);
 		~Cgi();
 		Cgi &operator=(const Cgi &copy);
 
 		void setVariables();
 
+		void launchCGI();
 
 };
-
 
 
 

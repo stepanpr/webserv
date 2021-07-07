@@ -234,7 +234,7 @@ bool Response::checkMethod(int &i)
 	for (int f = 0; f < _config->location[i].methods.size(); f++)
 	{
 			_allowedMethods += this->_config->location[i].methods[f];
-			std::cout << this->_config->location[i].methods[f] << " ddddd" << _allowedMethods << '\n';
+			// std::cout << this->_config->location[i].methods[f] << " ddddd" << _allowedMethods << '\n';
 
 		if(this->_requestMethod == this->_config->location[i].methods[f])
 		{
@@ -385,84 +385,117 @@ std::string Response::responseInit()
 		** https://routerus.com/curl-post-request/ //curl-post-request
 		*/
 
+			for (int i = 0; i < _config->location.size(); i++)
+			{
+				if (_config->location[i].location == _requestPath || (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find(".html"))) 
+				|| (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find("index.html")))) // requestPathWithoutHTML(_requestPath))		//если, запрос совпадает с каким-то локейшеном (с маской локейшена); сравниваем также возвтратом функциии, которая образает .html в конце запроса
+				{
+					if (_config->location[i].autoindex == "on")				//если включен автоиндекс
+					{
+						this->_autoindex = true;
+					}
+					if (!checkMethod(i) || !checkMaxBodySize())
+					{
+						// std::cout << _statusCode << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
+						break ;	
+					}
+					// else	
+					// {
+					_path = _config->location[i].root + '/';
+					_fullPath = _config->location[i].root + '/' + _config->location[i].index; //_path
+					_headers["Content-Type"] = _getMimeType(_config->location[i].index); /* устанавливаем MIME тип индекса */
+					// std::cout << _config->location[i].location << " "  << _requestPath << '\n';
+					// std::cout << _fullPath << '\n';
+					_statusCode = OK;
+					// isExist = 1;
+				
+					break ;
+					// }
+				}
+			}
+			
+		if (_requestHeaders.find("Content-Length:") == _requestHeaders.end() || _requestHeaders.at("Content-Length:") == "0")
+		{	
+			std::cout << RED << _requestHeaders.at("Content-Length:") << RESET<< std::endl;
+			_statusCode = BADREQUEST;
+		}
+		else
+			std::cout << RED << _requestHeaders.at("Content-Length:") << RESET<< std::endl;
+
+
+		
+
 
 		for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
 		{
-		// std::cout << it->first << " " << it->second << '\n';
-		/* обработка формы */
-		if (it->first == "Content-Type:" && it->second == "application/x-www-form-urlencoded")
-		{
-			std::cout << it->first << " " << it->second << '\n';
-			std::cout <<RED <<_requestBody <<RESET <<std::endl;
+
 			
-			pid_t PID;
-			PID = fork();
+			/* проверка на локейшн ?*/
+			// std::cout << it->first << " " << it->second << '\n';
 
-//			if(PID == 0)
-//			{
-//				Cgi cgi;
-//			}
-		}
-
-		/* обработка отправки файла  */
-		if (it->first == "Content-Type:" && it->second.find("multipart/form-data") != std::string::npos)
-		{
-			std::cout << it->first << " " << it->second << '\n';
-			std::cout << RED << "1" <<_requestBody << RESET << std::endl;
-			// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
-			// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
-
-			// char buff[100000];
-			std::string line;
-			std::ifstream r("www/file.tmp");
-			if (r.is_open())
+			/* обработка формы c вызовом CGI */
+			if (it->first == "Content-Type:" && it->second == "application/x-www-form-urlencoded")
 			{
-				std::ofstream w;
-				w.open("file"); 
-				while (getline(r, line))
-				{
-					w << line;
-					std::cout << line << std::endl;
-				}
+				std::cout << it->first << " " << it->second << '\n';
+				std::cout <<RED << "1"<<_requestBody <<RESET <<std::endl;
+				// if (_config->location[this].CGI)
+				// 	Cgi cgi(_requestBody, _config);
 			}
-			std::remove("www/file.tmp");
-			std::cout <<RED << "1" << line <<RESET <<std::endl;
 
-			
-			
+			/* обработка отправки файла */
+			if (it->first == "Content-Type:" && it->second.find("multipart/form-data") != std::string::npos)
+			{
+				std::cout << it->first << " " << it->second << '\n';
+				std::cout << RED << "2" <<_requestBody << RESET << std::endl;
+				// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
+				// std::cout <<CYAN <<_requestHeaders <<RESET <<std::endl;
 
-			// file << _requestBody;
-			// std::cout << it->first << " " << it->second << "OKOKOKOKOKOKOKOKOKKOK" << it->second.find("ddd") <<'\n';
+				// char buff[100000];
+				std::string line;
+				std::ifstream r("www/file.tmp");
+				if (r.is_open())
+				{
+					std::ofstream w;
+					w.open("file"); 
+					while (getline(r, line))
+					{
+						w << line;
+						std::cout << line << std::endl;
+					}
+				}
+				std::remove("www/file.tmp");
+				std::cout <<RED << "1" << line <<RESET <<std::endl;
+				// file << _requestBody;
+				// std::cout << it->first << " " << it->second << "OKOKOKOKOKOKOKOKOKKOK" << it->second.find("ddd") <<'\n';
+				// if ( it->second.find("multipart/form-data") == std::string::npos)
+				// 	std::cout << "NON FOUND!!!!!!!" <<'\n';
+
+			}
+			// if ()
 
 
-			// if ( it->second.find("multipart/form-data") == std::string::npos)
-			// 	std::cout << "NON FOUND!!!!!!!" <<'\n';
 
 		}
+		// for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
+		// {
+		// 	if (it->first == "Content-Disposition:")
+		// 		std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
+		// 	// 
+		// 	// std::cout << it->first << " " << it->second << '\n';
+		// 	if (it->first == "Connection:")
+		// 	 	 std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
+		// 	// {
+		// 	// 	// close(pfd_array[1 + i].fd);
+		// 	// 	std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
+		// 	// }
+		// 	// if (it->first == "")
+		// }
+		// 	// _requestHeaders.find("Content-Disposition");
+		// _statusCode = OK;
+		// 	std::cout << BLUE << _requestHeaders.find("Content-Disposition:")->second << RESET << "\n";
+		// 	std::cout << "BODY:" << BLUE << _requestBody << RESET << "\n";
 
-
-
-	}
-	// for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
-	// {
-	// 	if (it->first == "Content-Disposition:")
-	// 		std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
-	// 	// 
-	// 	// std::cout << it->first << " " << it->second << '\n';
-	// 	if (it->first == "Connection:")
-	// 	 	 std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
-	// 	// {
-	// 	// 	// close(pfd_array[1 + i].fd);
-	// 	// 	std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
-	// 	// }
-	// 	// if (it->first == "")
-	// }
-	// 	// _requestHeaders.find("Content-Disposition");
-	// _statusCode = OK;
-	// 	std::cout << BLUE << _requestHeaders.find("Content-Disposition:")->second << RESET << "\n";
-	// 	std::cout << "BODY:" << BLUE << _requestBody << RESET << "\n";
-
-	// responseCompose();
+		// responseCompose();
 
 	}
 
