@@ -28,9 +28,9 @@ public:
 	std::string getBody();
 	
 
-	// RequestParser(const RequestParser &copy);
+	 RequestParser(const RequestParser &copy);
 	~RequestParser();
-	// RequestParser &operator=(const RequestParser &copy);
+	 RequestParser &operator=(const RequestParser &copy);
 
 private:
 	// bool _is_ok;			// запрос ок! отправляем на обработку

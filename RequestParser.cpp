@@ -1,6 +1,6 @@
 #include "RequestParser.hpp"
 
-RequestParser::RequestParser(void) 
+RequestParser::RequestParser(void) : _headers()
 {
 	_isOk = 0;
 	_global_len = 0;
@@ -17,6 +17,34 @@ RequestParser::RequestParser(void)
 // RequestParser::RequestParser(std::string buf)
 // {
 // }
+RequestParser::RequestParser(const RequestParser &copy)
+{
+	*this = copy;
+}
+
+RequestParser &RequestParser::operator=(const RequestParser &copy)
+{
+	_isOk = copy._isOk;
+	_is_host = copy._is_host;
+	_is_chunked = copy._is_chunked;
+	_is_headers_ok = copy._is_headers_ok;
+	_is_body = copy._is_body;
+	_is_startline_ok = copy._is_startline_ok;
+	_is_multipart = copy._is_multipart;
+	_is_length = copy._is_length;
+	_contentLength = copy._contentLength;
+	_global_len = copy._global_len;
+	_str = copy._str;
+//	_ss = copy._ss;
+//	_bodybuffer = copy._bodybuffer;
+	_metod = copy._metod;
+	_path = copy._path;
+	_protokol = copy._protokol;
+	_headers = copy._headers;
+	_body = copy._body;
+	_fullRequest = copy._fullRequest;
+	return *this;
+}
 
 int RequestParser::RequestWaiter(const char *str, int len)
 {

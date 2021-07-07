@@ -1,11 +1,14 @@
 #include "Connection.hpp"
 
-Connection::Connection()
+Connection::Connection():
+		_sock(NULL), _config(NULL), _state(READING), _sock_fd(-1),
+		_response(), _isOK(0), _request()
 {
 }
 
 Connection::Connection(Socket *sock, t_config *config):
-	_sock(sock), _config(config), _state(READING), _sock_fd(sock->getFd())
+	_sock(sock), _config(config), _state(READING), _sock_fd(sock->getFd()),
+	_response(), _isOK(0), _request()
 {
 }
 
@@ -21,7 +24,13 @@ Connection::Connection(const Connection &copy)
 
 Connection	&Connection::operator=(const Connection &copy)
 {
-	//TODO
+	_request = copy._request;
+	_response = copy._response;
+	_state = copy._state;
+	_sock_fd  = copy._sock_fd;
+	_isOK = copy._isOK;
+	_sock = copy._sock;
+	_config = copy._config;
 	return (*this);
 }
 

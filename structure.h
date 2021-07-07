@@ -39,6 +39,19 @@ typedef struct 	s_config
 	std::string error_page;
 	std::vector<std::string> cgi_alias;
 	std::vector<t_location> location;
+
+//	struct s_config &operator=(const struct s_config &copy)
+//	{
+//		serverID = copy.serverID;
+//		listen = copy.listen;
+//		server_name = copy.server_name;
+//		max_body_size = copy.max_body_size;
+//		error_page = copy.error_page;
+//		cgi_alias = copy.cgi_alias;
+//		location = copy.location;
+//		return (*this);
+//	}
+
 }				t_config;
 
 
