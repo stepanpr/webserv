@@ -38,10 +38,6 @@ Server	&Server::operator=(const Server &copy)
 int Server::startServer(t_config *config)
 {
 	this->_config = config;
-	pthread_mutex_lock(&lock);
-	std::cout << std::endl << GREEN_B << "Server started! " << WHITE <<"(ID: "
-	<< _config->serverID << "; port: " << _config->listen << ")" << RESET << std::endl;
-	pthread_mutex_unlock(&lock);
 
 	_createListenSocket();
 
@@ -254,6 +250,10 @@ void Server::_createListenSocket()
 	}
 	if (_listenSock->listen() < 0)
 		throw Exceptions();
+	pthread_mutex_lock(&lock);
+	std::cout << std::endl << GREEN_B << "Server started! " << WHITE <<"(ID: "
+			  << _config->serverID << "; port: " << _config->listen << ")" << RESET << std::endl;
+	pthread_mutex_unlock(&lock);
 }
 
 void Server::_initPollfdStruct()
