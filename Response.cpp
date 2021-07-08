@@ -295,7 +295,7 @@ std::string Response::responseInit()
 	// }
 
 
-	if (_requestMethod == "GET")
+	if (_requestMethod == "GET" || _requestMethod == "HEAD")
 	{
 
 
@@ -600,14 +600,14 @@ std::string Response::responseInit()
 
 	}
 
-    if (_requestMethod == "HEAD")
-    {
-        _statusCode = OK;
-        _fullPath = _config->location[0].root + '/' + _config->location[0].index;
-        this->readBody(_fullPath);
-        responseCompose();
-
-    }
+//    if (_requestMethod == "HEAD")
+//    {
+//        _statusCode = OK;
+//        _fullPath = _config->location[0].root + '/' + _config->location[0].index;
+//        this->readBody(_fullPath);
+//        responseCompose();
+//
+//    }
 
 	// if (_requestMethod == "DELETE")
 	// {
