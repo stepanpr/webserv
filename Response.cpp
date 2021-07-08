@@ -103,6 +103,14 @@ void Response::writeHeaders(std::string &method)
 		// _headers["Retry-After"] = "1";
 		// _headers["Authorization"] = "Basic qqq : www";
 	}
+    if (method == "HEAD")
+    {
+        _headers["Server"] = "webserv/1.0";
+        setDate();
+        _headers["Date"] = _date + " GMT";
+        _headers["Title"] = "webserv (project for 21 school)";
+        _headers["Content-Language"] = "en,ru";
+    }
 	if (method == "DELETE")
 	{
 		_headers["Server"] = "webserv/1.0";
@@ -138,7 +146,9 @@ void Response::responseCompose()
 	_response += "Content-Length: ";
 	_response += toString(_body.size());
 	_response += "\r\n\r\n";
-	_response += _body;
+	if (_requestMethod != "HEAD")
+	    _response += _body;
+
 }
 
 
@@ -386,12 +396,12 @@ std::string Response::responseInit()
 		/* проверяем существование скрипта */
 		std::string relativePathToScript = _requestPath.substr(1, _requestPath.length());
 		// std::cout << RED << relativePathToScript << RESET <<std::endl;
-		if (stat(relativePathToScript.c_str(), &_stat) >= 0)
-		{
-			// std::cout << RED << "STAT!!!!!!"<< RESET <<std::endl;
-			_statusCode = OK;
-		}
-		else
+//		if (stat(relativePathToScript.c_str(), &_stat) >= 0)
+//		{
+//			// std::cout << RED << "STAT!!!!!!"<< RESET <<std::endl;
+//			_statusCode = OK;
+//		}
+//		else
             _statusCode = OK;
 //			_statusCode = NOTFOUND;
 		
@@ -457,12 +467,20 @@ std::string Response::responseInit()
 			{
 				std::cout << YELLOW << _requestHeaders.at("Content-Type:") << RESET<< std::endl;
 				std::cout << RED << "1"<<_requestBody <<RESET <<std::endl;
-					// if (_config->location[this].CGI)
-//				Cgi cgi(_requestBody, _config);
+                if (stat(relativePathToScript.c_str(), &_stat) >= 0)
+                {
+                    // std::cout << RED << "STAT!!!!!!"<< RESET <<std::endl;
+//                     if (_config->location[this].CGI)
+//				        Cgi cgi(_requestBody, _config);
+                    _statusCode = OK;
+                }
+                else
+                    _statusCode = NOTFOUND;
+
 			}
 			
 			/* multipart/form-data * обработка отправки файла */
-			if (_requestHeaders.count("Content-Type:") && _requestHeaders.at("Content-Type:").find("multipart/form-data") != std::string::npos)
+			else if (_requestHeaders.count("Content-Type:") && _requestHeaders.at("Content-Type:").find("multipart/form-data") != std::string::npos)
 			{
 				std::cout << YELLOW << _requestHeaders.at("Content-Type:") << RESET<< std::endl;
 				std::cout << RED << "2" <<_requestBody << RESET << std::endl;
@@ -473,6 +491,9 @@ std::string Response::responseInit()
 				w.open("file", std::ios::out | std::ios::binary);
 				w << _requestBody;
 			}
+			else
+			    _statusCode = NOTALLOWED;
+              //_fullPath = _config->location[0].root + '/' + _config->location[0].index;
 
 			// for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
 			// {
@@ -579,6 +600,15 @@ std::string Response::responseInit()
 
 	}
 
+    if (_requestMethod == "HEAD")
+    {
+        _statusCode = OK;
+        _fullPath = _config->location[0].root + '/' + _config->location[0].index;
+        this->readBody(_fullPath);
+        responseCompose();
+
+    }
+
 	// if (_requestMethod == "DELETE")
 	// {
 	// 	if (remove(_requestPath.c_str()) == 0)
@@ -614,7 +644,7 @@ std::string Response::responseInit()
 
 
 	{ /* запись ответа в лог-файл */
-		// std::cout << _response << '\n'; //вывод ответа
+		 std::cout << _response << '\n'; //вывод ответа
 
 		std::ofstream save_response("www/response.log", std::ios::app);
 
