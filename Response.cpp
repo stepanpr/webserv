@@ -185,7 +185,7 @@ void Response::autoindexOn()
 			" * { margin: 0; padding: 0; }"
 			"h1 { text-align: center; font-size: 25px; margin-top: 30px;}"
 			"a { text-decoration: none; color: black; font-size: 20px;}"
-			"body { background: rgb(238,174,202); background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%); }"
+			"body { bac     kground: rgb(238,174,202); background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%); }"
 			"ul { display: flex; flex-wrap: wrap; flex-direction: column; border-radius: 5px; text-align: center; padding-left: 0; margin-top: 30px;}"
 			"li { display: block; border-bottom: 1px solid #673ab7; padding-bottom: 5px;}"
 			"</style>\n</head>\n<body>\n";
