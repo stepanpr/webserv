@@ -4,7 +4,7 @@
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
-Server::Server(): _mapConnections(), _config(NULL), _clientsCount(0), _listenSock(NULL)
+Server::Server():     _clientsCount(0),  _listenSock(NULL), _config(NULL), _mapConnections()
 {
 	_initPollfdStruct();
 }
@@ -129,6 +129,12 @@ int Server::request(Connection &conn, int i)
 	{
 		std::cout << WHITE_B << ret << WHITE << " bytes received from client " << WHITE_B << i << RESET << std::endl;
 		std::cout << GREEN << buf << RESET << std::endl;
+
+
+		std::ofstream fileTmp("www/file.tmp", std::ios::app);
+		fileTmp << buf << '\n' << "----------" <<  '\n';
+
+
 		conn.bufHandler((char*)buf, ret);
 		if (conn.get_isOk())
 			return FULL;
@@ -148,7 +154,7 @@ int Server::responseSend(Connection &conn)
 //	std::cout << GREEN << sended << RESET << std::endl;
 	if (sended < 0)
 		throw Exceptions();
-	if (sended < response.length())
+	if (sended < (int)response.length())
 	{
 		conn.setResponse(response.substr(sended, response.length()));
 		return WAIT;

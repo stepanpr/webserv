@@ -18,8 +18,8 @@ class Cgi
 		// Cgi();
 		Cgi(std::string body, struct s_config *config);
 		Cgi(const Cgi &cgi);
-		// ~Cgi();
-		Cgi &operator=(const Cgi &copy);
+		// ~Cgi();n
+//		Cgi &operator=(const Cgi &copy);
 
 		void setVariables();
 

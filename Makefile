@@ -4,7 +4,7 @@ NAME = webserv
 CC = clang++
 
 # -Wall -Wextra -Werror
-CFLAGS = -std=c++98  
+CFLAGS = -std=c++98
 
 SRCS = main.cpp Config.cpp Server.cpp RequestParser.cpp Response.cpp Connection.cpp Socket.cpp Cgi.cpp
 
@@ -31,7 +31,7 @@ all: $(NAME)
 	@$(CC) $(CFLAGS)  -c $< -o $@
 
 $(NAME): $(OBJS)
-	@$(CC) $(OBJS) -o $(NAME) -pthread 
+	@$(CC) $(OBJS) -o $(NAME) -pthread -g
 	@echo "$(GREEN_BOLD)Completed!$(RESET)"
 	@echo "$(BLUE_BOLD)=======WEBSERV/arannara_team/21school=======$(RESET)"
 	@echo " $(PURPLE)Directories:$(RESET)"

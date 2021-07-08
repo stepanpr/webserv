@@ -4,7 +4,7 @@
 Response::Response() {}
 
 Response::Response(RequestParser &HTTPrequest, struct s_config *config)
-: _requestHeaders(HTTPrequest.getHeaders()), _requestBody(HTTPrequest.getBody()), _requestMethod(HTTPrequest.getMetod()), _requestPath(HTTPrequest.getPath()), _requestProtocol(HTTPrequest.getProtokol()), _config(config)
+: _requestHeaders(HTTPrequest.getHeaders()), _requestBody(HTTPrequest.getBody()), _requestMethod(HTTPrequest.getMetod()),  _requestProtocol(HTTPrequest.getProtokol()), _requestPath(HTTPrequest.getPath()), _config(config)
 {
 	this->_statusCode = "";
 	this->_autoindex = false;
@@ -12,9 +12,9 @@ Response::Response(RequestParser &HTTPrequest, struct s_config *config)
 
 Response::~Response() {}
 
-Response::Response(const Response &copy){}
+//Response::Response(const Response &copy){}
 
-Response	&Response::operator=(const Response &copy) { return (*this); }
+//Response	&Response::operator=(const Response &copy) { return (*this); }
 
 
 
@@ -229,9 +229,9 @@ std::string Response::requestPathWithoutHTML(std::string &pathWithHTML)
 /* проверка допустимых methods */
 bool Response::checkMethod(int &i)
 {
-	int ok = 0;
+//	int ok = 0;
 
-	for (int f = 0; f < _config->location[i].methods.size(); f++)
+	for (int f = 0; f < (int)_config->location[i].methods.size(); f++)
 	{
 			_allowedMethods += this->_config->location[i].methods[f];
 			// std::cout << this->_config->location[i].methods[f] << " ddddd" << _allowedMethods << '\n';
@@ -295,7 +295,7 @@ std::string Response::responseInit()
 			std::cout << _requestPath.substr(1, _requestPath.size()) << "THIS IS HTML\n";
 
 			// std::cout << config->listen << '\n';
-			for (int i = 0; i < _config->location.size(); i++)
+			for (int i = 0; i < (int)_config->location.size(); i++)
 			{
 				if (_config->location[i].location == _requestPath || (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find(".html"))) 
 				|| (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find("index.html")))) // requestPathWithoutHTML(_requestPath))		//если, запрос совпадает с каким-то локейшеном (с маской локейшена); сравниваем также возвтратом функциии, которая образает .html в конце запроса
@@ -378,16 +378,11 @@ std::string Response::responseInit()
 	{
 		if (_requestMethod == "POST") { std::cout << BLUE << "THIS IS POST!" << RESET << "\n"; }
 
-
 		/* 
 		** https://moskalukov.ru/articles/51-otpravka-fajlov-cherez-formu.html
 		** https://github.com.cnpmjs.org/42Curriculum/ft_webserv/blob/master/requests.cpp 
 		** https://routerus.com/curl-post-request/ //curl-post-request
 		*/
-
-
-	
-
 		/* проверяем существование скрипта */
 		std::string relativePathToScript = _requestPath.substr(1, _requestPath.length());
 		// std::cout << RED << relativePathToScript << RESET <<std::endl;
@@ -396,9 +391,9 @@ std::string Response::responseInit()
 			// std::cout << RED << "STAT!!!!!!"<< RESET <<std::endl;
 			_statusCode = OK;
 		}
-		else	
-			_statusCode = NOTFOUND;
-
+		else
+            _statusCode = OK;
+//			_statusCode = NOTFOUND;
 		
 		//если в данном локейшене есть cgi_path  и  локейшн поддерживает пост
 		//и если файл cgi существует stat("www/response.log", &_stat) == 0
@@ -447,7 +442,7 @@ std::string Response::responseInit()
 		if (_requestHeaders.find("Content-Length:") == _requestHeaders.end() || _requestHeaders.at("Content-Length:") == "0")
 		{	
 //			std::cout << RED << _requestHeaders.at("Content-Length:") << RESET<< std::endl;
-			_statusCode = BADREQUEST;
+			// _statusCode = BADREQUEST;
 		}
 		// else
 		// 	std::cout << RED << _requestHeaders.at("Content-Length:") << RESET<< std::endl;
@@ -463,7 +458,7 @@ std::string Response::responseInit()
 				std::cout << YELLOW << _requestHeaders.at("Content-Type:") << RESET<< std::endl;
 				std::cout << RED << "1"<<_requestBody <<RESET <<std::endl;
 					// if (_config->location[this].CGI)
-				Cgi cgi(_requestBody, _config);
+//				Cgi cgi(_requestBody, _config);
 			}
 			
 			/* multipart/form-data * обработка отправки файла */
@@ -479,10 +474,8 @@ std::string Response::responseInit()
 				w << _requestBody;
 			}
 
-
 			// for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
 			// {
-
 				
 			// 	/* проверка на локейшн ?*/
 			// 	// std::cout << it->first << " " << it->second << '\n';
@@ -526,8 +519,6 @@ std::string Response::responseInit()
 
 			// 	}
 			// 	// if ()
-
-
 
 			// }
 		}
@@ -588,11 +579,6 @@ std::string Response::responseInit()
 
 	}
 
-
-
-
-
-
 	// if (_requestMethod == "DELETE")
 	// {
 	// 	if (remove(_requestPath.c_str()) == 0)
@@ -609,8 +595,7 @@ std::string Response::responseInit()
 	// 	}
 	// 	readBody(_fullPath);
 	// 	responseCompose();
-	// }
-
+	// } 
 
 	{ /* вывод сообщения в соответствии со _statusCode*/
 		

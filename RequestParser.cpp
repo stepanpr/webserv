@@ -4,7 +4,9 @@ RequestParser::RequestParser(void) : _headers()
 {
 	_isOk = 0;
 	_global_len = 0;
-		_is_startline_ok = false; 
+    _contentLength = 0;
+
+        _is_startline_ok = false;
 		_is_headers_ok = false;
 		_is_host = false;
 		_is_body = false;
@@ -35,8 +37,10 @@ RequestParser &RequestParser::operator=(const RequestParser &copy)
 	_contentLength = copy._contentLength;
 	_global_len = copy._global_len;
 	_str = copy._str;
-//	_ss = copy._ss;
-//	_bodybuffer = copy._bodybuffer;
+
+    buf = copy.buf;
+	_bodybuffer = copy._bodybuffer;
+
 	_metod = copy._metod;
 	_path = copy._path;
 	_protokol = copy._protokol;
@@ -54,7 +58,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	std::string double_separator = "\r\n\r\n";
 	std::string startline;
 	std::string headers;
-	std::string buf;
+
 	std::string tmp_header;
 	std::string tmp_header_rigth;
 
@@ -65,7 +69,6 @@ int RequestParser::RequestWaiter(const char *str, int len)
 
 	buf.append(new_str);				//  Добавляем приходящую строку в буфер
 
-	buf_all.append(new_str);
 	
 
 // std::cout << "!!!!!!!!" << new_str <<std::endl;
@@ -93,12 +96,12 @@ int RequestParser::RequestWaiter(const char *str, int len)
 
 	
 	
-	//	Стартлайн спарсили, парсим хедеры
-	if ((((pos = buf.find(double_separator)) != std::string::npos)) && (_is_length == 0)) // если есть \r\n\r\n парсим и удаляем все что до него
+		// Стартлайн спарсили, парсим хедеры
+	if ((((pos = buf.find(double_separator)) != std::string::npos))) // если есть \r\n\r\n парсим и удаляем все что до него
 	{
-		if (_is_headers_ok != true) // если не было хедеров
+		if (_is_headers_ok != true) // если не было хедеров
 		{
-			headers = buf.substr(0, pos + double_separator.length());  // отрезаем хедеры
+			headers = buf.substr(0, pos + separator.length());  // отрезаем хедеры
 
 			buf.erase(0, pos + double_separator.length());
 
@@ -115,6 +118,10 @@ int RequestParser::RequestWaiter(const char *str, int len)
 		}
 		_is_headers_ok = true;
 	}
+			
+
+	// if ((((pos = buf.find(double_separator)) != std::string::npos)))
+	// 	std::cout << "base" << '\n';
 
 
 
@@ -140,7 +147,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 		}
 	}
 
-	//  начинаем читать тело Chunked
+	//  начинаем читать тело Chunked
 	if  (_is_chunked == true)
 		{
 			while (_is_body != true)
@@ -156,7 +163,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 				if (bodydigit_dec > 0)
 				{
 					buf.erase(buf.begin(), buf.begin() + bodydigit.length() + separator.length());
-					_bodybuffer << buf.substr(0, bodydigit_dec); // Положили в буфер
+					_bodybuffer.append(buf.substr(0, bodydigit_dec)); // Положили в буфер
 					buf.erase(buf.begin(), buf.begin() + bodydigit_dec + separator.length());
 				}
 				if (bodydigit_dec == 0)
@@ -227,7 +234,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 			// {
 			// 	buf.erase(0, pos);
 			// }
-			_bodybuffer << buf;
+			_bodybuffer.append(buf);
 			_global_len = _global_len + len;
 		}
 	}
@@ -235,13 +242,13 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	// std::cout<< "!!!!!!!! " << _contentLength << ' ' << len <<'\n';
 	// std::cout << "_is_multipart:" << _is_multipart << ' ' << " _is_length:" << _is_length << " _global_len:" << _global_len << '\n' << '\n';
 
-	 std::cout << _bodybuffer.str() << '\n';
+	 std::cout << buf << '\n';
 
 	// std::ofstream fileTmp("www/file.tmp", std::ios::app);
 	// fileTmp << _bodybuffer.str();
 
 
-	if (!(_metod.empty()) && !(_path.empty()) && !(_protokol.empty()) && (_is_headers_ok == true) )  //  проверяем стартлайн, мапу с хедерами и выставляем флаг is_ok
+	if (_is_startline_ok == true && _is_headers_ok == true)  //  проверяем стартлайн, мапу с хедерами и выставляем флаг is_ok
 	{
 		if (((_is_chunked == true) || (_is_length == true)) && (_is_body == true)) // если есть чанк или лен и боди собралось
 					_isOk = 1;
@@ -251,10 +258,12 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	}
 	// std::cout << "_global_len:" << _global_len << " _contentLength:" << _contentLength << '\n';
 
-	if ( _global_len >= _contentLength ) 
+	if ( (_global_len >= _contentLength) && _global_len != 0 )
 		_isOk = 1;
 
-	 std::cout << "_isOk:" << _isOk << '\n';
+    std::cout << "_isOk:" << _isOk << '\n';
+    std::cout << "_is_startline_ok: " << _is_startline_ok << " _is_headers_ok: " << _is_headers_ok << " _is_chunked: " << _is_chunked << " _is_body: " << _is_body << '\n';
+
 
 	return (_isOk);
 
@@ -268,9 +277,10 @@ int RequestParser::RequestWaiter(const char *str, int len)
 void RequestParser::PrintMap()
 {
 	std::cout << "map contains:\n";
-	std::map<std::string,std::string>::iterator it = _headers.begin();
-  	for (it = _headers.begin(); it != _headers.end(); ++it)
-    std::cout << it->first << " " << it->second << '\n';
+		std::map<std::string,std::string>::iterator it = _headers.begin();
+  		for (it = _headers.begin(); it != _headers.end(); ++it)
+    	std::cout << it->first << " " << it->second << '\n';
+
 
 }
 
@@ -296,7 +306,7 @@ std::map<std::string,std::string> RequestParser::getHeaders()
 
 std::string RequestParser::getBody()
 {
-	return (_bodybuffer.str());
+	return (_bodybuffer);
 }
 
 // RequestParser::RequestParser(const RequestParser &copy)

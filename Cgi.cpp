@@ -7,17 +7,17 @@
 
 
 
-Cgi::Cgi(std::string body, struct s_config *config)
-{
-
-}
+//Cgi::Cgi(std::string body, struct s_config *config)
+//{
+//
+//}
 
 Cgi::Cgi(const Cgi &cgi) { *this = cgi; }
 
-Cgi &Cgi::operator=(const Cgi &copy)
-{
-	return *this;
-}
+//Cgi &Cgi::operator=(const Cgi &copy)
+//{
+//	return *this;
+//}
 
 void Cgi::launchCGI()
 {

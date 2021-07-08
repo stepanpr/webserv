@@ -42,13 +42,14 @@ private:
 	bool _is_multipart;		// если постом передается файл
 	bool _is_length;		// есть ли хедер Content-length:
 
+    std::string buf;
+
 	size_t _contentLength;
 	size_t _global_len;		// если постом передается файл
 
 	std::string _str;
 
-	std::stringstream _ss;
-	std::stringstream _bodybuffer;
+	std::string _bodybuffer;
 	std::string _metod;
 	std::string _path;
 	std::string _protokol;

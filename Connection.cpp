@@ -1,14 +1,14 @@
 #include "Connection.hpp"
 
 Connection::Connection():
-		_sock(NULL), _config(NULL), _state(READING), _sock_fd(-1),
-		_response(), _isOK(0), _request()
+
+		         _request(),_response(), _state(READING),  _sock_fd(-1), _isOK(0), _sock(NULL), _config(NULL)
 {
 }
 
 Connection::Connection(Socket *sock, t_config *config):
-	_sock(sock), _config(config), _state(READING), _sock_fd(sock->getFd()),
-	_response(), _isOK(0), _request()
+
+	    _request(),_response(),_state(READING),_sock_fd(sock->getFd()),  _isOK(0), _sock(sock), _config(config)
 {
 }
 
