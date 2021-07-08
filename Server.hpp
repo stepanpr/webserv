@@ -30,6 +30,7 @@ class Connection;
 class Server
 {
 private:
+	int conNumber;
 	int							_clientsCount;
 	Socket						*_listenSock;
 	t_config					*_config;

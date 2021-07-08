@@ -7,6 +7,7 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 Server::Server():     _clientsCount(0),  _listenSock(NULL), _config(NULL), _mapConnections()
 {
 	_initPollfdStruct();
+    conNumber = 0;
 }
 
 Server::~Server()
@@ -62,6 +63,7 @@ int Server::_pollLoop()
 		** nfds - параметр типа nfds_t, используемый для обозначения бщее количества элементов (клиентов);
 		** timeout - время блокировки (в миллисекундах)
 		*/
+        std::cout << "connection number: " << ++conNumber << '\n';
 		int ret = poll(_fd_array, 1 + MAX_CLIENTS, -1); //-1 (infinity) или значние TIMEOUT
 		if (ret == -1)
 		{
