@@ -48,6 +48,9 @@ private:
 	size_t _global_len;		// если постом передается файл
 
 	std::string _str;
+    static const std::string space;
+    static const std::string separator;
+    static const std::string double_separator;
 
 	std::string _bodybuffer;
 	std::string _metod;
