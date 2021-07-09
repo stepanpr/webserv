@@ -4,6 +4,18 @@
 # include "main.hpp"
 #include "structure.h"
 #include "Response.hpp"
+#include "main.hpp"
+
+
+#include <errno.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
+// #include <process.h> /* Required for _spawnv */
+// #include <io.h>
+#include <fcntl.h>
+#include <string>
+#include <vector>
 
 
 
@@ -12,17 +24,30 @@
 class Cgi
 {
 	private:
-		std::map<std::string, std::string> variables;
+		// std::map<std::string, std::string> variables;
+		std::vector<std::string> _vars;
+		char **_varsArray;
+		// std::string _vars;
+
+
+		// std::map<std::string, std::string> _requestHeaders;
+		// std::string 			_requestMethod;
+		struct s_config			*_config;
+		std::string 			_body;
+		std::string 			_pathToCgi;
+
+
+		
 
 	public:
 		// Cgi();
-		Cgi(std::string body, struct s_config *config);
+		Cgi(std::string body, struct s_config *config, std::string pathToCgi, std::map<std::string, std::string> requestHeaders, std::string requestMethod);
 		Cgi(const Cgi &cgi);
 		// ~Cgi();n
-//		Cgi &operator=(const Cgi &copy);
+		// Cgi &operator=(const Cgi &copy);
 
-		void setVariables();
-
+		std::vector<std::string>  setVariables(std::map<std::string, std::string> requestHeaders, std::string requestMethod);
+		char **getVarsArray(std::vector<std::string> vars);
 		void launchCGI();
 
 };
