@@ -40,6 +40,8 @@ typedef struct 	s_config
 	std::vector<std::string> cgi_alias;
 	std::vector<t_location> location;
 
+	// int aIdx;
+
 //	struct s_config &operator=(const struct s_config &copy)
 //	{
 //		serverID = copy.serverID;

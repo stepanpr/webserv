@@ -209,6 +209,8 @@ void Response::autoindexOn()
 	closedir(dir);
 	body += "</ul></body>\n</html>\n";
 	this->_body = body;
+
+	// aIdx = 1;
 }
 
 
@@ -334,7 +336,21 @@ std::string Response::responseInit()
 				}
 				else //if (_config->location[i].location != _requestPath && _config->location[i].location != _requestPath.substr(0, _requestPath.find(".html")))
 				{	//если это файл он существует и имеет mime тип, то также отправляем в респонс, записываем в ответ боди
-					if (stat("www/response.log", &_stat) == 0 && _getMimeType(_requestPath.substr(0, _requestPath.size())) != MIME_TYPE_NOT_FOUND)
+
+					// if (stat((_config->location[i].root + '/' + _requestPath.substr(1, _requestPath.size())).c_str(), &_stat) == 0 
+					// && _getMimeType(_requestPath.substr(0, _requestPath.size())) != MIME_TYPE_NOT_FOUND /*&& aIdx == 1*)
+					// // && _getMimeType(_requestPath.substr(0, _requestPath.size())) != "text/html")
+					// {
+					// 	std::cout << RED << _getMimeType(_requestPath.substr(0, _requestPath.size()))  << RESET <<std::endl;
+					// 		_statusCode = OK; /* при отключенных locations сайта, покажет ошибку */
+					// 		// _fullPath = _requestPath.substr(1, _requestPath.size());
+					// 		_fullPath = _config->location[i].root + '/' + _requestPath.substr(1, _requestPath.size());
+					// 		_headers["Content-Type"] = _getMimeType(_requestPath.substr(1, _requestPath.size()));
+					// 		// aIdx = 0;
+					// }
+
+
+					if (stat("www/response.log", &_stat) == 0 && _getMimeType(_requestPath.substr(0, _requestPath.size())) != MIME_TYPE_NOT_FOUND /*&& aIdx == 0*/)
 					{
 							_statusCode = OK; /* при отключенных locations сайта, покажет ошибку */
 							_fullPath = _requestPath.substr(1, _requestPath.size());
@@ -395,58 +411,9 @@ std::string Response::responseInit()
 		*/
 		/* проверяем существование скрипта */
 		std::string relativePathToScript = _requestPath.substr(1, _requestPath.length());
-		// std::cout << RED << relativePathToScript << RESET <<std::endl;
-//		if (stat(relativePathToScript.c_str(), &_stat) >= 0)
-//		{
-//			// std::cout << RED << "STAT!!!!!!"<< RESET <<std::endl;
-//			_statusCode = OK;
-//		}
-//		else
-            _statusCode = OK;
-//			_statusCode = NOTFOUND;
-		
-		//если в данном локейшене есть cgi_path  и  локейшн поддерживает пост
-		//и если файл cgi существует stat("www/response.log", &_stat) == 0
 
+        _statusCode = OK;
 
-		/* проверяем наличие location, а также доступных методов */
-		// for (int i = 0; i < _config->location.size(); i++)
-		// {
-		// 	if (_config->location[i].location == _requestPath || (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find(".html"))) 
-		// 	|| (_config->location[i].location ==  _requestPath.substr(0, _requestPath.find("index.html")))) // requestPathWithoutHTML(_requestPath))		//если, запрос совпадает с каким-то локейшеном (с маской локейшена); сравниваем также возвтратом функциии, которая образает .html в конце запроса
-		// 	{
-		// 		if (_config->location[i].autoindex == "on")				//если включен автоиндекс
-		// 		{
-		// 			this->_autoindex = true;
-		// 		}
-		// 		if (!checkMethod(i) || !checkMaxBodySize())
-		// 		{
-		// 			break ;	
-		// 		}
-		// 		// else	
-		// 		// {
-		// 		_path = _config->location[i].root + '/';
-		// 		_fullPath = _config->location[i].root + '/' + _config->location[i].index; //_path
-		// 		_headers["Content-Type"] = _getMimeType(_config->location[i].index); /* устанавливаем MIME тип индекса */
-		// 		_statusCode = OK;
-		// 		break ;
-		// 		// }
-		// 	}
-		// 	// else //if (_config->location[i].location != _requestPath && _config->location[i].location != _requestPath.substr(0, _requestPath.find(".html")))
-		// 	// {	//если это файл он существует и имеет mime тип, то также отправляем в респонс, записываем в ответ боди
-		// 	// 	if (stat("www/response.log", &_stat) == 0 && _getMimeType(_requestPath.substr(0, _requestPath.size())) != MIME_TYPE_NOT_FOUND)
-		// 	// 	{
-		// 	// 			_statusCode = OK; /* при отключенных locations сайта, покажет ошибку */
-		// 	// 			_fullPath = _requestPath.substr(1, _requestPath.size());
-		// 	// 			_headers["Content-Type"] = _getMimeType(_requestPath.substr(1, _requestPath.size()));
-		// 	// 	}
-		// 	// 	// std::cout <<stat("www/response.log", &_stat) << "STAT\n";
-		// 	// 	// if (_getMimeType(_requestPath.substr(0, _requestPath.size())) == MIME_TYPE_NOT_FOUND || stat("www/response.log", &_stat) == -1)
-		// 	// 	// {
-		// 	// 	// 	continue ;
-		// 	// 	// }
-		// 	// }
-		// }
 
 		/* если хедер Content-Length отсутствует или его значение равно нулю то возвращаем меняем статус на BADREQUEST */
 		if (_requestHeaders.find("Content-Length:") == _requestHeaders.end() || _requestHeaders.at("Content-Length:") == "0")
@@ -467,11 +434,15 @@ std::string Response::responseInit()
 			{
 				std::cout << YELLOW << _requestHeaders.at("Content-Type:") << RESET<< std::endl;
 				std::cout << RED << "1"<<_requestBody <<RESET <<std::endl;
-                if (stat(relativePathToScript.c_str(), &_stat) >= 0)
+                std::cout << RED << _requestPath <<"requestpsth!!!!!!"<< RESET <<std::endl;
+                std::cout << RED << relativePathToScript <<"relativePathToScript!!!!!!"<< RESET <<std::endl;
+
+                if (stat(relativePathToScript.c_str(), &_stat) == 0)
                 {
-                    // std::cout << RED << "STAT!!!!!!"<< RESET <<std::endl;
 //                     if (_config->location[this].CGI)
-//				        Cgi cgi(_requestBody, _config);
+				    Cgi cgi(_requestBody, _config, relativePathToScript, _requestHeaders, _requestMethod);
+					// cgi.createEnv(_requestHeaders, _requestMethod);
+					cgi.launchCGI();
                     _statusCode = OK;
                 }
                 else
@@ -600,14 +571,6 @@ std::string Response::responseInit()
 
 	}
 
-//    if (_requestMethod == "HEAD")
-//    {
-//        _statusCode = OK;
-//        _fullPath = _config->location[0].root + '/' + _config->location[0].index;
-//        this->readBody(_fullPath);
-//        responseCompose();
-//
-//    }
 
 	// if (_requestMethod == "DELETE")
 	// {
@@ -631,12 +594,14 @@ std::string Response::responseInit()
 		
 		if (_statusCode == OK)
 			std::cout << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+		else if (_statusCode == BADREQUEST)
+			std::cout  << RED_B << "KO: " << WHITE <<"request is bad, error \"400\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 		else if (_statusCode == NOTFOUND)
 			std::cout  << RED_B << "KO: " << WHITE <<"content not found, error \"404\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 		else if (_statusCode == NOTALLOWED)
 			std::cout  << RED_B << "KO: " << WHITE <<"request method not allowed, error \"405\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 		else if (_statusCode == REQTOOLARGE)
-			std::cout  << RED_B << "KO: " << WHITE <<"request is too large, error \"404\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout  << RED_B << "KO: " << WHITE <<"request is too large, error \"413\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 		else if (_statusCode == INTERNALERROR)
 			std::cout  << RED_B << "KO: " << WHITE <<"problems with server settings, error \"500\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
 	}
@@ -644,7 +609,7 @@ std::string Response::responseInit()
 
 
 	{ /* запись ответа в лог-файл */
-		 std::cout << _response << '\n'; //вывод ответа
+		//  std::cout << _response << '\n'; //вывод ответа
 
 		std::ofstream save_response("www/response.log", std::ios::app);
 
@@ -679,226 +644,6 @@ return _response;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// int Server::response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config)
-// {
-// 200 используются для успешных запросов.
-// 300 для перенаправления.
-// 400 используются, если возникла проблема с запросом.
-// 500 используются, если возникла проблема с сервером.
-//Хедеры на возврат:
-//Content-Type: text/html; charset=UTF-8  //Content-Type: image/gif //ТИП ОТВЕТНЫХ ДАННЫХ
-// Content-Type: application/zip
-// Content-Disposition: attachment; filename="download.zip" //ЕСЛИ ЗАПРОСИЛИ ФАЙЛ
-// Content-Length: 89123 //ДЛИНА КОНТЕНТА В БАЙТАХ
-// Etag: "pub1259380237;gz" КЕШИРОВАНИЕ ??
-// Last-Modified: Sat, 28 Nov 2009 03:50:37 GMT //ДАТА ПОСЛЕДНЕГО ИЗМЕНЕНИЯ
-// HTTP/1.x 301 Moved Permanently
-// ...
-// Location: https://net.tutsplus.com/	//ПЕРЕНАПРАВЛЕНИЕ (также если код 301 или 302)
-// Set-Cookie: skin=noskin; path=/; domain=.amazon.com; expires=Sun, 29-Nov-2009 21:42:28 GMT 			//УСТАНОВКА КУКИ
-// Set-Cookie: session-id=120-7333518-8165026; path=/; domain=.amazon.com; expires=Sat Feb 27 08:00:00 2010 GMT
-// WWW-Authenticate: Basic realm="Restricted Area" //АУТЕНТИФИКАЦИЯ ПО HTTP - браузер запрашивает аутентификацию
-// Content-Encoding: gzip // ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ СЖИМАЕТСЯ
-// func parcerPath (если находим знак ?), то обрабатываем его, если обработать не получается, то рет 0
-
-// ResponsePreparing response;
-
-// 	std::map<std::string, std::string> headers = HTTPrequest.getHeaders();
-// 	// std::cout << parseHTTPrequest.getMetod() << " " << parseHTTPrequest.getPath() << " " << parseHTTPrequest.getProtokol() <<'\n';
-// 	// for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end() ; it++)
-// 	// {
-// 	// 	std::cout << it->first << " " << it->second << '\n';
-// 	// }
-
-// 	/* обработка method */
-// 	std::string method = HTTPrequest.getMetod();
-
-// 	/* обработка path */
-// 	std::string path;
-// 	int isExist = 0; //существует ли location с таким запросом
-// 	for (int i =0; i < config.location.size(); i++)
-// 	{
-// 		if (config.location[i].location == HTTPrequest.getPath())			//если, у нас не корень и запрос совпадает с каким-то локейшеном (с маской локейшена)
-// 		{
-// 			path = config.location[i].root + '/' + config.location[i].index;
-// 			std::cout << config.location[i].location << " "  << HTTPrequest.getPath() << '\n';
-// 			std::cout << path << '\n';
-// 			isExist = 1;
-// 			break ;
-// 		}
-// 	}
-// 	if (isExist == 0)				//если не найден файл
-// 		path = config.error_page + '/' + "404.html";
-
-// 	/* обработка protocol */
-// 	std::string protocol = HTTPrequest.getProtokol();
-
-
-
-// 	/* обработка заголовков */
-// 	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end() ; it++)
-// 	{
-// 		std::cout << it->first << " " << it->second << '\n';
-// 		// if (it->first == "Connection:" && it->second == "close")
-// 		// {
-// 		// 	// close(pfd_array[1 + i].fd);
-// 		// 	std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
-// 		// }
-// 	}
-
-
-// 	// std::map<std::string, std::string>::iterator it;
-// 	// it = headers.find("Connection:");
-// 	// std::cout << it->first << " " << it->second << '\n';
-
-
-// /* формирование ответа на основе обработанного запроса */
-// if (HTTPrequest.getPath() != "/favicon.ico")
-// {
-// 	std::stringstream response_body;////////////////////////////////////
-// 	std::ifstream file; // создаем объект класса ifstream
-// 	char *file_buffer = new char[10000 + 1]; file_buffer[10000] = 0;    //поменять!
-
-// // www/site.com/index.html
-// 	file.open(path.c_str()); 	//пытаемся открыть файл по запросу
-
-// 	if (!file) 								//нужного контента нету
-// 	{
-// 		std::ifstream error_404;
-// 		file.open("www/default/404.html");
-// 		if (!file)
-// 		{
-// 			std::cout << YELLOW << "error: content not found!" << RESET << std::endl;  //обработать
-// 		}
-// 		else
-// 		{
-// 			error_404.read(file_buffer, 10000);
-// 			response_body << file_buffer;
-// 		}
-// 		return -1;
-// 	}
-// 	else									//контейнт найден
-// 	{
-// 		std::cout << isExist <<'\n';
-// 		if (isExist)
-// 			std::cout << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl; //изменить если 404
-// 		else
-// 			std::cout  << RED_B << "KO: " << WHITE <<"content not found, error-page will be send to client" << RESET << std::endl << std::endl; //изменить если 404
-// 		// std::string file_buffer;
-// 		// char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;
-// 		// response_body << file;
-// 		file.read(file_buffer, 100000);
-// 		// for(file >> file_buffer; !file.eof(); file >> file_buffer)
-// 		// 	std::cout << file_buffer;
-// 		response_body << file_buffer;
-// 	// }
-
-
-// 		std::stringstream response;
-// 		response << "HTTP/1.1 200 OK\r\n"
-// 			<< "Version: HTTP/1.1\r\n"
-// 		<< "Content-Type: text/html; charset=utf-8\r\n"
-// 		<< "Content-Length: " << response_body.str().length()
-// 		<< "\r\n\r\n"
-// 		<< response_body.str();
-
-// 	if(-1 == send(pfd_array[1 + i].fd, response.str().c_str(), response.str().length(), 0))
-// 	{
-// 		printf("Error on call 'send': %s\n", strerror(errno));
-// 		return -1;
-// 	}
-// 	}
-
-// }
-// 	path.clear();
-// 	return 0;
-// }
-
-
-
-
-
-// int Server::response(struct pollfd *pfd_array, int &i)
-// {
-// 			std::stringstream response_body;////////////////////////////////////
-// 				std::ifstream file; // создаем объект класса ifstream
-// 				char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;    //поменять!
-
-
-// 				file.open("www/site.com/index.html"); 	//пытаемся открыть файл по запросу
-
-// 				if (!file) 								//нужного контента нету
-// 				{
-// 					std::ifstream error_404;
-// 					file.open("www/default/404.html");
-// 					if (!file)
-// 					{
-// 						std::cout << YELLOW << "error: content not found!" << RESET << std::endl;
-// 					}
-// 					else
-// 					{
-// 						error_404.read(file_buffer, 300);
-// 						response_body << file_buffer;
-// 					}
-// 					return -1;
-// 				}
-// 				else									//контейнт найден
-// 				{
-// 					std::cout << std::endl << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl;
-// 					// std::string file_buffer;
-// 					// char *file_buffer = new char[1000 + 1]; file_buffer[1000] = 0;
-// 					// response_body << file;
-// 					file.read(file_buffer, 300);
-// 					// for(file >> file_buffer; !file.eof(); file >> file_buffer)
-// 					// 	std::cout << file_buffer;
-// 					response_body << file_buffer;
-// 				// }
-
-
-// 					std::stringstream response;
-// 					// if (flag == 1)
-// 						response << "HTTP/1.1 200 OK\r\n"
-// 						 << "Version: HTTP/1.1\r\n"
-// 					<< "Content-Type: text/html; charset=utf-8\r\n"
-// 					<< "Content-Length: " << response_body.str().length()
-// 					<< "\r\n\r\n"
-// 					<< response_body.str();
-
-// 					if(-1 == send(pfd_array[1 + i].fd, response.str().c_str(), response.str().length(), 0))
-// 					{
-// 						printf("Error on call 'send': %s\n", strerror(errno));
-// 						return -1;
-// 					}
-// 					}
-// 					return 0;
-
-// }
 
 
 
