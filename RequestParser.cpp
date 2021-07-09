@@ -64,6 +64,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 
 	std::string tmp_header;
 	std::string tmp_header_rigth;
+	std::string multipartName;
 
 	std::string new_str ((char*)str, len);	//  Приводим к стрингу
 	buf.append(new_str);				//  Добавляем приходящую строку в буфер
@@ -124,8 +125,11 @@ int RequestParser::RequestWaiter(const char *str, int len)
 			}
 			if ((it->first.compare("Host:") == 0))
 				_is_host = true;
-			if ((it->first.compare("Content-Type:") == 0) && (it->second.find("multipart/form-data;") != std::string::npos))
-				_is_multipart = true;
+			if ((it->first.compare("Content-Type:") == 0) && ((pos = it->second.find("multipart/form-data;")) != std::string::npos))
+            {
+			    multipartName = it->second.substr(pos + 30);
+			    _is_multipart = true;
+            }
 		}
 	}
 
@@ -159,10 +163,17 @@ int RequestParser::RequestWaiter(const char *str, int len)
     //  начинаем читать тело Multipart
     if  (_is_multipart == true)
     {
+        pos = buf.find(separator);
+        buf.erase(buf.begin(), buf.begin() + pos + separator.length());
+
+
         _bodybuffer.append(buf);
         _global_len = _global_len + len;
+
+
         if ( (_global_len >= _contentLength) && _global_len != 0 )
         {
+
             _isOk = 1;
 
         }
@@ -187,7 +198,7 @@ int RequestParser::RequestWaiter(const char *str, int len)
 					_isOk = 1;
 	}
 
-    std::cout << "_isOk:" << _isOk << '\n';
+    std::cout << "_isOk:" << _isOk << " " << multipartName << '\n';
 
 //    std::cout << "_is_startline_ok: " << _is_startline_ok << " _is_headers_ok: " << _is_headers_ok << " _is_chunked: " << _is_chunked << " _is_body: " << _is_body << '\n';
 

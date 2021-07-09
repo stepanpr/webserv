@@ -19,7 +19,7 @@
 // Cgi::Cgi(const Cgi &cgi) { *this = cgi; }
 
 Cgi::Cgi(std::string body, struct s_config *config, std::string pathToCgi, std::map<std::string, std::string> requestHeaders, std::string requestMethod) 
-: _body(body), _config(config), _pathToCgi(pathToCgi)
+:  _config(config), _body(body), _pathToCgi(pathToCgi)
 {
 	std::cout << CYAN << "!CGI is working" << RESET << "\n";
 	_varsArray = getVarsArray(setVariables(requestHeaders, requestMethod));
@@ -55,7 +55,7 @@ std::vector<std::string> Cgi::setVariables(std::map<std::string, std::string> re
     _vars.push_back("SERVER_PROTOCOL=HTTP/1.1");
     _vars.push_back("SERVER_SOFTWARE=web_server");
 	
-	for (int i = 0; i < _vars.size(); i++)
+	for (int i = 0; i < (int)_vars.size(); i++)
 		std::cout << _vars[i] << std::endl;
 	return _vars;
 }
@@ -83,7 +83,7 @@ void Cgi::launchCGI()
 
 	static const std::string strRequestHeader = "Content-Length=" + std::to_string((long long)strRequestBody.length());
 	//Формируем переменные окружения которые будут отосланы дочернему процессу
-	static const char *variables[4] = {strRequestHeader.c_str(), "VARIABLE2=erererer", "VARIABLE3=3", 0};
+//	static const char *variables[4] = {strRequestHeader.c_str(), "VARIABLE2=erererer", "VARIABLE3=3", 0};
 
 	//Формируем переменные командной строки для дочернего процесса. Первая переменная - путь к дочернему процессу.
 	// static const char *pszChildProcessArgs[4] = {"./cgi_bin/mkcgi", "first argument", "second argument", 0};

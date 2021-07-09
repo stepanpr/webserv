@@ -437,6 +437,7 @@ std::string Response::responseInit()
                 std::cout << RED << _requestPath <<"requestpsth!!!!!!"<< RESET <<std::endl;
                 std::cout << RED << relativePathToScript <<"relativePathToScript!!!!!!"<< RESET <<std::endl;
 
+
                 if (stat(relativePathToScript.c_str(), &_stat) == 0)
                 {
 //                     if (_config->location[this].CGI)
