@@ -14,6 +14,7 @@ RequestParser::RequestParser(void) : _headers()
 		_is_chunked = false;
 		_is_length = false;
 		_is_multipart = false;
+		_is_application = false;
 	_is_post = false;
 }
 
@@ -129,8 +130,12 @@ int RequestParser::RequestWaiter(const char *str, int len)
 			if ((it->first.compare("Content-Type:") == 0) && ((pos = it->second.find("multipart/form-data;")) != std::string::npos))
             {
 			    _is_multipart = true;
-
             }
+			if ((it->first.compare("Content-Type:") == 0) && ((pos = it->second.find("application/x-www-form-urlencoded")) != std::string::npos)) //!emabel's changes
+            {
+			    _is_application = true; //!emabel's changes
+            }
+
 		}
 	}
 
@@ -194,16 +199,21 @@ int RequestParser::RequestWaiter(const char *str, int len)
             _bodybuffer.append(buf);
 
         }
-
     }
+	else if  ((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)) && _is_application == true) //!emabel's changes
+	{
+			_bodybuffer.append(buf); //!emabel's changes
+			_global_len = _global_len + len; //!emabel's changes
+			_isOk = 2; //!emabel's changes
+	}
 
 
 	// контент length обработка
-	if  ((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)))
-	{
-//			_bodybuffer.append(buf);
-			_global_len = _global_len + len;
-	}
+	// if  ((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)))
+	// {
+	// 		_bodybuffer.append(buf);
+	// 		_global_len = _global_len + len;
+	// }
 
 
 
@@ -213,6 +223,8 @@ int RequestParser::RequestWaiter(const char *str, int len)
 					_isOk = 1;
 		if ( (_is_host == true) && (_is_chunked == false) && (_is_length == false) ) // если есть тока хост
 					_isOk = 1;
+		else if (_isOk == 2) //!emabel's changes
+			_isOk = 1; //!emabel's changes
 	}
 
 //    std::cout << "_isOk:" << _isOk << '\n';
@@ -220,6 +232,8 @@ int RequestParser::RequestWaiter(const char *str, int len)
 //    std::cout << " _is_headers_ok: " << _is_headers_ok << " _is_multipart: " << _is_multipart << " _is_body: " << _is_body << '\n';
 
 //    std::cout <<"\n\n"<< fileName << "\n\n";
+	//  std::cout << "buf:" << buf << '\n';
+	//  std::cout << "_bodybuf:"<< _bodybuffer << '\n';
 
 	return (_isOk);
 
@@ -265,7 +279,7 @@ std::string RequestParser::getBody()
 	return (_bodybuffer);
 }
 
-std::string RequestParser::getfileName()
+std::string RequestParser::getFileName()
 {
     return (fileName);
 }

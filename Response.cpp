@@ -4,7 +4,7 @@
 Response::Response() {}
 
 Response::Response(RequestParser &HTTPrequest, struct s_config *config)
-: _requestHeaders(HTTPrequest.getHeaders()), _requestBody(HTTPrequest.getBody()), _requestMethod(HTTPrequest.getMetod()),  _requestProtocol(HTTPrequest.getProtokol()), _requestPath(HTTPrequest.getPath()), _config(config), _fileName(HTTPrequest.getfileName())
+: _requestHeaders(HTTPrequest.getHeaders()), _requestBody(HTTPrequest.getBody()), _requestMethod(HTTPrequest.getMetod()),  _requestProtocol(HTTPrequest.getProtokol()), _requestPath(HTTPrequest.getPath()), _config(config), _fileName(HTTPrequest.getFileName())
 {
 	this->_statusCode = "";
 	this->_autoindex = false;
@@ -429,11 +429,12 @@ std::string Response::responseInit()
 
 		if (_statusCode == OK)
 		{
+
 			/* application/x-www-form-urlencoded * обработка формы c вызовом CGI */
 			if (_requestHeaders.count("Content-Type:") && _requestHeaders.at("Content-Type:") == "application/x-www-form-urlencoded")
 			{
 				std::cout << YELLOW << _requestHeaders.at("Content-Type:") << RESET<< std::endl;
-				std::cout << RED << "1"<<_requestBody <<RESET <<std::endl;
+				std::cout << RED <<_requestBody <<RESET <<std::endl;
                 std::cout << RED << _requestPath <<"requestpsth!!!!!!"<< RESET <<std::endl;
                 std::cout << RED << relativePathToScript <<"relativePathToScript!!!!!!"<< RESET <<std::endl;
 
@@ -443,7 +444,7 @@ std::string Response::responseInit()
 //                     if (_config->location[this].CGI)
 				    Cgi cgi(_requestBody, _config, relativePathToScript, _requestHeaders, _requestMethod);
 					// cgi.createEnv(_requestHeaders, _requestMethod);
-					cgi.launchCGI();
+					// cgi.launchCGI();
                     _statusCode = OK;
                 }
                 else

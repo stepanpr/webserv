@@ -26,7 +26,7 @@ public:
 	std::string getProtokol();
 	std::map<std::string,std::string> getHeaders();
 	std::string getBody();
-    std::string getfileName();
+    std::string getFileName();
 	
 
 	 RequestParser(const RequestParser &copy);
@@ -41,6 +41,7 @@ private:
 	bool _is_body;			// пришло ли боди?
 	bool _is_startline_ok;	// есть ли стартлайн
 	bool _is_multipart;		// если постом передается файл
+	bool _is_application; 	// если постом передается форма
 	bool _is_length;		// есть ли хедер Content-length:
 
     std::string buf;

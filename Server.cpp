@@ -133,8 +133,8 @@ int Server::request(Connection &conn, int i)
 		std::cout << GREEN << buf << RESET << std::endl; /* раскоментировать для вывода буфера */
 
 
-		std::ofstream fileTmp("www/file.tmp", std::ios::app);
-		fileTmp << buf << '\n' << "----------" <<  '\n';
+		// std::ofstream fileTmp("www/file.tmp", std::ios::app);
+		// fileTmp << buf << '\n' << "----------" <<  '\n';
 
 
 		conn.bufHandler((char*)buf, ret);

@@ -87,8 +87,8 @@ void Cgi::launchCGI()
 
 	//Формируем переменные командной строки для дочернего процесса. Первая переменная - путь к дочернему процессу.
 	// static const char *pszChildProcessArgs[4] = {"./cgi_bin/mkcgi", "first argument", "second argument", 0};
-	// static const char *pszChildProcessArgs[3] = {"/usr/bin/perl", "./cgi_bin/perl1.cgi", 0};
-	static const char *pszChildProcessArgs[3] = {"/usr/bin/python", "./cgi_bin/python1.py", 0};
+	static const char *pszChildProcessArgs[3] = {"/usr/bin/perl", "./cgi_bin/perl1.cgi", 0};
+	// static const char *pszChildProcessArgs[3] = {"/usr/bin/python", "./cgi_bin/python1.py", 0};
 
 	//При желании можно запустить интерпретатор какого-нибудь скрипта. 
 	//Тогда первый аргумент - путь к интерпретатору, второй - к скрипту
