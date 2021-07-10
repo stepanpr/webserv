@@ -76,6 +76,8 @@ private:
 	std::string _allowedMethods;
 	bool 		_autoindex;
 
+	std::string _fileName;
+
 
 	/* укомплектовынный ответ */
 	std::string _response;

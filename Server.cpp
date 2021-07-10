@@ -130,7 +130,7 @@ int Server::request(Connection &conn, int i)
 	else if (ret > 0)
 	{
 		std::cout << WHITE_B << ret << WHITE << " bytes received from client " << WHITE_B << i << RESET << std::endl;
-		std::cout << GREEN << buf << RESET << std::endl;
+		std::cout << GREEN << buf << RESET << std::endl; /* раскоментировать для вывода буфера */
 
 
 		std::ofstream fileTmp("www/file.tmp", std::ios::app);

@@ -26,6 +26,7 @@ public:
 	std::string getProtokol();
 	std::map<std::string,std::string> getHeaders();
 	std::string getBody();
+    std::string getfileName();
 	
 
 	 RequestParser(const RequestParser &copy);
@@ -44,6 +45,7 @@ private:
 
     std::string buf;
 
+    std::string fileName;
 	size_t _contentLength;
 	size_t _global_len;		// если постом передается файл
 

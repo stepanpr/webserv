@@ -44,7 +44,9 @@ std::string Connection::responsePrepare()
 
 	Response response(_request, _config);
 	// std::string responseString = response.responseInit(_request, _config);
-	_response = response.responseInit();
+
+	if (_isOK == 1)
+	    _response = response.responseInit();
 
 	return _response;
 }

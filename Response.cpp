@@ -4,7 +4,7 @@
 Response::Response() {}
 
 Response::Response(RequestParser &HTTPrequest, struct s_config *config)
-: _requestHeaders(HTTPrequest.getHeaders()), _requestBody(HTTPrequest.getBody()), _requestMethod(HTTPrequest.getMetod()),  _requestProtocol(HTTPrequest.getProtokol()), _requestPath(HTTPrequest.getPath()), _config(config)
+: _requestHeaders(HTTPrequest.getHeaders()), _requestBody(HTTPrequest.getBody()), _requestMethod(HTTPrequest.getMetod()),  _requestProtocol(HTTPrequest.getProtokol()), _requestPath(HTTPrequest.getPath()), _config(config), _fileName(HTTPrequest.getfileName())
 {
 	this->_statusCode = "";
 	this->_autoindex = false;
@@ -454,13 +454,15 @@ std::string Response::responseInit()
 			/* multipart/form-data * обработка отправки файла */
 			else if (_requestHeaders.count("Content-Type:") && _requestHeaders.at("Content-Type:").find("multipart/form-data") != std::string::npos)
 			{
+//                curl -F 'fileX=@quickie-jpeg-010.jpg' localhost:8000/cgi_bin/getfile.cgi
+
 				std::cout << YELLOW << _requestHeaders.at("Content-Type:") << RESET<< std::endl;
-				std::cout << RED << "2" <<_requestBody << RESET << std::endl;
+//				std::cout << RED <<_requestBody << RESET << std::endl;
 
-
+                std::string pathToFile = "www/site.com/" + _fileName;
 				//отезать вебкит и все что за ним следует
 				std::ofstream w;
-				w.open("file", std::ios::out | std::ios::binary);
+				w.open(pathToFile, std::ios::out | std::ios::binary);
 				w << _requestBody;
 			}
 			else

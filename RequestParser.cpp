@@ -58,6 +58,7 @@ RequestParser &RequestParser::operator=(const RequestParser &copy)
 int RequestParser::RequestWaiter(const char *str, int len)
 {
 	size_t pos = 0;
+    size_t pos2 = 0;
 
 	std::string startline;
 	std::string headers;
@@ -127,8 +128,8 @@ int RequestParser::RequestWaiter(const char *str, int len)
 				_is_host = true;
 			if ((it->first.compare("Content-Type:") == 0) && ((pos = it->second.find("multipart/form-data;")) != std::string::npos))
             {
-			    multipartName = it->second.substr(pos + 30);
 			    _is_multipart = true;
+
             }
 		}
 	}
@@ -163,8 +164,6 @@ int RequestParser::RequestWaiter(const char *str, int len)
     //  начинаем читать тело Multipart
     if  (_is_multipart == true)
     {
-        pos = buf.find(separator);
-        buf.erase(buf.begin(), buf.begin() + pos + separator.length());
 
 
         _bodybuffer.append(buf);
@@ -175,6 +174,24 @@ int RequestParser::RequestWaiter(const char *str, int len)
         {
 
             _isOk = 1;
+            if ((pos = buf.find(double_separator)) != std::string::npos) // убираем хедеры из тела мультипарт запроса спереди
+            {
+                if ((pos2 = buf.find("filename")) != std::string::npos)
+                {
+                    fileName = buf.substr(pos2 + 10);
+                    if ((pos2 = fileName.find("\"")) != std::string::npos)
+                        fileName = fileName.substr(0, pos2);
+                }
+                buf.erase(0, pos + double_separator.length());
+            }
+            if ((pos2 = buf.find(separator)) != std::string::npos) // убираем хедеры сзади
+            {
+                buf.erase(pos2, separator.length());
+                if ((pos = buf.find(separator)) != std::string::npos)
+                    buf.erase(pos2, pos + separator.length());
+            }
+            _bodybuffer.erase();
+            _bodybuffer.append(buf);
 
         }
 
@@ -184,11 +201,11 @@ int RequestParser::RequestWaiter(const char *str, int len)
 	// контент length обработка
 	if  ((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)))
 	{
-			_bodybuffer.append(buf);
+//			_bodybuffer.append(buf);
 			_global_len = _global_len + len;
 	}
 
-	std::cout << buf << '\n';
+
 
 	if (_is_startline_ok == true && _is_headers_ok == true)  //  проверяем стартлайн, мапу с хедерами и выставляем флаг is_ok
 	{
@@ -198,9 +215,11 @@ int RequestParser::RequestWaiter(const char *str, int len)
 					_isOk = 1;
 	}
 
-    std::cout << "_isOk:" << _isOk << " " << multipartName << '\n';
+//    std::cout << "_isOk:" << _isOk << '\n';
 
-//    std::cout << "_is_startline_ok: " << _is_startline_ok << " _is_headers_ok: " << _is_headers_ok << " _is_chunked: " << _is_chunked << " _is_body: " << _is_body << '\n';
+//    std::cout << " _is_headers_ok: " << _is_headers_ok << " _is_multipart: " << _is_multipart << " _is_body: " << _is_body << '\n';
+
+//    std::cout <<"\n\n"<< fileName << "\n\n";
 
 	return (_isOk);
 
@@ -244,6 +263,11 @@ std::map<std::string,std::string> RequestParser::getHeaders()
 std::string RequestParser::getBody()
 {
 	return (_bodybuffer);
+}
+
+std::string RequestParser::getfileName()
+{
+    return (fileName);
 }
 
 // RequestParser::RequestParser(const RequestParser &copy)
