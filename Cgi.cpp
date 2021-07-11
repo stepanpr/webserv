@@ -2,24 +2,20 @@
 
 #include "Cgi.hpp"
 
-
 // Cgi::Cgi() {}
-
 // Cgi::~Cgi()
 // {         
 // 	for (int i = 0; _varsArray[i]; ++i)
 //         free(_varsArray[i]);
 // }
-
 // Cgi &Cgi::operator=(const Cgi &copy)
 // {
 // 	return *this;
 // }
-
 // Cgi::Cgi(const Cgi &cgi) { *this = cgi; }
 
-Cgi::Cgi(std::string body, struct s_config *config, std::string pathToCgi, std::map<std::string, std::string> requestHeaders, std::string requestMethod) 
-:  _config(config), _body(body), _pathToCgi(pathToCgi)
+Cgi::Cgi(std::string body, struct s_config *config, std::string pathToScript, std::map<std::string, std::string> requestHeaders, std::string requestMethod) 
+:  _config(config), _body(body), _pathToScript(pathToScript)
 {
 	std::cout << CYAN << "!CGI is working" << RESET << "\n";
 	_varsArray = getVarsArray(setVariables(requestHeaders, requestMethod));
@@ -38,10 +34,10 @@ std::vector<std::string> Cgi::setVariables(std::map<std::string, std::string> re
     _vars.push_back("GATEWAY_INTERFACE=CGI/1.1");
     // _vars.push_back(getPathInfo("PATH_INFO=" + );
     // _vars.push_back("PATH_TRANSLATED=" + );
-	// if (.find("query_string") != )
-   	// 	_vars.push_back("QUERY_STRING=" + .find("query_string")->second);
-	// else
-    //     _vars.push_back("QUERY_STRING=");
+	if (requestHeaders.count("query_string"))
+   		_vars.push_back("QUERY_STRING=" + requestHeaders.find("query_string")->second);
+	else
+        _vars.push_back("QUERY_STRING=");
     _vars.push_back("REMOTE_ADDR=" + _config->server_name);
     // _vars.push_back("REMOTE_IDENT=" + );
     // _vars.push_back("REMOTE_USER=" + );
@@ -55,10 +51,12 @@ std::vector<std::string> Cgi::setVariables(std::map<std::string, std::string> re
     _vars.push_back("SERVER_PROTOCOL=HTTP/1.1");
     _vars.push_back("SERVER_SOFTWARE=web_server");
 	
-	for (int i = 0; i < (int)_vars.size(); i++)
-		std::cout << _vars[i] << std::endl;
+	// for (int i = 0; i < (int)_vars.size(); i++)
+	// 	std::cout << _vars[i] << std::endl;
 	return _vars;
 }
+
+
 
 char **Cgi::getVarsArray(std::vector<std::string> vars) 
 {
@@ -76,104 +74,411 @@ char **Cgi::getVarsArray(std::vector<std::string> vars)
 
 
 
-void Cgi::launchCGI()
+void strToFd(std::string const &str, int fd)
 {
-	//Формируем в глобальных переменных тело запроса и его длинну
-	static const std::string strRequestBody = _body.c_str();
-
-	static const std::string strRequestHeader = "Content-Length=" + std::to_string((long long)strRequestBody.length());
-	//Формируем переменные окружения которые будут отосланы дочернему процессу
-//	static const char *variables[4] = {strRequestHeader.c_str(), "VARIABLE2=erererer", "VARIABLE3=3", 0};
-
-	//Формируем переменные командной строки для дочернего процесса. Первая переменная - путь к дочернему процессу.
-	// static const char *pszChildProcessArgs[4] = {"./cgi_bin/mkcgi", "first argument", "second argument", 0};
-	static const char *pszChildProcessArgs[3] = {"/usr/bin/perl", "./cgi_bin/perl1.cgi", 0};
-	// static const char *pszChildProcessArgs[3] = {"/usr/bin/python", "./cgi_bin/python1.py", 0};
-
-	//При желании можно запустить интерпретатор какого-нибудь скрипта. 
-	//Тогда первый аргумент - путь к интерпретатору, второй - к скрипту
-	//static const char *pszChildProcessArgs[3] = {"python", "./test.py", 0};
-
-	int fdStdInPipe[2], fdStdOutPipe[2];
-	
-	fdStdInPipe[0] = fdStdInPipe[1] = fdStdOutPipe[0] = fdStdOutPipe[1] = -1;
-	if (pipe(fdStdInPipe) != 0 || pipe(fdStdOutPipe) != 0)
-	{
-		std::cout << "Cannot create CGI pipe";
-		// return 0;
-	}
-
-	// Duplicate stdin and stdout file descriptors
-	int fdOldStdIn = dup(fileno(stdin));
-	int fdOldStdOut = dup(fileno(stdout));
-
-	// Duplicate end of pipe to stdout and stdin file descriptors
-	if ((dup2(fdStdOutPipe[1], fileno(stdout)) == -1) || (dup2(fdStdInPipe[0], fileno(stdin)) == -1))
-		std::cout << "Cannot create CGI pipe2";
-
-	// Close original end of pipe
-	close(fdStdInPipe[0]);
-	close(fdStdOutPipe[1]);
-
-	//Запускаем дочерний процесс, отдаем ему переменные командной строки и окружения
-	// const int nChildProcessID = spawn_process(pszChildProcessArgs, variables);
-
-
-    /* Create copy of current process */
-    // const int pID = spawn_process(pszChildProcessArgs, variables);
-    pid_t pID = fork();
-    
-    /* The parent`s new pid will be 0 */
-    if(pID == 0)
-    {
-		/* We are now in a child progress 
-		Execute different process */
-		execve(pszChildProcessArgs[0], (char* const*)pszChildProcessArgs, (char* const*)_varsArray);
-		/* This code will never be executed */
-		exit(EXIT_SUCCESS);
-
-	} else if (pID < 0)
-        write(2, "Error Fork", 10);
-
-    /* We are still in the original process */
-
-	// Duplicate copy of original stdin an stdout back into stdout
-	dup2(fdOldStdIn, fileno(stdin));
-	dup2(fdOldStdOut, fileno(stdout));
-
-	// Close duplicate copy of original stdin and stdout
-	close(fdOldStdIn);
-	close(fdOldStdOut);
-
-	//Отдаем тело запроса дочернему процессу
-	write(fdStdInPipe[1], strRequestBody.c_str(), strRequestBody.length());
-
-	while (1)
-	{
-		//Читаем ответ от дочернего процесса
-		char bufferOut[100000];
-		int n = read(fdStdOutPipe[0], bufferOut, 100000);
-		if (n > 0)
-		{
-			//Выводим ответ на экран
-			fwrite(bufferOut, 1, n, stdout);
-			fflush(stdout);
-		}
-
-		//Если дочерний процесс завершился, то завершаем и родительский процесс
-
-		int status;
-		if (waitpid(pID, &status, 0) > 0)
-			std::cout << "OKKK";
-
-	}
-
-
-
+	std::streambuf *backup = std::cerr.rdbuf();
+	dup2(fd, 2);
+	std::cerr << str;
+	std::cerr.rdbuf(backup);
 }
 
 
 
+bool Cgi::launchCGI()
+{
+	this->_fullPathToScript = "./cgi_bin" + this->_pathToScript;
+	std::string relativePathToScript = _fullPathToScript.substr(2, _fullPathToScript.length());
+
+
+std::cout << CYAN << _pathToScript << RESET << std::endl;
+std::cout << CYAN << _fullPathToScript << RESET << std::endl;
+std::cout << CYAN << relativePathToScript << RESET << std::endl;
+
+	/* проверяем существует ли такой файл */
+	if (stat(relativePathToScript.c_str(), &_stat) != 0)
+		return false;
+
+
+	/* проверяем расширение файла */
+	int cgi = 0;
+	if (_pathToScript.rfind(".py") != std::string::npos)
+		this->_pathToHandler = "/usr/bin/python";
+	else if (_pathToScript.rfind(".php") != std::string::npos)
+		this->_pathToHandler = "/usr/bin/php";
+	else if (_pathToScript.rfind(".perl") != std::string::npos || _pathToScript.rfind(".pl") != std::string::npos)
+		this->_pathToHandler = "/usr/bin/perl";
+	else // if (_pathToScript.rfind(".cgi") || _pathToScript.rfind(".exe"))
+		cgi = 1;
+
+	static const char *arguments_cgi[4] = {_fullPathToScript.c_str(), 0, 0, 0}; //если скрипту не требуется интерпретатор (C++) //path, arg, arg
+
+	static const char *arguments[3] = {_pathToHandler.c_str(), _fullPathToScript.c_str(), 0}; //если скрипт с интепретатором
+	std::cout << CYAN << _pathToHandler << RESET << std::endl;
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+	// int status;
+	// int p[2];
+
+    // pid_t pID = fork();
+    
+    // if(pID == 0)
+    // {
+	// 	// close(p[1]);
+	// 	// dup2(p[0], 0); 
+	// 	// execve(CGIarguments[0], (char* const*)CGIarguments, (char* const*)_varsArray);
+	// 	status = execve(CGIarguments[0], (char* const*)CGIarguments, (char* const*)_varsArray);
+	// 	exit(status);
+	// } else if (pID < 0)
+    // 	write(2, "Error Fork", 10);
+
+
+	// 	//Если дочерний процесс завершился, то завершаем и родительский процесс
+	// 	// int status;
+	// 	if (waitpid(pID, &status, 0) > 0)
+	// 		std::cout << "OKKK";
+
+	
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+//   char s[100];
+//   printf("%s\n", getcwd(s, 100));
+	// std::cout << CYAN << _pathToScript << RESET << std::endl;
+	// std::string dir = _pathToScript.substr(0, _pathToScript.find("/") + 1);
+	// const char *pathToScript_char = "cgi_bin/";
+	// std::cout << CYAN << dir << RESET << std::endl;
+
+
+	int tmpFD;
+	int FD[2];
+	pid_t pid;
+	if ((tmpFD = open("tempbuffer", O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0 || pipe(FD) < 0 || (pid = fork()) < 0)
+		throw Exceptions();
+	if (pid == 0)
+	{
+		close(FD[1]);
+		dup2(FD[0], 0);
+		close(FD[0]);
+		dup2(tmpFD, 1);
+
+		int exec;
+
+		// if (chdir(pathToScript_char)) //переходим к каталогу со скриптом
+		// 	throw Exceptions();
+		if (cgi == 1)
+		{
+			if ((exec = execve(arguments_cgi[0], (char* const*)arguments_cgi, (char* const*)_varsArray)) < 0)
+				throw Exceptions();
+			// std::cout << CYAN << "1" << RESET << std::endl;
+		}
+		else if (cgi == 0)
+		{
+			if ((exec = execve(arguments[0], (char* const*)arguments, (char* const*)_varsArray)) < 0)
+				throw Exceptions();
+			// std::cout << CYAN << "2" << RESET << std::endl;
+		}
+	}
+	else if (pid > 0)
+	{
+		close(FD[0]);
+		strToFd(this->_body, FD[1]);
+		int stat;
+		waitpid(pid, &stat, 0);
+		close(FD[1]);
+		close(tmpFD);
+	}
+//////////////////////////////////////////////////////////////////////////////////////////
+
+	// int fdIn, fdOut, status;
+    // pid_t pid = fork();
+    // if (pid == 0) {
+    //     fdIn = open("cgi_file_input.txt", O_RDWR);
+    //     dup2(fdIn, 0);
+    //     fdOut = open("cgi_file_output.txt", O_CREAT | O_RDWR | O_TRUNC, 0666);
+    //     dup2(fdOut, 1);
+    //     // chdir(_client.getHttp().getStartLine().find("change_location")->second.c_str());
+    //     // std::cerr << "dir=\"" << _client.getHttp().getStartLine().find("change_location")->second << "\"" << std::endl;
+    //     // std::cerr << "launch=\"" << getLaunch()[0] << " " << getLaunch()[1] << "\"" << std::endl;
+    //     status = execve(CGIarguments[0], (char* const*)CGIarguments, (char* const*)_varsArray);
+    //     exit(status);
+    // } else if (pid < 0)
+    //     write(2, "Error Fork", 10);
+    // pid = waitpid(pid, &status, WUNTRACED);
+    // close(fdIn);
+
+	return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// void Cgi::launchCGI()
+// {
+// 	//Формируем в глобальных переменных тело запроса и его длинну
+// 	static const std::string strRequestBody = _body.c_str();
+// 	std::cout <<CYAN<< _body.c_str() << RESET<< std::endl;
+
+// 	static const std::string strRequestHeader = "Content-Length=" + std::to_string((long long)strRequestBody.length());
+// 	//Формируем переменные окружения которые будут отосланы дочернему процессу
+// //	static const char *variables[4] = {strRequestHeader.c_str(), "VARIABLE2=erererer", "VARIABLE3=3", 0};
+
+// 	//Формируем переменные командной строки для дочернего процесса. Первая переменная - путь к дочернему процессу.
+// 	// static const char *pszChildProcessArgs[4] = {"./cgi_bin/mkcgi", "first argument", "second argument", 0};
+// 	static const char *CGIarguments[3] = {"/usr/bin/perl", "./cgi_bin/perl1.cgi", 0};
+// 	// static const char *CGIarguments[3] = {"/usr/bin/python", "./cgi_bin/python1.py", 0};
+
+// 	//При желании можно запустить интерпретатор какого-нибудь скрипта. 
+// 	//Тогда первый аргумент - путь к интерпретатору, второй - к скрипту
+// 	//static const char *pszChildProcessArgs[3] = {"python", "./test.py", 0};
+
+// 	int fdStdInPipe[2], fdStdOutPipe[2];
+// 	int p[2];
+	
+// 	fdStdInPipe[0] = fdStdInPipe[1] = fdStdOutPipe[0] = fdStdOutPipe[1] = -1;
+// 	// if (pipe(fdStdInPipe) != 0 || pipe(fdStdOutPipe) != 0)
+// 	// {
+// 	// 	std::cout << "Cannot create CGI pipe";
+// 	// 	// return 0;
+// 	// }
+
+// 	// Duplicate stdin and stdout file descriptors
+// 	// int fdOldStdIn = dup(fileno(stdin));
+// 	// int fdOldStdOut = dup(fileno(stdout));
+
+// 	// // Duplicate end of pipe to stdout and stdin file descriptors
+// 	// if ((dup2(fdStdOutPipe[1], fileno(stdout)) == -1) || (dup2(fdStdInPipe[0], fileno(stdin)) == -1))
+// 	// 	std::cout << "Cannot create CGI pipe2";
+
+// 	// // Close original end of pipe
+// 	// close(fdStdInPipe[0]);
+// 	// close(fdStdOutPipe[1]);
+
+// 	//Запускаем дочерний процесс, отдаем ему переменные командной строки и окружения
+// 	// const int nChildProcessID = spawn_process(pszChildProcessArgs, variables);
+
+
+//     /* Create copy of current process */
+//     // const int pID = spawn_process(pszChildProcessArgs, variables);
+//     pid_t pID = fork();
+    
+//     /* The parent`s new pid will be 0 */
+//     if(pID == 0)
+//     {
+// 		close(p[1]);
+// 		dup2(p[0], 0); 
+// 		/* We are now in a child progress 
+// 		Execute different process */
+// 		// execve(pszChildProcessArgs[0], (char* const*)pszChildProcessArgs, (char* const*)_varsArray);
+// 		execve(CGIarguments[0], (char* const*)CGIarguments, (char* const*)_varsArray);
+// 		/* This code will never be executed */
+// 		exit(0);
+
+// 	}// else if (pID < 0)
+//     //     write(2, "Error Fork", 10);
+
+//     /* We are still in the original process */
+
+// 	// Duplicate copy of original stdin an stdout back into stdout
+// 	// dup2(fdOldStdIn, fileno(stdin));
+// 	// dup2(fdOldStdOut, fileno(stdout));
+
+// 	// // Close duplicate copy of original stdin and stdout
+// 	// close(fdOldStdIn);
+// 	// close(fdOldStdOut);
+
+// 	// //Отдаем тело запроса дочернему процессу
+// 	// write(fdStdInPipe[1], strRequestBody.c_str(), strRequestBody.length());
+
+// 	// while (1)
+// 	// {
+// 	// 	//Читаем ответ от дочернего процесса
+// 	// 	char bufferOut[100000];
+// 	// 	int n = read(fdStdOutPipe[0], bufferOut, 100000);
+// 	// 	if (n > 0)
+// 	// 	{
+// 	// 		//Выводим ответ на экран
+// 	// 		fwrite(bufferOut, 1, n, stdout);
+// 	// 		fflush(stdout);
+// 	// 	}
+
+// 	// 	//Если дочерний процесс завершился, то завершаем и родительский процесс
+
+// 	// 	int status;
+// 	// 	if (waitpid(pID, &status, 0) > 0)
+// 	// 		std::cout << "OKKK";
+
+// 	// }
+
+
+
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // void Cgi::launchCGI()
+// // {
+// 	//Формируем в глобальных переменных тело запроса и его длинну
+// 	static const std::string strRequestBody = _body.c_str();
+
+// 	static const std::string strRequestHeader = "Content-Length=" + std::to_string((long long)strRequestBody.length());
+// 	//Формируем переменные окружения которые будут отосланы дочернему процессу
+// //	static const char *variables[4] = {strRequestHeader.c_str(), "VARIABLE2=erererer", "VARIABLE3=3", 0};
+
+// 	//Формируем переменные командной строки для дочернего процесса. Первая переменная - путь к дочернему процессу.
+// 	// static const char *pszChildProcessArgs[4] = {"./cgi_bin/mkcgi", "first argument", "second argument", 0};
+// 	static const char *pszChildProcessArgs[3] = {"/usr/bin/perl", "./cgi_bin/perl1.cgi", 0};
+// 	// static const char *pszChildProcessArgs[3] = {"/usr/bin/python", "./cgi_bin/python1.py", 0};
+
+// 	//При желании можно запустить интерпретатор какого-нибудь скрипта. 
+// 	//Тогда первый аргумент - путь к интерпретатору, второй - к скрипту
+// 	//static const char *pszChildProcessArgs[3] = {"python", "./test.py", 0};
+
+// 	int fdStdInPipe[2], fdStdOutPipe[2];
+	
+// 	fdStdInPipe[0] = fdStdInPipe[1] = fdStdOutPipe[0] = fdStdOutPipe[1] = -1;
+// 	// if (pipe(fdStdInPipe) != 0 || pipe(fdStdOutPipe) != 0)
+// 	// {
+// 	// 	std::cout << "Cannot create CGI pipe";
+// 	// 	// return 0;
+// 	// }
+
+// 	// Duplicate stdin and stdout file descriptors
+// 	// int fdOldStdIn = dup(fileno(stdin));
+// 	// int fdOldStdOut = dup(fileno(stdout));
+
+// 	// // Duplicate end of pipe to stdout and stdin file descriptors
+// 	// if ((dup2(fdStdOutPipe[1], fileno(stdout)) == -1) || (dup2(fdStdInPipe[0], fileno(stdin)) == -1))
+// 	// 	std::cout << "Cannot create CGI pipe2";
+
+// 	// // Close original end of pipe
+// 	// close(fdStdInPipe[0]);
+// 	// close(fdStdOutPipe[1]);
+
+// 	//Запускаем дочерний процесс, отдаем ему переменные командной строки и окружения
+// 	// const int nChildProcessID = spawn_process(pszChildProcessArgs, variables);
+
+
+//     /* Create copy of current process */
+//     // const int pID = spawn_process(pszChildProcessArgs, variables);
+//     pid_t pID = fork();
+    
+//     /* The parent`s new pid will be 0 */
+//     if(pID == 0)
+//     {
+// 		/* We are now in a child progress 
+// 		Execute different process */
+// 		// execve(pszChildProcessArgs[0], (char* const*)pszChildProcessArgs, (char* const*)_varsArray);
+// 		/* This code will never be executed */
+// 		exit(0);
+
+// 	}// else if (pID < 0)
+//     //     write(2, "Error Fork", 10);
+
+//     /* We are still in the original process */
+
+// 	// Duplicate copy of original stdin an stdout back into stdout
+// 	// dup2(fdOldStdIn, fileno(stdin));
+// 	// dup2(fdOldStdOut, fileno(stdout));
+
+// 	// // Close duplicate copy of original stdin and stdout
+// 	// close(fdOldStdIn);
+// 	// close(fdOldStdOut);
+
+// 	// //Отдаем тело запроса дочернему процессу
+// 	// write(fdStdInPipe[1], strRequestBody.c_str(), strRequestBody.length());
+
+// 	// while (1)
+// 	// {
+// 	// 	//Читаем ответ от дочернего процесса
+// 	// 	char bufferOut[100000];
+// 	// 	int n = read(fdStdOutPipe[0], bufferOut, 100000);
+// 	// 	if (n > 0)
+// 	// 	{
+// 	// 		//Выводим ответ на экран
+// 	// 		fwrite(bufferOut, 1, n, stdout);
+// 	// 		fflush(stdout);
+// 	// 	}
+
+// 	// 	//Если дочерний процесс завершился, то завершаем и родительский процесс
+
+// 	// 	int status;
+// 	// 	if (waitpid(pID, &status, 0) > 0)
+// 	// 		std::cout << "OKKK";
+
+// 	// }
+
+
+
+// }
 
 
 

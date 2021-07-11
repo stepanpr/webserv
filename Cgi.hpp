@@ -18,6 +18,14 @@
 #include <vector>
 
 
+/*
+** для корректной работы cgi-модуля, все скрипты должны находиться в каталоге cgi_bin;
+** в атрибуте "href" тега <form>, требуется указывать имя скрипта без пути к нему;
+** если скрипт написан на таких языках как python, php или perl, то расширение файла 
+** должно быть "py", "php", "perl" или "pl" соответственно;
+**
+**
+*/
 
 
 
@@ -25,30 +33,35 @@ class Cgi
 {
 	private:
 		// std::map<std::string, std::string> variables;
-		std::vector<std::string> _vars;
-		char **_varsArray;
+		std::vector<std::string> _vars; //переменные оркужения (string)
+		char **_varsArray;				//переменные оркужения (char)
 		// std::string _vars;
 
 
 		// std::map<std::string, std::string> _requestHeaders;
 		// std::string 			_requestMethod;
-		struct s_config			*_config;
-		std::string 			_body;
-		std::string 			_pathToCgi;
+		struct s_config			*_config;				//конфиг
+		std::string 			_body;					//боди при запросе POST
+		std::string 			_pathToScript;			//путь к скрипту из html-формы
+		std::string 			_fullPathToScript;		//полный путь к скрипту из корня сервера
+		std::string             _pathToHandler;			//путь к обработчику скрипта
+
+		/* получение данный о файле */
+		struct stat _stat; 
 
 
 		
 
 	public:
 		// Cgi();
-		Cgi(std::string body, struct s_config *config, std::string pathToCgi, std::map<std::string, std::string> requestHeaders, std::string requestMethod);
+		Cgi(std::string body, struct s_config *config, std::string pathToScript, std::map<std::string, std::string> requestHeaders, std::string requestMethod);
 		Cgi(const Cgi &cgi);
 		// ~Cgi();n
 		// Cgi &operator=(const Cgi &copy);
 
 		std::vector<std::string>  setVariables(std::map<std::string, std::string> requestHeaders, std::string requestMethod);
 		char **getVarsArray(std::vector<std::string> vars);
-		void launchCGI();
+		bool launchCGI();
 
 };
 
@@ -67,5 +80,4 @@ class Cgi
 // http://www.cyberguru.ru/web/web-programming/cgi-tutor.html?start=14
 // http://www.xserver.ru/computer/langprogr/cgi/7/
 
-// std::map<std::string, std::string> mime_types{ {1, 2}, {3, 4}, {6, 5}, {8, 9}, {6, 8}, {3, 4}, {6, 7} };
 
