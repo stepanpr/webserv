@@ -458,8 +458,11 @@ std::string Response::responseInit()
                 std::string pathToFile = "www/site.com/" + _fileName;
 				//отезать вебкит и все что за ним следует
 				std::ofstream w;
-				w.open(pathToFile, std::ios::out | std::ios::binary);
+				w.open(pathToFile.c_str(), std::ios::out | std::ios::binary);
 				w << _requestBody;
+
+				_statusCode = OK;
+				_fullPath = _config->error_page + '/' + "send.html";
 			}
 			else
 			    _statusCode = NOTALLOWED;
