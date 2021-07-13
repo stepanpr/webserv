@@ -547,17 +547,17 @@ std::string Response::responseInit()
 	{ /* вывод сообщения в соответствии со _statusCode*/
 		
 		if (_statusCode == OK)
-			std::cout << GREEN_B << "OK: " << WHITE <<"response will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout << GREEN_B << "OK: " << WHITE <<"response will be send to client " << BLUE << "(ID: " << _config->serverID << ")" << RESET<< std::endl << std::endl; //изменить если 404
 		else if (_statusCode == BADREQUEST)
-			std::cout  << RED_B << "KO: " << WHITE <<"request is bad, error \"400\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout  << RED_B << "KO: " << WHITE <<"request is bad, error \"400\" will be send to client" << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl; //изменить если 404
 		else if (_statusCode == NOTFOUND)
-			std::cout  << RED_B << "KO: " << WHITE <<"content not found, error \"404\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout  << RED_B << "KO: " << WHITE <<"content not found, error \"404\" will be send to client" << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl; //изменить если 404
 		else if (_statusCode == NOTALLOWED)
-			std::cout  << RED_B << "KO: " << WHITE <<"request method not allowed, error \"405\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout  << RED_B << "KO: " << WHITE <<"request method not allowed, error \"405\" will be send to client" << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl; //изменить если 404
 		else if (_statusCode == REQTOOLARGE)
-			std::cout  << RED_B << "KO: " << WHITE <<"request is too large, error \"413\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout  << RED_B << "KO: " << WHITE <<"request is too large, error \"413\" will be send to client" << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl; //изменить если 404
 		else if (_statusCode == INTERNALERROR)
-			std::cout  << RED_B << "KO: " << WHITE <<"problems with server settings, error \"500\" will be send to client" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout  << RED_B << "KO: " << WHITE <<"problems with server settings, error \"500\" will be send to client" << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl; //изменить если 404
 	}
 
 

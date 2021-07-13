@@ -1,6 +1,10 @@
 
+<!DOCTYPE html>
 <html>
 <head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>WebServ1.0/contact</title>
 	<link rel="stylesheet" href="www/site.com/style.css" type="text/css">
 	<link rel="shortcut icon" href="www/site.com/favicon.ico" type="image/x-icon">
@@ -137,20 +141,29 @@
 		</div>
 	</div>
 
-	<!-- <div name="iframePostDiv"></div><iframe name="iframePost">h</iframe></div> -->
-	<iframe name="iframePost" style="position: absolute; left: -9999px;"></iframe>
-	 <form class="form" action="db.py" method="post" name="contact_form" target="iframePost"><br>
-	<!-- <form action="/cgi_bin/form.cgi" method="post" name="contact_form" target="iframe1"><br> -->
-		<input type="hidden" name="location" value="contact.html">
-		<input name = "name" type="text" size="25" value="your name"><br>
-		<input name="phone" type="tel" size="25" value="your phone"><br>
-		<textarea name="message" id="msg" cols="30" rows="10">dsd</textarea>
-		<input name="submit" type="submit" value="Send request" onclick="alert('message send')">
-		<!-- onclick="alert('message send')" -->
-		<!-- onclick="return showModal(this);" -->
-		<!-- <button onclick="location.hash ='zatemnenie'">button</button> -->
-	</form>
+
+
+	<div class="formbox">		
+
+		<!-- <div name="iframePostDiv"></div><iframe name="iframePost">h</iframe></div> -->
+		<iframe name="iframePost" style="position: absolute; left: -9999px;"></iframe>
+		<form class="form" action="/cgi_bin/db.py" method="post" name="contact_form" target="iframePost"><br>
+		<!-- <form action="/cgi_bin/form.cgi" method="post" name="contact_form" target="iframe1"><br> -->
+			<input type="hidden" name="location" value="contact.html">
+			<input name = "name" type="text" size="25" placeholder="Your name"><br>
+			<input name="phone" type="tel" size="25" placeholder="Your phone"><br>
+			<textarea name="message" id="msg" cols="30" rows="10" placeholder="Message"></textarea>
+			<input name="submit" type="submit" value="Send request" onclick="alert('message send')">
+			<!-- onclick="alert('message send')" -->
+			<!-- onclick="return showModal(this);" -->
+			<!-- <button onclick="location.hash ='zatemnenie'">button</button> -->
+		</form>
+		<p class="text">
+			Ждем ваших предложений! 
+		</p>
+	</div>
 	<br><br>
+	
 
 	
 	<!-- <form enctype="multipart/form-data" action="/cgi_bin/getfile.cgi" method="post">
