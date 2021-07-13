@@ -431,8 +431,9 @@ std::string Response::responseInit()
                 std::cout << RED << _requestPath <<"requestpsth!!!!!!"<< RESET <<std::endl;
                 // std::cout << RED << _ <<"relativePathToScript!!!!!!"<< RESET <<std::endl;
 
-
-				    Cgi cgi(_requestBody, _config, _requestPath, _requestHeaders, _requestMethod);
+					setDate();
+					std::string d = _date + " GTM";
+				    Cgi cgi(_requestBody, _config, _requestPath, _requestHeaders, _requestMethod, d);
 					// cgi.createEnv(_requestHeaders, _requestMethod);
 					if ((cgi.launchCGI()) == true)
 					{

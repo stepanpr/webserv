@@ -17,12 +17,17 @@
 #include <string>
 #include <vector>
 
+# define EXTENTION_WITH_INTERPRETER 1
+# define EXTENTION_WITHOUT_INTERPRETER 0
+
 
 /*
 ** для корректной работы cgi-модуля, все скрипты должны находиться в каталоге cgi_bin;
 ** в атрибуте "href" тега <form>, требуется указывать имя скрипта без пути к нему;
 ** если скрипт написан на таких языках как python, php или perl, то расширение файла 
-** должно быть "py", "php", "perl" или "pl" соответственно;
+** должно быть ".py", ".php", ".perl" или ".pl" соответственно; 
+** если скрипт написан на коипилируемых языках, таких языках как С/С++,  то расширение файла  
+** должно быть ".cgi" или ".exe"
 **
 **
 */
@@ -46,6 +51,8 @@ class Cgi
 		std::string 			_fullPathToScript;		//полный путь к скрипту из корня сервера
 		std::string             _pathToHandler;			//путь к обработчику скрипта
 
+		std::string _date;
+
 		/* получение данный о файле */
 		struct stat _stat; 
 
@@ -54,7 +61,8 @@ class Cgi
 
 	public:
 		// Cgi();
-		Cgi(std::string body, struct s_config *config, std::string pathToScript, std::map<std::string, std::string> requestHeaders, std::string requestMethod);
+		Cgi(std::string body, struct s_config *config, std::string pathToScript, 
+		std::map<std::string, std::string> requestHeaders, std::string requestMethod, std::string &date);
 		Cgi(const Cgi &cgi);
 		// ~Cgi();n
 		// Cgi &operator=(const Cgi &copy);
@@ -62,6 +70,7 @@ class Cgi
 		std::vector<std::string>  setVariables(std::map<std::string, std::string> requestHeaders, std::string requestMethod);
 		char **getVarsArray(std::vector<std::string> vars);
 		bool launchCGI();
+		void addToDataBase();
 
 };
 
