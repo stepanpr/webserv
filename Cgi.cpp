@@ -94,8 +94,11 @@ void Cgi::addToDataBase()
 	std::ifstream db(nameOfTMP.c_str(), std::ios::in);
 	std::string line;
 	std::string dataBaseBuffer;
-	while(getline(db, line)) 
+	while(getline(db, line))
+	{
 			dataBaseBuffer += line;
+		dataBaseBuffer += "\n";
+	}
 
 	// std::cout << dataBaseBuffer;
 	std::ofstream html(nameOfHTML.c_str(), std::ios::out | std::ios::trunc);
