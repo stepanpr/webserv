@@ -158,7 +158,7 @@ bool Cgi::launchCGI()
 	/* проверяем расширение файла */
 	int extentionOfSctipt = EXTENTION_WITH_INTERPRETER;
 	if (_pathToScript.rfind(".py") != std::string::npos)
-		this->_pathToHandler = "/usr/bin/python";
+		this->_pathToHandler = "/usr/bin/python2.7";
 	else if (_pathToScript.rfind(".php") != std::string::npos)
 		this->_pathToHandler = "/usr/bin/php";
 	else if (_pathToScript.rfind(".perl") != std::string::npos || _pathToScript.rfind(".pl") != std::string::npos)
@@ -181,7 +181,7 @@ bool Cgi::launchCGI()
 	// std::cout << CYAN << _pathToScript << RESET << std::endl;
 	// std::cout << CYAN << _fullPathToScript << RESET << std::endl;
 	// std::cout << CYAN << relativePathToScript << RESET << std::endl;
-	// std::cout << CYAN << _pathToHandler << RESET << std::endl;
+	std::cout << CYAN << _pathToHandler << RESET << std::endl;
 
 	// std::cout <<GREEN << extentionOfSctipt <<RESET << "\n";
 
@@ -194,8 +194,7 @@ bool Cgi::launchCGI()
 
 
 	pid_t		pid;
-	int			saveStdin;
-	int			saveStdout;
+//	int			saveStdn
 	// char		**env;
 	std::string	newBody;
 
@@ -207,8 +206,8 @@ bool Cgi::launchCGI()
 	// }
 
 	// SAVING STDIN AND STDOUT IN ORDER TO TURN THEM BACK TO NORMAL LATER
-	saveStdin = dup(STDIN_FILENO);
-	saveStdout = dup(STDOUT_FILENO);
+//	saveStdin = dup(STDIN_FILENO);
+//	saveStdout = dup(STDOUT_FILENO);
 
 	FILE	*fIn = tmpfile();
 	FILE	*fOut = tmpfile();
@@ -230,7 +229,7 @@ bool Cgi::launchCGI()
 	}
 	else if (!pid)
 	{
-		char * const * nll = NULL;
+//		char * const * nll = NULL;
 
 		dup2(fdIn, STDIN_FILENO);
 		dup2(fdOut, STDOUT_FILENO);
@@ -279,14 +278,14 @@ bool Cgi::launchCGI()
 
 
 
-	dup2(saveStdin, STDIN_FILENO);
-	dup2(saveStdout, STDOUT_FILENO);
+//	dup2(saveStdin, STDIN_FILENO);
+//	dup2(saveStdout, STDOUT_FILENO);
 	fclose(fIn);
 	fclose(fOut);
 	close(fdIn);
 	close(fdOut);
-	close(saveStdin);
-	close(saveStdout);
+//	close(saveStdin);
+//	close(saveStdout);
 
 
 

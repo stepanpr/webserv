@@ -4,7 +4,7 @@
 # include "main.hpp"
 # include "Server.hpp"
 # include "structure.h"
-# define DEFAULT_CONFIG_PATH "config/default.conf"
+# define DEFAULT_CONFIG_PATH "config/default.conf" //"../config/default.conf" //
 # include "structure.h"
 
 class Server;
