@@ -4,22 +4,19 @@
 #include <sstream>
 #include <map>
 #include <fstream>
-#include <stdio.h>//itoa
-#include <stdlib.h>//itoa
+#include <stdio.h>
+#include <stdlib.h>
 
 class RequestParser
 {
 
 public:
 	RequestParser();
-	// RequestParser(std::string);
-	// void addRequest(std::string);
 	int RequestWaiter(const char *, int);
 	void PrintMap();
 	void Vault(std::string str);
 
 	bool _is_post;
-	// std::string addBody();
 
 	std::string getMetod();
 	std::string getPath();
@@ -34,7 +31,6 @@ public:
 	 RequestParser &operator=(const RequestParser &copy);
 
 private:
-	// bool _is_ok;			// запрос ок! отправляем на обработку
 	bool _is_host;			// есть ли хедер Host:
 	bool _is_chunked;		// есть ли хедер Content-encoding: chunked
 	bool _is_headers_ok;	// все ли хедеры пришли?

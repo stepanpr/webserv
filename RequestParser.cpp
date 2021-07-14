@@ -23,9 +23,7 @@ const std::string RequestParser::space = " ";
 const std::string RequestParser::separator = "\r\n";
 const std::string RequestParser::double_separator = "\r\n\r\n";
 
-// RequestParser::RequestParser(std::string buf)
-// {
-// }
+
 RequestParser::RequestParser(const RequestParser &copy)
 {
 	*this = copy;
@@ -122,7 +120,6 @@ int RequestParser::RequestWaiter(const char *str, int len)
 				_is_chunked = true;
 			if ((it->first.compare("Content-Length:") == 0))
 			{
-				// _contentLength = std::stoi(it->second);
 				_contentLength = atoi(it->second.c_str());
 				_is_length = true;
 			}
@@ -132,13 +129,13 @@ int RequestParser::RequestWaiter(const char *str, int len)
             {
 			    _is_multipart = true;
             }
-			if ((it->first.compare("Content-Type:") == 0) && ((pos = it->second.find("application/x-www-form-urlencoded")) != std::string::npos)) //!emabel's changes
+			if ((it->first.compare("Content-Type:") == 0) && ((pos = it->second.find("application/x-www-form-urlencoded")) != std::string::npos))
             {
-			    _is_application = true; //!emabel's changes
+			    _is_application = true;
             }
-			if ((it->first.compare("Content-Type:") == 0) && ((pos = it->second.find("text/plain")) != std::string::npos)) //!emabel's changes
+			if ((it->first.compare("Content-Type:") == 0) && ((pos = it->second.find("text/plain")) != std::string::npos))
             {
-			    _is_textPlain = true; //!emabel's changes
+			    _is_textPlain = true;
             }
 
 		}
@@ -205,23 +202,13 @@ int RequestParser::RequestWaiter(const char *str, int len)
 
         }
     }
-	// else if  ((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)) && _is_application == true) //!emabel's changes
 	else if  (((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)) && _is_textPlain != true && _is_application == true)
-			|| ((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)) && _is_application != true && _is_textPlain == true)) //!emabel's changes
+			|| ((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)) && _is_application != true && _is_textPlain == true))
 	{
-			_bodybuffer.append(buf); //!emabel's changes
-			_global_len = _global_len + len; //!emabel's changes
-			_isOk = 2; //!emabel's changes
+			_bodybuffer.append(buf);
+			_global_len = _global_len + len;
+			_isOk = 2;
 	}
-
-
-	// контент length обработка
-	// if  ((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)))
-	// {
-	// 		_bodybuffer.append(buf);
-	// 		_global_len = _global_len + len;
-	// }
-
 
 
 	if (_is_startline_ok == true && _is_headers_ok == true)  //  проверяем стартлайн, мапу с хедерами и выставляем флаг is_ok
@@ -230,26 +217,14 @@ int RequestParser::RequestWaiter(const char *str, int len)
 					_isOk = 1;
 		if ( (_is_host == true) && (_is_chunked == false) && (_is_length == false) ) // если есть тока хост
 					_isOk = 1;
-		else if (_isOk == 2) //!emabel's changes
-			_isOk = 1; //!emabel's changes
+		else if (_isOk == 2)
+			_isOk = 1;
 	}
-
-//    std::cout << "_isOk:" << _isOk << '\n';
-
-//    std::cout << " _is_headers_ok: " << _is_headers_ok << " _is_multipart: " << _is_multipart << " _is_body: " << _is_body << '\n';
-
-//    std::cout <<"\n\n"<< fileName << "\n\n";
-	//  std::cout << "buf:" << buf << '\n';
-	//  std::cout << "_bodybuf:"<< _bodybuffer << '\n';
 
 	return (_isOk);
 
 }
 
-// std::string RequestParser::addBody()
-// {
-// 	return (_bodybuffer.str().c_str());
-// }
 
 void RequestParser::PrintMap()
 {
@@ -291,14 +266,6 @@ std::string RequestParser::getFileName()
     return (fileName);
 }
 
-// RequestParser::RequestParser(const RequestParser &copy)
-// {
-// }
-
-// RequestParser	&RequestParser::operator=(const RequestParser &copy)
-// {
-// 	return (*this);
-// }
 
 RequestParser::~RequestParser()
 { }

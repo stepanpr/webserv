@@ -52,8 +52,6 @@ class Cgi
 		Cgi(std::string body, struct s_config *config, std::string pathToScript, 
 		std::map<std::string, std::string> requestHeaders, std::string requestMethod, std::string &date);
 		Cgi(const Cgi &cgi);
-		// ~Cgi();
-		// Cgi &operator=(const Cgi &copy);
 
 		std::vector<std::string>  setVariables(std::map<std::string, std::string> requestHeaders, std::string requestMethod);
 		char **getVarsArray(std::vector<std::string> vars);

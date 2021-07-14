@@ -2,65 +2,38 @@
 
 #include "Cgi.hpp"
 
-// Cgi::Cgi() {}
-// Cgi::~Cgi()
-// {         
-// 	for (int i = 0; _varsArray[i]; ++i)
-//         free(_varsArray[i]);
-// }
-// Cgi &Cgi::operator=(const Cgi &copy)
-// {
-// 	return *this;
-// }
-// Cgi::Cgi(const Cgi &cgi) { *this = cgi; }
 
 Cgi::Cgi(std::string body, struct s_config *config, std::string pathToScript, 
 std::map<std::string, std::string> requestHeaders, std::string requestMethod, std::string &date) 
 :  _config(config), _body(body), _pathToScript(pathToScript), _date(date)
 {
-	std::cout << CYAN << "!CGI is working" << RESET << "\n";
-
 	_varsArray = NULL;
-	// _fullPathToScript = ;
 	_varsArray = getVarsArray(setVariables(requestHeaders, requestMethod));
-
 }
 
 
 std::vector<std::string> Cgi::setVariables(std::map<std::string, std::string> requestHeaders, std::string requestMethod)
 {
-	// std::vector<std::string> env;
-    // _vars.push_back("AUTH_TYPE=" + locations.auth_data.AuthType);
     _vars.push_back("CONTENT_LENGTH=" + toString(_body.size()));
 	if (requestHeaders.find("Content-Type") != requestHeaders.end())
     	_vars.push_back("CONTENT_TYPE=" + requestHeaders.find("Content-Type")->second);
 	else
 		_vars.push_back("CONTENT_TYPE=");
     _vars.push_back("GATEWAY_INTERFACE=CGI/1.1");
-    // _vars.push_back(getPathInfo("PATH_INFO=" + );
-    // _vars.push_back("PATH_TRANSLATED=" + );
 	if (requestHeaders.count("query_string"))
    		_vars.push_back("QUERY_STRING=" + requestHeaders.find("query_string")->second);
 	else
         _vars.push_back("QUERY_STRING=");
     _vars.push_back("REMOTE_ADDR=" + _config->server_name);
-    // _vars.push_back("REMOTE_IDENT=" + );
-    // _vars.push_back("REMOTE_USER=" + );
 	if (requestMethod.size() > 1)
     	_vars.push_back("REQUEST_METHOD=" + requestMethod);
 	else
         _vars.push_back("REQUEST_METHOD=");
-    // _vars.push_back("RЕQUEST_URI=" + );
-    // _vars.push_back("SERVER_NAME=" + _config->server_name);
     _vars.push_back("SERVER_PORT=" + _config->listen);
     _vars.push_back("SERVER_PROTOCOL=HTTP/1.1");
     _vars.push_back("SERVER_SOFTWARE=web_server");
 	_vars.push_back("DATE_LOCAL=" + _date);
 	_vars.push_back("SERVER_NAME=" + toString( _config->serverID));
-
-	
-	// for (int i = 0; i < (int)_vars.size(); i++)
-	// 	std::cout << _vars[i] << std::endl;
 	return _vars;
 }
 
@@ -99,8 +72,6 @@ void Cgi::addToDataBase()
 		dataBaseBuffer += line;
 		dataBaseBuffer += "\n";
 	}
-
-	// std::cout << dataBaseBuffer;
 	std::ofstream html(nameOfHTML.c_str(), std::ios::out | std::ios::trunc);
 	html << "<!DOCTYPE html>\n<html>\n<head>\n<title>webserv - DataBase</title>\n";
 	html << "</head>\n<body>\n";
@@ -114,11 +85,8 @@ void Cgi::addToDataBase()
 
 
 
-
 bool Cgi::launchCGI()
 {
-
-
 /* (1, basic)
 ** версия пути к скрипту с изпользованием обоих параметров из alias (/cgi_bin/ == /usr/bin/[name]/webserv/cgi_bin/)
 ** первый параметр может быть отличным от "cgi_bin"
@@ -126,9 +94,6 @@ bool Cgi::launchCGI()
 */
 	_pathToScript.erase(0, _config->cgi_alias[0].size());
 	_fullPathToScript = _config->cgi_alias[1] + _pathToScript;
-	// std::cout << CYAN << _pathToScript << RESET << std::endl;
-	// std::cout << CYAN << _fullPathToScript << RESET << std::endl;
-
 
 /* (2)
 ** 	релативная версия ссылки к скрипту без использования alias из конфиг-файла;
@@ -142,15 +107,8 @@ bool Cgi::launchCGI()
 ** this->_fullPathToScript = _config->cgi_alias[1]  + this->_pathToScript; 
 */
 
-
-
-// std::cout << CYAN << _pathToScript << RESET << std::endl;
-// std::cout << CYAN << _fullPathToScript << RESET << std::endl;
-// std::cout << CYAN << relativePathToScript << RESET << std::endl;
-
 	/* проверяем существует ли такой файл */
 	std::string relativePathToScript = "./cgi_bin" + this->_pathToScript;
-	std::cout << CYAN << relativePathToScript << RESET << std::endl;
 	if (stat(relativePathToScript.c_str(), &_stat) != 0)
 	{
 		std::cout << RED << "webserv: " << RESET << "please, check existence if script" << std::endl;
@@ -180,37 +138,8 @@ bool Cgi::launchCGI()
 	const char *arguments_cgi[4] = {_fullPathToScript.c_str(), 0, 0, 0}; 				//если скрипту не требуется интерпретатор (C++)
 	const char *arguments[3] = {_pathToHandler.c_str(), _fullPathToScript.c_str(), 0}; 	//если скрипт с интепретатором 	(python, perl)
 
-	// std::cout << CYAN << _pathToHandler << RESET << std::endl;
-	// std::cout << CYAN << _pathToScript << RESET << std::endl;
-	// std::cout << CYAN << _fullPathToScript << RESET << std::endl;
-	// std::cout << CYAN << relativePathToScript << RESET << std::endl;
-	std::cout << CYAN << _pathToHandler << RESET << std::endl;
-
-	// std::cout <<GREEN << extentionOfSctipt <<RESET << "\n";
-
-
-
-
-
-
-
-
-
 	pid_t		pid;
-//	int			saveStdn
-	// char		**env;
 	std::string	newBody;
-
-	// try {
-	// 	env = this->_getEnvAsCstrArray();
-	// }
-	// catch (std::bad_alloc &e) {
-	// 	std::cerr << RED << e.what() << RESET << std::endl;
-	// }
-
-	// SAVING STDIN AND STDOUT IN ORDER TO TURN THEM BACK TO NORMAL LATER
-//	saveStdin = dup(STDIN_FILENO);
-//	saveStdout = dup(STDOUT_FILENO);
 
 	FILE	*fIn = tmpfile();
 	FILE	*fOut = tmpfile();
@@ -226,31 +155,20 @@ bool Cgi::launchCGI()
 	if (pid == -1)
 	{
 		throw Exceptions();
-		// std::cerr << RED << "Fork crashed" << RESET << std::endl;
-		// return ("Status: 500\r\n\r\n");
 		return false;
 	}
 	else if (!pid)
 	{
-//		char * const * nll = NULL;
 
 		dup2(fdIn, STDIN_FILENO);
 		dup2(fdOut, STDOUT_FILENO);
 
-
-		std::cout <<GREEN << extentionOfSctipt <<RESET << "\n";
-
 		if (extentionOfSctipt == EXTENTION_WITHOUT_INTERPRETER)
-			execve(arguments_cgi[0], (char* const*)arguments_cgi, (char* const*)_varsArray); //OK c++
+			execve(arguments_cgi[0], (char* const*)arguments_cgi, (char* const*)_varsArray);
 		else if (extentionOfSctipt == EXTENTION_WITH_INTERPRETER)
-			execve(arguments[0], (char* const*)arguments, (char* const*)_varsArray);     //OK py
+			execve(arguments[0], (char* const*)arguments, (char* const*)_varsArray);
 
-		// throw Exceptions();
-		// execve(arguments[0], nll, (char* const*)_varsArray);
-
-		// execve(scriptName.c_str(), nll, env);
 		std::cerr << RED << "Execve crashed" << RESET << std::endl;
-		// write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
 		exit(EXIT_SUCCESS);
 	}
 	else
@@ -282,19 +200,11 @@ bool Cgi::launchCGI()
 		addToDataBase();
 
 
-
-//	dup2(saveStdin, STDIN_FILENO);
-//	dup2(saveStdout, STDOUT_FILENO);
 	fclose(fIn);
 	fclose(fOut);
 	close(fdIn);
 	close(fdOut);
-//	close(saveStdin);
-//	close(saveStdout);
-
-
-
-
+	
 	return true;
 }
 

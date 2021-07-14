@@ -4,7 +4,7 @@
 # include "main.hpp"
 # include "Server.hpp"
 # include "structure.h"
-# define DEFAULT_CONFIG_PATH "config/default.conf" //"../config/default.conf" //
+# define DEFAULT_CONFIG_PATH "config/default.conf"
 # include "structure.h"
 
 class Server;
@@ -82,11 +82,10 @@ void *cmds(void* object)
 {
 	Config* obj = (Config*)object;
 	std::string cmd;
-	(void)obj; ////использ. перем.
-	// std::cout << CYAN<<"webserv: " << obj->get <<RESET<<std::endl;
+	(void)obj;
+
 	while(1)
 	{
-		// std::cout << CYAN<<"webserv: please enter your command (exit)" <<RESET<<std::endl;
 		std::cin >> cmd;
 		if (cmd == "exit")
 		{
