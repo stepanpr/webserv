@@ -42,6 +42,7 @@ private:
 	bool _is_startline_ok;	// есть ли стартлайн
 	bool _is_multipart;		// если постом передается файл
 	bool _is_application; 	// если постом передается форма
+	bool _is_textPlain;		// если постом передается простой текст
 	bool _is_length;		// есть ли хедер Content-length:
 
     std::string buf;

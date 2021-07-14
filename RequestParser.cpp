@@ -15,6 +15,7 @@ RequestParser::RequestParser(void) : _headers()
 		_is_length = false;
 		_is_multipart = false;
 		_is_application = false;
+		_is_textPlain = false;
 	_is_post = false;
 }
 
@@ -135,6 +136,10 @@ int RequestParser::RequestWaiter(const char *str, int len)
             {
 			    _is_application = true; //!emabel's changes
             }
+			if ((it->first.compare("Content-Type:") == 0) && ((pos = it->second.find("text/plain")) != std::string::npos)) //!emabel's changes
+            {
+			    _is_textPlain = true; //!emabel's changes
+            }
 
 		}
 	}
@@ -200,7 +205,9 @@ int RequestParser::RequestWaiter(const char *str, int len)
 
         }
     }
-	else if  ((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)) && _is_application == true) //!emabel's changes
+	// else if  ((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)) && _is_application == true) //!emabel's changes
+	else if  (((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)) && _is_textPlain != true && _is_application == true)
+			|| ((_is_multipart != true) && ((_is_length == true) || (_contentLength > 0)) && _is_application != true && _is_textPlain == true)) //!emabel's changes
 	{
 			_bodybuffer.append(buf); //!emabel's changes
 			_global_len = _global_len + len; //!emabel's changes
