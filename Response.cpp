@@ -260,9 +260,11 @@ bool Response::checkMethod(int &i)
 /* проверка max_body_size */
 bool Response::checkMaxBodySize()
 {
-	if (atoi(_requestBody.c_str()) > atoi(_config->max_body_size.c_str()))
+	// if (atoi(_requestBody.c_str()) > atoi(_config->max_body_size.c_str()))
+	if ((int)_requestBody.size() > atoi(_config->max_body_size.c_str()))
 	{
 		this->_statusCode = REQTOOLARGE;
+		std::cout << _config->max_body_size << " : " << _requestBody.size() << " : " << _statusCode << "\n";
 		return false;
 	}
 	return true;
@@ -276,25 +278,6 @@ bool Response::checkMaxBodySize()
 
 std::string Response::responseInit()
 {
-	// std::cout << _method << " " << _path << " " << _protocol <<'\n';
-	// std::cout << _config->error_page << " " << _config->listen << " " << _config->location[0].methods <<'\n';
-	// for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end() ; it++)
-	// {
-	// 	std::cout << it->first << " " << it->second << '\n';
-	// }
-// https://github.com.cnpmjs.org/42Curriculum/ft_webserv/blob/master/http_serv.cpp
-// https://github.com/t0mm4rx/webserv/blob/main/sources/RequestInterpretor.cpp
-	/* обработка заголовков */
-	// for (std::map<std::string, std::string>::iterator it = _requestHeaders.begin(); it != _requestHeaders.end() ; it++)
-	// {
-	// 	// std::cout << it->first << " " << it->second << '\n';
-	// 	// if (it->first == "Connection:" && it->second == "close")
-	// 	// {
-	// 	// 	// close(pfd_array[1 + i].fd);
-	// 	// 	std::cout << "GOOD!!!!!!!!!!!!"<< it->first << " : " << it->second << '\n';
-	// 	// }
-	// 	// if (it->first == "")
-	// }
 
 
 	if (_requestMethod == "GET" || _requestMethod == "HEAD")
@@ -348,6 +331,8 @@ std::string Response::responseInit()
 					// 		_headers["Content-Type"] = _getMimeType(_requestPath.substr(1, _requestPath.size()));
 					// 		// aIdx = 0;
 					// }
+					//ПРОВЕРИТЬ СТАТОМ ПАПКУ, ЕСЛИ ЧУЩЕСТВУЕт, то ОТПРАВИТЬ В АВТОИНДЕКС
+					// включаем автоиндекс он и передаем путь в функцию (доработать)
 
 
 					if (stat("www/response.log", &_stat) == 0 && _getMimeType(_requestPath.substr(0, _requestPath.size())) != MIME_TYPE_NOT_FOUND /*&& aIdx == 0*/)
@@ -370,37 +355,13 @@ std::string Response::responseInit()
 			else if (_statusCode == OK && _autoindex == false)			/* если автоиндекс выключен */		
 				this->readBody(_fullPath);
 			
-			/* если статускод содержит ошибку */
-			// if (_statusCode != OK)									
-			// {
-			// 	if (_statusCode != NOTALLOWED && _statusCode != REQTOOLARGE && _statusCode != INTERNALERROR)
-			// 	{
-			// 		_statusCode = NOTFOUND;
-			// 	}
-			// 	if (_statusCode == NOTFOUND)
-			// 		_fullPath = _config->error_page + '/' + "404.html";
-			// 	if (_statusCode == NOTALLOWED)
-			// 		_fullPath = _config->error_page + '/' + "405.html";
-			// 	if (_statusCode == REQTOOLARGE)
-			// 		_fullPath = _config->error_page + '/' + "413.html";
-			// 	if (_statusCode == INTERNALERROR)
-			// 		_fullPath = _config->error_page + '/' + "500.html";
-			// 	_headers["Content-Type"] = _getMimeType("error.html");
-			// 	this->readBody(_fullPath);
-
-			// }
-			// std::cout << _body << '\n';
-			// std::cout << _statusCode << '\n';
-
-			/* сборка ответа */
-			// responseCompose();
 	}
 
 
 
 
 
-	if (_requestMethod == "POST")
+	else if (_requestMethod == "POST")
 	{
 		if (_requestMethod == "POST") { std::cout << BLUE << "THIS IS POST!" << RESET << "\n"; }
 
@@ -409,8 +370,11 @@ std::string Response::responseInit()
 		** https://github.com.cnpmjs.org/42Curriculum/ft_webserv/blob/master/requests.cpp 
 		** https://routerus.com/curl-post-request/ //curl-post-request
 		*/
-
         _statusCode = OK;
+
+		// checkMethod(i); 
+		checkMaxBodySize();
+		std::cout << _config->max_body_size << " : " << _requestBody.size() << " : " << _statusCode << "\n";
 
 		/* если хедер Content-Length отсутствует или его значение равно нулю то возвращаем меняем статус на BADREQUEST */
 		// if (_requestHeaders.find("Content-Length:") == _requestHeaders.end() || _requestHeaders.at("Content-Length:") == "0")
@@ -438,7 +402,7 @@ std::string Response::responseInit()
 					if ((cgi.launchCGI()) == true)
 					{
                    		_statusCode = OK;
-						_fullPath = _config->error_page + '/' + "send.html";
+						_fullPath = _config->error_page + '/' + "sent.html";
 						 std::cout << RED << _statusCode <<"status111!!!!!!"<< RESET <<std::endl;
 					}
         			else
@@ -453,28 +417,93 @@ std::string Response::responseInit()
 				//  curl -F 'fileX=@quickie-jpeg-010.jpg' localhost:8000/cgi_bin/getfile.cgi
 				//  curl -F 'fileX=@car.jpg' localhost:8005
 
-				std::cout << YELLOW << _requestHeaders.at("Content-Type:") << RESET<< std::endl;
-				//std::cout << RED <<_requestBody << RESET << std::endl;
-
                 std::string pathToFile = "www/site.com/" + _fileName;
 				//отезать вебкит и все что за ним следует
 				std::ofstream w;
 				w.open(pathToFile.c_str(), std::ios::out | std::ios::binary);
-				w << _requestBody;
+				if (!w.is_open())
+				{
+					_statusCode = INTERNALERROR;
+				}
+				else
+				{
+					w << _requestBody;
+					_statusCode = OK;
+					_fullPath = _config->error_page + '/' + "copied.html";
+				}
+			}
 
-				_statusCode = OK;
-				_fullPath = _config->error_page + '/' + "send.html";
+			/* text/plain * обработка отправки текста */
+			else if (_requestHeaders.count("Content-Type:") && _requestHeaders.at("Content-Type:") == "text/plain")
+			{
+				std::string rp = _requestPath.substr(1, _requestPath.size());
+				std::string patchToWrite;
+				std::string defaultFileName = "file";
+				std::string fileName;
+
+				if ( _requestPath == "/") /* (1) записываем в корень с дефолтным именем */
+				{
+					if (stat((rp+defaultFileName).c_str(), &_stat) != 0)
+						patchToWrite = defaultFileName;
+					else
+					 _statusCode = CONFLICT;
+				} 
+				else if ((stat(rp.c_str(), &_stat) == 0) && (((_stat.st_mode) & S_IFMT) == S_IFDIR))
+				{						/* (2) записываем во вложенную папку с дефолтным именем, например "www.site.com/www/" */
+					patchToWrite = rp;
+					if (patchToWrite[patchToWrite.size()-1] != '/')
+						patchToWrite += "/";
+					patchToWrite += defaultFileName;
+					if (stat(patchToWrite.c_str(), &_stat) == 0)
+						_statusCode = CONFLICT;
+				} 
+				else if ((stat(rp.c_str(), &_stat) != 0))
+				{						/* (3) записываем во вложенную папку с уникальным именем, например "www.site.com/www/myfile" */
+					fileName = rp.substr(rp.rfind("/") + 1, rp.size());
+					patchToWrite = rp.substr(0, rp.rfind("/"));
+					if (patchToWrite == rp || patchToWrite == fileName)
+					{	
+						patchToWrite.erase();
+						// patchToWrite += "/";
+						patchToWrite += fileName;
+					}
+					else if  ((stat(patchToWrite.c_str(), &_stat) == 0) && (((_stat.st_mode) & S_IFMT) == S_IFDIR))
+					{
+						if (patchToWrite[patchToWrite.size()-1] != '/')
+								patchToWrite += "/";
+						patchToWrite += fileName;
+					}
+					else
+					{
+						_statusCode = NOTFOUND;
+					}
+				}
+				else
+				{	/* если файл с таким именем уже существует */
+					_statusCode = CONFLICT;
+				}
+
+
+				// std::cout <<RED_B << patchToWrite << "!!!!"<< RESET << std::endl;
+	
+				if (_statusCode == OK)
+				{
+					std::ofstream W(patchToWrite.c_str(), std::ios::out);
+					if (!W.is_open())
+						_statusCode = INTERNALERROR;
+					else
+					{
+						W << _requestBody;
+						_statusCode = OK;
+						_fullPath = _config->error_page + '/' + "sent.html";
+						W.close();
+					}
+				}
+				std::cout << YELLOW << _requestHeaders.at("Content-Type:") << "PLAIN"<< RESET<< std::endl;
 			}
 			else
 			    _statusCode = NOTALLOWED;
 		}
-
-
-		/* проверка автоиндекса */
-		// if (_statusCode == OK && _autoindex == true)				/* если автоиндекс включен */	
-		// 	this->autoindexOn();
-		// else if (_statusCode == OK && _autoindex == false)			/* если автоиндекс выключен */		
-		// 	this->readBody(_fullPath);
 
 		if (_statusCode == OK)			/* если автоиндекс выключен */		
 			this->readBody(_fullPath);
@@ -486,28 +515,35 @@ std::string Response::responseInit()
 
 ////////////////////////////////////////////////////////////DELETE
 
-	// if (_requestMethod == "DELETE")
-	// {
-	// 	if (remove(_requestPath.c_str()) == 0)
-	// 	{
-	// 		_statusCode = OK;
-	// 		_fullPath = "путь к странице уведомляющей об удалении";
-	// 		readBody(_fullPath);
-	// 		// std::cout <<
-	// 	}
-	// 	else
-	// 	{
-	// 		_statusCode = NOTFOUND;
-	// 		_fullPath = _config->error_page + '/' + "404.html";
-	// 	}
-	// 	readBody(_fullPath);
-	// 	responseCompose();
-	// } 
+	if (_requestMethod == "DELETE")
+	{
+		std::string rp = _requestPath.substr(1, _requestPath.size());
+		if (remove(rp.c_str()) == 0)
+		{
+			_statusCode = OK;
+			_fullPath = _config->error_page + '/' + "deleted.html";;
+			// readBody(_fullPath);
+			// std::cout <<
+		}
+		else
+		{
+			_statusCode = NOTFOUND;
+			// _fullPath = _config->error_page + '/' + "404.html";
+		}
+
+		if (_statusCode == OK)		
+			this->readBody(_fullPath);
+	} 
 
 ////////////////////////////////////////////////////////////DELETE
 
 
 
+
+	else if (_requestMethod != "GET" && _requestMethod != "POST" && _requestMethod != "HEAD" && _requestMethod != "DELETE")
+	{
+		_statusCode = NOTALLOWED;
+	}
 
 
 
@@ -518,7 +554,7 @@ std::string Response::responseInit()
 	/* если статускод содержит ошибку */
 	if (_statusCode != OK)									
 	{
-		if (_statusCode != BADREQUEST && _statusCode != NOTALLOWED && _statusCode != REQTOOLARGE && _statusCode != INTERNALERROR)
+		if (_statusCode != BADREQUEST && _statusCode != NOTALLOWED && _statusCode != REQTOOLARGE && _statusCode != INTERNALERROR && _statusCode != CONFLICT)
 		{	/* защита от возможных непредвиденных ошибок - в этом случае выводи 404 */
 			_statusCode = NOTFOUND;
 		}
@@ -528,6 +564,8 @@ std::string Response::responseInit()
 			_fullPath = _config->error_page + '/' + "404.html";
 		if (_statusCode == NOTALLOWED)
 			_fullPath = _config->error_page + '/' + "405.html";
+		if (_statusCode == CONFLICT)
+			_fullPath = _config->error_page + '/' + "409.html";
 		if (_statusCode == REQTOOLARGE)
 			_fullPath = _config->error_page + '/' + "413.html";
 		if (_statusCode == INTERNALERROR)
@@ -547,17 +585,19 @@ std::string Response::responseInit()
 	{ /* вывод сообщения в соответствии со _statusCode*/
 		
 		if (_statusCode == OK)
-			std::cout << GREEN_B << "OK: " << WHITE <<"response will be send to client " << BLUE << "(ID: " << _config->serverID << ")" << RESET<< std::endl << std::endl; //изменить если 404
+			std::cout << GREEN_B << "OK: " << WHITE <<"response " << WHITE_B << 200 << RESET <<" will be send to client " << BLUE << "(ID: " << _config->serverID << ")" << RESET<< std::endl << std::endl;
 		else if (_statusCode == BADREQUEST)
-			std::cout  << RED_B << "KO: " << WHITE <<"request is bad, error \"400\" will be send to client" << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout  << RED_B << "KO: " << WHITE <<"request is bad, error" << WHITE_B << 400 << RESET << " will be send to client " << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl;
 		else if (_statusCode == NOTFOUND)
-			std::cout  << RED_B << "KO: " << WHITE <<"content not found, error \"404\" will be send to client" << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout  << RED_B << "KO: " << WHITE <<"content not found, error " << WHITE_B << 404 << RESET <<" will be send to client " << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl;
 		else if (_statusCode == NOTALLOWED)
-			std::cout  << RED_B << "KO: " << WHITE <<"request method not allowed, error \"405\" will be send to client" << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout  << RED_B << "KO: " << WHITE <<"request method not allowed, error " << WHITE_B << 405 << RESET << " will be send to client " << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl;
+		else if (_statusCode == CONFLICT)
+			std::cout  << RED_B << "KO: " << WHITE <<"file with the same name already exists, error " << WHITE_B << 409 << RESET << " will be send to client " << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl;
 		else if (_statusCode == REQTOOLARGE)
-			std::cout  << RED_B << "KO: " << WHITE <<"request is too large, error \"413\" will be send to client" << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout  << RED_B << "KO: " << WHITE <<"request is too large, error " << WHITE_B << 413 << RESET << " will be send to client " << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl;
 		else if (_statusCode == INTERNALERROR)
-			std::cout  << RED_B << "KO: " << WHITE <<"problems with server settings, error \"500\" will be send to client" << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl; //изменить если 404
+			std::cout  << RED_B << "KO: " << WHITE <<"problems with server settings, error " << WHITE_B << 500 << RESET << " will be send to client " << BLUE << "(ID: " << _config->serverID << ")" << RESET << std::endl << std::endl;
 	}
 
 

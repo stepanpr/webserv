@@ -84,7 +84,7 @@ char **Cgi::getVarsArray(std::vector<std::string> vars)
 
 /*
 ** считывает созданный скриптом db.py файл db_[ID сервера].tmp
-** и формирует на отсное его дынных html-страницу db_[ID сервера].html
+** и формирует на основе его дынных html-страницу db_[ID сервера].html
 */
 void Cgi::addToDataBase()
 {
@@ -96,7 +96,7 @@ void Cgi::addToDataBase()
 	std::string dataBaseBuffer;
 	while(getline(db, line))
 	{
-			dataBaseBuffer += line;
+		dataBaseBuffer += line;
 		dataBaseBuffer += "\n";
 	}
 
@@ -161,7 +161,7 @@ bool Cgi::launchCGI()
 	/* проверяем расширение файла */
 	int extentionOfSctipt = EXTENTION_WITH_INTERPRETER;
 	if (_pathToScript.rfind(".py") != std::string::npos)
-		this->_pathToHandler = "/usr/bin/python2.7";
+		this->_pathToHandler = "/usr/bin/python";
 	else if (_pathToScript.rfind(".php") != std::string::npos)
 		this->_pathToHandler = "/usr/bin/php";
 	else if (_pathToScript.rfind(".perl") != std::string::npos || _pathToScript.rfind(".pl") != std::string::npos)
@@ -276,8 +276,10 @@ bool Cgi::launchCGI()
 	** std::cout << newBody << std::endl;
 	*/
 
-	/* считаваем созданный скриптом временный файл и формируем html-страницу */
-	addToDataBase();
+	/* если использовался скрипт для обработки формы "db.py", то
+	считаваем созданный скриптом временный файл и формируем html-страницу */
+	if (_fullPathToScript.rfind("db.py") != std::string::npos)
+		addToDataBase();
 
 
 

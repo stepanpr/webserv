@@ -21,8 +21,11 @@
 // # define UNAUTHORIZED	"401 Unauthorized"
 # define NOTFOUND 		"404 Not Found"
 # define NOTALLOWED		"405 Method Not Allowed"
+# define CONFLICT       "409 Conflict"
 # define REQTOOLARGE	"413 Request Entity Too Large"
 # define INTERNALERROR	"500 Internal Server Error"
+// 510 Not Extended
+// 411	Length Required
 // # define NOTIMPLEMENTED	"501 Not Implemented"
 
 class Response

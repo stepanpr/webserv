@@ -4,14 +4,11 @@
 # include "main.hpp"
 # include "structure.h"
 # include "Response.hpp"
-# include "main.hpp"
 # include <errno.h>
-# include <unistd.h>
 # include <signal.h>
 # include <sys/wait.h>
 # include <fcntl.h>
-# include <string>
-# include <vector>
+
 
 # define EXTENTION_WITH_INTERPRETER 1
 # define EXTENTION_WITHOUT_INTERPRETER 0
