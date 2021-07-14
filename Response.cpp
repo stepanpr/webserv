@@ -89,6 +89,7 @@ void Response::writeHeaders(std::string &method)
 		// _headers["Content-Type"] = "text/html; charset=UTF-8";
 		_headers["Title"] = "webserv (project for 21 school)";
 		_headers["Content-Language"] = "en,ru";
+		_headers["Set-Cookie"] = "id=212121; Expires=Wed, 21 Oct 2015 07:28:00 GMT; Max-Age=2592000; Domain=localhost:8080; Path=localhost:8080;";
 		// _headers["Retry-After"] = "1";
 		// _headers["Authorization"] = "Basic qqq : www";
 	}
