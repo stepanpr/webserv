@@ -33,7 +33,7 @@
 
 ### default configuration
  server {
-	listen 8021 -
+ listen 8021 
 	server_name 127.0.0.1
 	error_page /Users/emabel/webserv/www/default
 	max_body_size 10
