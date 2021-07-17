@@ -44,8 +44,8 @@
  		+ `autoindex off`   - автоиндекс (on/off)
  		+ `methods GET`     - разрешенные методы для даного раздела
  		+ `root  /Users/emabel/webserv/www/site.com`  - корень раздела
-        }
-       location /gallery {
+   `}`
+  + `location /gallery {`
         index gallery.html
         autoindex off
         methods GET POST HEAD
