@@ -46,11 +46,11 @@
  		+ `root  /Users/emabel/webserv/www/site.com`  - корень раздела
    `}`
   + `location /gallery {`
-        index gallery.html
-        autoindex off
-        methods GET POST HEAD
-        root  /Users/emabel/webserv/www/site.com
-        }
+   + `index gallery.html`
+   + `autoindex off`
+   + `methods GET POST HEAD`
+   + `root  /Users/emabel/webserv/www/site.com`
+   `}`
        location /about {
         index about.html
         autoindex off
