@@ -4,7 +4,6 @@
 *** 
 ### Directories:
 
-```
 1. `/config/` - файлы конфигураций
 2. `/www/` - основной раздел для контента
 3. `/www/default/` - директория служебных станиц (errors, etc)
@@ -12,6 +11,10 @@
 5. `/www/YourSite.com/` - новые разделы необходимо размещать в каталоге www
 6. `/cgi_bin/` - раздел с cgi-скриптами
 7. `/bd/` - раздел "базы данных", где генерируются html-страницы с данными
+
+```sh
+npm install --production
+NODE_ENV=production node app
 ```
 ***
 ### description:
