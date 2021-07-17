@@ -51,8 +51,8 @@
     + `methods GET POST HEAD`
     + `root  /Users/emabel/webserv/www/site.com`
    `}`
-  + `location /about {`
+  + `location /about {` - соответствует запросу "/about" (127.0.0.1/about), устанавливаем конфигурацию для данного запроса
    + ... `}`
-  + `location /contact {`
+  + `location /contact {`  - соответствует запросу "/contact" (127.0.0.1/contact), устанавливаем конфигурацию для данного запроса
    + ... `}`
 `}`
