@@ -1,9 +1,14 @@
 
 # webserv
+***
 
-*** 
+### description:
+webserv проект HTTP-сервера, ядро которого основано на POLL.
+Обрабатывает GET, POST и DELETE запросы.
+По умолчанию в "site.com" подключен скрипт "bd.py", считывающий данные с форм (страница "contact.html)
+и добавляющий эти данные в генерируемую html-страницу в раздел `/bd/`
+
 ### Directories:
-
 ```
 1. `/config/` - файлы конфигураций
 2. `/www/` - основной раздел для контента
@@ -14,13 +19,6 @@
 7. `/bd/` - раздел "базы данных", где генерируются html-страницы с данными
 ```
 
-### description:
-webserv проект HTTP-сервера, ядро которого основано на POLL.
-Обрабатывает GET, POST и DELETE запросы.
-По умолчанию в "site.com" подключен скрипт "bd.py", считывающий данные с форм (страница "contact.html)
-и добавляющий эти данные в генерируемую html-страницу в раздел `/bd/`
-
-
 ### examples:
 ```
  use `make` to compile
@@ -28,8 +26,7 @@ webserv проект HTTP-сервера, ядро которого основа
  or `./webserv [path to configuration file]` to run webserv with your configuration file
  ```
  
- ***
- ### commands for check:
+### commands for check:
  ```
  * для записи нового файла на сервер методом POST, используйте комманду: `curl -X POST -H "Content-Type: text/plain" --data "TEXT body of file" 127.0.0.1:8021/www/site.com/NewFile`
  * для удаления файла с сервера методом DELETE, используйте комманду: `curl -X DELETE 127.0.0.1:8021/www/site.com/NewFile`
