@@ -35,10 +35,9 @@
 
  + *server {* - раздел сервера
  	+ *listen 8021* - порт который будет прослушиваться
- 
-	server_name 127.0.0.1
-	error_page /Users/emabel/webserv/www/default
-	max_body_size 10
+ 	+ *server_name 127.0.0.1* - IP-адрес сервера
+ 	+ *error_page /Users/emabel/webserv/www/default* - расположение страниц ошибок и состояний
+ 	+ `max_body_size 10` - масимально допустимый размер тела запроса
 	cgi_alias /cgi_bin /Users/emabel/webserv/cgi_bin
        location / {
         index index.html
