@@ -53,10 +53,6 @@
    `}`
   + `location /about {`
    + ... `}`
-       location /contact {
-        index contact.html
-        autoindex off
-        methods POST GET DELETE
-        root  /Users/emabel/webserv/www/site.com
-        }
-}
+  + `location /contact {`
+   + ... `}`
+`}`
