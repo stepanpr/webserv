@@ -45,18 +45,14 @@
  		+ `methods GET`     - разрешенные методы для даного раздела
  		+ `root  /Users/emabel/webserv/www/site.com`  - корень раздела
    `}`
-  + `location /gallery {`
+  + `location /gallery {` - соответствует запросу "/gallery" (127.0.0.1/gallery), устанавливаем конфигурацию для данного запроса
    + `index gallery.html`
    + `autoindex off`
    + `methods GET POST HEAD`
    + `root  /Users/emabel/webserv/www/site.com`
    `}`
-       location /about {
-        index about.html
-        autoindex off
-        methods POST GET
-        root  /Users/emabel/webserv/www/site.com
-        }
+  + `location /about {`
+   + ... `}`
        location /contact {
         index contact.html
         autoindex off
