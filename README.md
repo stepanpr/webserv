@@ -32,8 +32,8 @@
  * для отправки файла на сервер, используйте комманду: `curl -F 'fileX=@car.jpg' localhost:8021` (файл запишется в корень сайта)
 
 ### default configuration
->server {
-	listen 8021
+ server {
+	listen 8021 -
 	server_name 127.0.0.1
 	error_page /Users/emabel/webserv/www/default
 	max_body_size 10
