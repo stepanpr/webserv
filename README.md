@@ -33,9 +33,8 @@
 
 ### default configuration
 
- *server {* -ыв
- 
-  *listen 8021* - порт который будет прослушиваться
+ + *server {* - раздел сервера
+ 	+ *listen 8021* - порт который будет прослушиваться
  
 	server_name 127.0.0.1
 	error_page /Users/emabel/webserv/www/default
