@@ -19,12 +19,12 @@ webserv проект HTTP-сервера, ядро которого основа
 и добавляющий эти данные в генерируемую html-страницу в раздел `/bd/`
 
 ***
-#### examples:
+### examples:
  use `make` to compile
  then run `./webserv` for start program
  or `./webserv [path to configuration file]` to run webserv with your configuration file
  
- #### commands for check:
+ ### commands for check:
  * для записи нового файла на сервер методом POST, используйте комманду: `curl -X POST -H "Content-Type: text/plain" --data "TEXT body of file" 127.0.0.1:8021/www/site.com/NewFile`
  * для удаления файла с сервера методом DELETE, используйте комманду: `curl -X DELETE 127.0.0.1:8021/www/site.com/NewFile`
  * для отправки файла на сервер, используйте комманду: `curl -F 'fileX=@car.jpg' localhost:8021` (файл запишется в корень сайта)
