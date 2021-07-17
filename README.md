@@ -12,10 +12,16 @@
 6. `/cgi_bin/` - раздел с cgi-скриптами
 7. `/bd/` - раздел "базы данных", где генерируются html-страницы с данными
 
+
+
+Install the dependencies and devDependencies and start the server.
+
 ```sh
-npm install --production
-NODE_ENV=production node app
+cd dillinger
+npm i
+node app
 ```
+
 ***
 ### description:
 webserv проект HTTP-сервера, ядро которого основано на POLL.
