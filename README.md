@@ -39,11 +39,11 @@
  	+ `error_page /Users/emabel/webserv/www/default` - расположение страниц ошибок и состояний
  	+ `max_body_size 10` - масимально допустимый размер тела запроса
  	+ `cgi_alias /cgi_bin /Users/emabel/webserv/cgi_bin` - alias соответствующий разелу с cgi-скриптами
- 		+ location / {
- 		+ index index.html
- 		+ autoindex off
- 		+ methods GET
- 		+ root  /Users/emabel/webserv/www/site.com
+ 		+ `location / {`    - соответствует запросу "/" (127.0.0.1/), устанавливаем конфигурацию для данного запроса
+ 		+ `index index.html` - страница которая будет загружаться в ответ на запрос
+ 		+ `autoindex off`   - автоиндекс (on/off)
+ 		+ `methods GET`     - разрешенные методы для даного раздела
+ 		+ `root  /Users/emabel/webserv/www/site.com`  - корень раздела
         }
        location /gallery {
         index gallery.html
