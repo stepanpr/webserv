@@ -35,6 +35,7 @@
 
  server {
  listen 8021 - порт который будет прослушиваться
+ 
 	server_name 127.0.0.1
 	error_page /Users/emabel/webserv/www/default
 	max_body_size 10
