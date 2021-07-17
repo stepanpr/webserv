@@ -31,4 +31,35 @@
  * для удаления файла с сервера методом DELETE, используйте комманду: `curl -X DELETE 127.0.0.1:8021/www/site.com/NewFile`
  * для отправки файла на сервер, используйте комманду: `curl -F 'fileX=@car.jpg' localhost:8021` (файл запишется в корень сайта)
 
-
+### default configuration
+>server {
+	listen 8021
+	server_name 127.0.0.1
+	error_page /Users/emabel/webserv/www/default
+	max_body_size 10
+	cgi_alias /cgi_bin /Users/emabel/webserv/cgi_bin
+       location / {
+        index index.html
+        autoindex off
+        methods GET
+        root  /Users/emabel/webserv/www/site.com
+        }
+       location /gallery {
+        index gallery.html
+        autoindex off
+        methods GET POST HEAD
+        root  /Users/emabel/webserv/www/site.com
+        }
+       location /about {
+        index about.html
+        autoindex off
+        methods POST GET
+        root  /Users/emabel/webserv/www/site.com
+        }
+       location /contact {
+        index contact.html
+        autoindex off
+        methods POST GET DELETE
+        root  /Users/emabel/webserv/www/site.com
+        }
+	}
