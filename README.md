@@ -46,11 +46,7 @@
  		+ `root  /Users/emabel/webserv/www/site.com`  - корень раздела
    `}`
   + `location /gallery {` - соответствует запросу "/gallery" (127.0.0.1/gallery), устанавливаем конфигурацию для данного запроса
-    + `index gallery.html`
-    + `autoindex off`
-    + `methods GET POST HEAD`
-    + `root  /Users/emabel/webserv/www/site.com`
-   `}`
+   + ... `}`
   + `location /about {` - соответствует запросу "/about" (127.0.0.1/about), устанавливаем конфигурацию для данного запроса
    + ... `}`
   + `location /contact {`  - соответствует запросу "/contact" (127.0.0.1/contact), устанавливаем конфигурацию для данного запроса
