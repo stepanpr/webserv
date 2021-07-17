@@ -33,7 +33,7 @@
 
 ### default configuration
 
- + *server {* - раздел сервера
++ *server {* - раздел сервера
  	+ `listen 8021` - порт который будет прослушиваться
  	+ `server_name 127.0.0.1` - IP-адрес сервера
  	+ `error_page /Users/emabel/webserv/www/default` - расположение страниц ошибок и состояний
@@ -45,7 +45,7 @@
  		+ `methods GET`     - разрешенные методы для даного раздела
  		+ `root  /Users/emabel/webserv/www/site.com`  - корень раздела
    `}`
-  + `location /gallery {`
+ + `location /gallery {`
    + `index gallery.html`
    + `autoindex off`
    + `methods GET POST HEAD`
